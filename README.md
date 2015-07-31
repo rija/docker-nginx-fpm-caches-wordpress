@@ -1,7 +1,7 @@
 # docker-nginx-fpm-caches-wordpress
 --
 
-**Status: Work In Progress(all packages don't build yet)**
+**Status: Work In Progress**
 
 ###Maintainer
 

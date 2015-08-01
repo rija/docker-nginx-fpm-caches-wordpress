@@ -59,11 +59,30 @@ $ docker run --name <name you want for your container> -d -p 80:80 --link <name 
 ```
 
 You can also build and deploy on the target machine as well. The command stays the same.
+If you intend to use Docker Compose, make sure the name you choose for your container is only within [a-z][A-Z].
 
 
 ### Examples of deployment patterns
 
-[TODO]
+The typical pattern I've adopted is using a container each for Wordpress and Mysql and two data volume containers, one for each as well.
+
+For mysql:
+
+```bash
+$ docker create --name mysqldata -v /var/lib/mysql mysql:5.5.42
+$ docker run --name mysql --volumes-from mysqldata -e MYSQL_ROOT_PASSWORD=<root password> -e MYSQL_DATABASE=wordpress -e MYSQL_USER=<user name> -e MYSQL_PASSWORD=<user password> -d mysql:5.5.42
+```
+
+For wordpress:
+```
+$ docker create --name wwwdata -v /usr/share/nginx/www <name of your image>
+$ docker run --name wordpress --volumes-from wwwdata -d -p 80:80 --link mysql-server:db <name of your image>
+```
+
+Using data volume container for Wordpress and Mysql makes some operational task incredibly easy (backups, data migrations, cloning, developing with production data,...)
+
+
+
 
 --
  

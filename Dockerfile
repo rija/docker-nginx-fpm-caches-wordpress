@@ -12,16 +12,28 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
 RUN apt-get -y upgrade
 
-# Basic Requirements
-RUN apt-get -y install mysql-client php5-fpm php5-mysql pwgen python-setuptools curl git unzip
+# Basic Dependencies
+RUN apt-get -y install mysql-client php5-fpm php5-mysql wgen python-setuptools curl git unzip
 
-# Requirements to fix 'add-apt-repository: not found' in Ubuntu 14.04 LTS
+
+
+# to fix 'add-apt-repository: not found' in Ubuntu 14.04 LTS
 RUN apt-get install software-properties-common python-software-properties -y
 
-# Requirements for Nginx compiled with fastcgi_cache and fastcgi_cache_purge
+# Where to find  Nginx compiled with fastcgi_cache and fastcgi_cache_purge
 RUN add-apt-repository ppa:rtcamp/nginx
 RUN apt-get update
 RUN apt-get -y install nginx-custom
+
+# Dependencies for APCu
+RUN apt-get -y install php5-dev plibpcre3-dev
+
+# Installing  Php-APCu
+RUN yes "" | pecl install APCu
+
+# Configuring APCu
+RUN echo "extension=apcu.so" >> /etc/php5/mods-available/apcu.ini
+RUN cd /etc/php5/fpm/conf.d/ && ln -s ../../mods-available/apcu.ini 20-apcu.ini
 
 
 # Wordpress Requirements
@@ -61,7 +73,7 @@ ADD ./supervisord.conf /etc/supervisord.conf
 # Install Wordpress in default nginx htdocs path
 ADD https://wordpress.org/latest.tar.gz /usr/share/nginx/latest.tar.gz
 RUN cd /usr/share/nginx/ && tar xvf latest.tar.gz && rm latest.tar.gz
-RUN cp /usr/share/nginx/html/5* /usr/share/nginx/wordpress
+#RUN cp /usr/share/nginx/html/5* /usr/share/nginx/wordpress
 RUN rm -rf /usr/share/nginx/www
 RUN mv /usr/share/nginx/wordpress /usr/share/nginx/www
 RUN chown -R www-data:www-data /usr/share/nginx/www

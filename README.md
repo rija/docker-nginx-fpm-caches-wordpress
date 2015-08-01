@@ -30,7 +30,8 @@ The expected usage is to link another container running the database server.
 * There is no mail server.
 * Wordpress is installed from **'latest'** version
 * Wordpress is installed as a single site deployment (no multisite support)
-* It is recommended to mount the wp-content folder from a Data Volume Container
+* Any reference to NAXSI has been removed from the supplied nginx config. If you want to use, NAXSI, the Nginx Web Application Firewall (WAF), I recommend to deploy a separate NAXSI-enabled instance of Nginx in front that will proxy its connection towards the backend.
+* Currently, the version of Nginx installed deployed to the built image is 1.8 (<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>)
 
 ###SSL:
 

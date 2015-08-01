@@ -1,7 +1,7 @@
 # docker-nginx-fpm-caches-wordpress
 --
 
-**Status: Works for me**
+**Status: Works for me (but still one TODO left) **
 
 ###Maintainer
 
@@ -80,7 +80,8 @@ Using data volume container for Wordpress and Mysql makes some operational task 
 
 ### Future plan
 
-I'm in the process of refactoring this project completely to use baseimage-docker as base image. That also means that I will drop Supervisor in favor of RunIt. 
+* I'm in the process of refactoring this project completely to use baseimage-docker as base image. That also means that I will drop Supervisor in favor of RunIt. 
+* use of trusted builds
 
 
 

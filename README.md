@@ -1,7 +1,7 @@
 # docker-nginx-fpm-caches-wordpress
 --
 
-**Status: Work In Progress**
+**Status: Works for me**
 
 ###Maintainer
 
@@ -32,10 +32,6 @@ The expected usage is to link another container running the database server.
 * Wordpress is installed as a single site deployment (no multisite support)
 * Currently, the version of Nginx installed deployed to the built image is 1.8 (<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>)
 
-###SSL:
-
-[TODO] The Dockerfile also generate self signed certificates and ssl is enabled by default using the generated self-signed certificates. 
-Feel free to remove the SSL section from the '**nginx-site.conf**' file if SSL is not needed. 
 
 ### How to build
 
@@ -81,6 +77,10 @@ $ docker run --name wordpress --volumes-from wwwdata -d -p 80:80 --link mysql-se
 
 Using data volume container for Wordpress and Mysql makes some operational task incredibly easy (backups, data migrations, cloning, developing with production data,...)
 
+
+### Future plan
+
+I'm in the process of refactoring this project completely to use baseimage-docker as base image. That also means that I will drop Supervisor in favor of RunIt. 
 
 
 

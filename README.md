@@ -30,7 +30,6 @@ The expected usage is to link another container running the database server.
 * There is no mail server.
 * Wordpress is installed from **'latest'** version
 * Wordpress is installed as a single site deployment (no multisite support)
-* Any reference to NAXSI has been removed from the supplied nginx config. If you want to use, NAXSI, the Nginx Web Application Firewall (WAF), I recommend to deploy a separate NAXSI-enabled instance of Nginx in front that will proxy its connection towards the backend.
 * Currently, the version of Nginx installed deployed to the built image is 1.8 (<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>)
 
 ###SSL:
@@ -45,9 +44,22 @@ $ git clone git@github.com:rija/docker-nginx-fpm-caches-wordpress.git
 $ cd docker-nginx-fpm-caches-wordpress
 $ docker build -t="wordpress-nginx-caches-wordpress" .
 ```
+You can choose whatever name you want for the image after the '-t=' parameter. 
 
 **Tips:**
 * If encountering problems with some package not installing, you can add the **'-no-cache'** option to **'docker build'** otherwise it will fetch package from cache. But to omit the option when you know there is no silent failure in order to accelerate build time.
+
+
+### How to deploy
+
+upload the image in a repository, private or public, and on the target Docker enabled system, type: 
+
+```bash
+$ docker run --name <name you want for your container> -d -p 80:80 --link <name of a database container>:db <name of the image you've built>
+```
+
+You can also build and deploy on the target machine as well. The command stays the same.
+
 
 ### Examples of deployment patterns
 

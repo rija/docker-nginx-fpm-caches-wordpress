@@ -13,7 +13,7 @@ RUN apt-get update
 RUN apt-get -y upgrade
 
 # Basic Dependencies
-RUN apt-get -y install mysql-client php5-fpm php5-mysql wgen python-setuptools curl git unzip
+RUN apt-get -y install mysql-client php5-fpm php5-mysql pwgen python-setuptools curl git unzip
 
 
 
@@ -26,10 +26,10 @@ RUN apt-get update
 RUN apt-get -y install nginx-custom
 
 # Dependencies for APCu
-RUN apt-get -y install php5-dev plibpcre3-dev
+RUN apt-get -y install php5-dev libpcre3-dev
 
 # Installing  Php-APCu
-RUN yes "" | pecl install APCu
+RUN yes "" | pecl install APCu-beta
 
 # Configuring APCu
 RUN echo "extension=apcu.so" >> /etc/php5/mods-available/apcu.ini

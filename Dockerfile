@@ -75,9 +75,7 @@ RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_fil
 RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
 
 # nginx config
-RUN sed -i -e"s/keepalive_timeout\s*65/keepalive_timeout 2/" /etc/nginx/nginx.conf
-RUN sed -i -e"s/keepalive_timeout 2/keepalive_timeout 2;\n\tclient_max_body_size 100m/" /etc/nginx/nginx.conf
-RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+COPY  nginx.conf /etc/nginx/nginx.conf
 
 
 # php-fpm config
@@ -89,6 +87,7 @@ RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /
 
 # site specific nginx conf
 COPY  ./nginx-site.conf /etc/nginx/sites-available/default
+
 
 # Supervisor Config
 RUN /usr/bin/easy_install supervisor

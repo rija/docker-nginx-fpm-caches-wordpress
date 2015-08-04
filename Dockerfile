@@ -89,12 +89,12 @@ RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /
 RUN find /etc/php5/cli/conf.d/ -name "*.ini" -exec sed -i -re 's/^(\s*)#(.*)/\1;\2/g' {} \;
 
 # site specific nginx conf
-ADD ./nginx-site.conf /etc/nginx/sites-available/default
+COPY  ./nginx-site.conf /etc/nginx/sites-available/default
 
 # Supervisor Config
 RUN /usr/bin/easy_install supervisor
 RUN /usr/bin/easy_install supervisor-stdout
-ADD ./supervisord.conf /etc/supervisord.conf
+COPY  ./supervisord.conf /etc/supervisord.conf
 
 # Install Wordpress 
 RUN cd /usr/share/nginx/ \
@@ -106,7 +106,7 @@ RUN chown -R www-data:www-data /usr/share/nginx/www
 
 
 # Wordpress Initialization and Startup Script
-ADD ./start.sh /start.sh
+COPY  ./start.sh /start.sh
 RUN chmod 755 /start.sh
 
 VOLUME ["/var/log"]

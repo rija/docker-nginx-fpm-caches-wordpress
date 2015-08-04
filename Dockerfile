@@ -13,11 +13,8 @@ RUN ln -sf /bin/true /sbin/initctl
 ENV DEBIAN_FRONTEND noninteractive
 
 
-RUN apt-get update
-RUN apt-get -y upgrade
-
 # Basic Dependencies
-RUN apt-get -y install mysql-client \
+RUN apt-get update && apt-get install -y mysql-client \
 						php5-fpm \
 						php5-mysql \
 						pwgen \
@@ -32,16 +29,12 @@ RUN apt-get -y install mysql-client \
 RUN apt-get -y install software-properties-common \
 						python-software-properties
 
-# Where to find  Nginx compiled with fastcgi_cache and fastcgi_cache_purge
-RUN add-apt-repository ppa:rtcamp/nginx
-RUN apt-get update
-RUN apt-get -y install nginx-custom
 
 # Dependencies for APCu
-RUN apt-get -y install php5-dev libpcre3-dev
+RUN apt-get install -y php5-dev libpcre3-dev
 
 # Wordpress Requirements
-RUN apt-get -y install php5-curl \
+RUN apt-get install -y php5-curl \
 						php5-gd \
 						php5-intl \
 						php-pear \
@@ -57,6 +50,12 @@ RUN apt-get -y install php5-curl \
 						php5-tidy \
 						php5-xmlrpc \
 						php5-xsl
+
+
+# Where to find  Nginx compiled with fastcgi_cache and fastcgi_cache_purge
+RUN add-apt-repository ppa:rtcamp/nginx
+RUN apt-get update && apt-get install -y nginx-custom
+
 
 # Installing  Php-APCu
 RUN yes "" | pecl install APCu-beta

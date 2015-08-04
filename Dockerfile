@@ -70,10 +70,6 @@ RUN cd /etc/php5/fpm/conf.d/ && ln -s ../../mods-available/apcu.ini 20-apcu.ini
 RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php5/fpm/php.ini
 RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php5/fpm/php.ini
 
-
-# mysql config
-RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
-
 # nginx config
 COPY  nginx.conf /etc/nginx/nginx.conf
 

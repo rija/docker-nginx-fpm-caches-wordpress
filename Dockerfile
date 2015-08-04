@@ -109,3 +109,6 @@ RUN chown -R www-data:www-data /usr/share/nginx/www
 ADD ./start.sh /start.sh
 RUN chmod 755 /start.sh
 
+VOLUME ["/var/log"]
+
+

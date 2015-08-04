@@ -90,11 +90,11 @@ RUN /usr/bin/easy_install supervisor
 RUN /usr/bin/easy_install supervisor-stdout
 COPY  ./supervisord.conf /etc/supervisord.conf
 
-# Install Wordpress 
+# Install Wordpress
+ENV WP_URL https://wordpress.org/latest.tar.gz
 RUN cd /usr/share/nginx/ \
-    && curl -SLO https://wordpress.org/latest.tar.gz \
-    && tar -xvf latest.tar.gz \
-    && rm latest.tar.gz    
+    && curl -o wp.tar.gz $WP_URL \
+    && tar -xvf wp.tar.gz   
 RUN mv /usr/share/nginx/wordpress /usr/share/nginx/www
 RUN chown -R www-data:www-data /usr/share/nginx/www
 

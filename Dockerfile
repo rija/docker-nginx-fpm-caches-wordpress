@@ -70,11 +70,11 @@ RUN /usr/bin/easy_install supervisor
 RUN /usr/bin/easy_install supervisor-stdout
 ADD ./supervisord.conf /etc/supervisord.conf
 
-# Install Wordpress in default nginx htdocs path
-ADD https://wordpress.org/latest.tar.gz /usr/share/nginx/latest.tar.gz
-RUN cd /usr/share/nginx/ && tar xvf latest.tar.gz && rm latest.tar.gz
-#RUN cp /usr/share/nginx/html/5* /usr/share/nginx/wordpress
-RUN rm -rf /usr/share/nginx/www
+# Install Wordpress 
+RUN cd /usr/share/nginx/ \
+    && curl -SLO https://wordpress.org/latest.tar.gz \
+    && tar -xvf latest.tar.gz \
+    && rm latest.tar.gz    
 RUN mv /usr/share/nginx/wordpress /usr/share/nginx/www
 RUN chown -R www-data:www-data /usr/share/nginx/www
 

@@ -1,7 +1,6 @@
 # docker-nginx-fpm-caches-wordpress
 --
 
-**Status: Works for me (but still one TODO left) **
 
 ###Maintainer
 
@@ -57,6 +56,24 @@ $ docker run --name <name you want for your container> -d -p 80:80 --link <name 
 You can also build and deploy on the target machine as well. The command stays the same.
 If you intend to use Docker Compose, make sure the name you choose for your container is only within [a-z][A-Z].
 
+### Logs
+
+The logs are exposed outside the container as a volume. 
+So you can deploy your own services to process, analyse or aggregate the logs from the Wordpress installation.
+
+The corresponding line in the Dockerfile is: 
+
+```
+VOLUME ["/var/log"]
+```
+
+you can mount this volume on another container with a command that looks as below (assuming your Wordpress container is called 'WordpressApp'):
+
+```bash
+
+docker run --name MyLogAnalyser --volumes-from WordpressApp -d MyLogAnalyserImage
+
+```
 
 ### Examples of deployment patterns
 
@@ -80,10 +97,17 @@ Using data volume container for Wordpress and Mysql makes some operational task 
 
 ### Future plan
 
-* I'm in the process of refactoring this project completely to use baseimage-docker as base image. That also means that I will drop Supervisor in favor of RunIt. 
-* use of trusted builds
+* install supervisor from Ubuntu package and with one config file per service
+* have two optional subprojects (own directories/Dockerfile) for:
+	* a Mysql container
+	* a container for a frontend Nginx server for SSL/WAF/Proxy
+* Test deployment on more cloud providers (so far only tested with Digital Ocean, aiming for AWS and Microsoft Azure)
+* make trusted builds
 
 
+### Current Issues
+
+* Only the home page is page-cached by fastcgi-cache
 
 --
  

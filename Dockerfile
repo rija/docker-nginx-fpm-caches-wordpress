@@ -1,6 +1,10 @@
 FROM ubuntu:14.04
 MAINTAINER Rija Menage <dockerfile@rijam.sent.as>
 
+EXPOSE 80
+
+CMD ["/bin/bash", "/start.sh"]
+
 # Keep upstart from complaining
 RUN dpkg-divert --local --rename --add /sbin/initctl
 RUN ln -sf /bin/true /sbin/initctl
@@ -13,12 +17,20 @@ RUN apt-get update
 RUN apt-get -y upgrade
 
 # Basic Dependencies
-RUN apt-get -y install mysql-client php5-fpm php5-mysql pwgen python-setuptools curl git unzip
+RUN apt-get -y install mysql-client \
+						php5-fpm \
+						php5-mysql \
+						pwgen \
+						python-setuptools \
+						curl \
+						git \
+						unzip
 
 
 
 # to fix 'add-apt-repository: not found' in Ubuntu 14.04 LTS
-RUN apt-get install software-properties-common python-software-properties -y
+RUN apt-get -y install software-properties-common \
+						python-software-properties
 
 # Where to find  Nginx compiled with fastcgi_cache and fastcgi_cache_purge
 RUN add-apt-repository ppa:rtcamp/nginx
@@ -28,6 +40,24 @@ RUN apt-get -y install nginx-custom
 # Dependencies for APCu
 RUN apt-get -y install php5-dev libpcre3-dev
 
+# Wordpress Requirements
+RUN apt-get -y install php5-curl \
+						php5-gd \
+						php5-intl \
+						php-pear \
+						php5-imagick \
+						php5-imap \
+						php5-mcrypt \
+						php5-memcache \
+						php5-ming \
+						php5-ps \
+						php5-pspell \
+						php5-recode \
+						php5-sqlite \
+						php5-tidy \
+						php5-xmlrpc \
+						php5-xsl
+
 # Installing  Php-APCu
 RUN yes "" | pecl install APCu-beta
 
@@ -35,9 +65,6 @@ RUN yes "" | pecl install APCu-beta
 RUN echo "extension=apcu.so" >> /etc/php5/mods-available/apcu.ini
 RUN cd /etc/php5/fpm/conf.d/ && ln -s ../../mods-available/apcu.ini 20-apcu.ini
 
-
-# Wordpress Requirements
-RUN apt-get -y install php5-curl php5-gd php5-intl php-pear php5-imagick php5-imap php5-mcrypt php5-memcache php5-ming php5-ps php5-pspell php5-recode php5-sqlite php5-tidy php5-xmlrpc php5-xsl
 
 
 # Opcode config
@@ -83,8 +110,3 @@ RUN chown -R www-data:www-data /usr/share/nginx/www
 ADD ./start.sh /start.sh
 RUN chmod 755 /start.sh
 
-# private port exposed
-EXPOSE 80
-
-
-CMD ["/bin/bash", "/start.sh"]

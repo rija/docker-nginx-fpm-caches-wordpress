@@ -72,6 +72,8 @@ RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_fil
 
 # nginx config
 COPY  nginx.conf /etc/nginx/nginx.conf
+COPY  restrictions.conf /etc/nginx/restrictions.conf
+COPY  nginx-site.conf /etc/nginx/sites-available/default
 
 
 # php-fpm config
@@ -81,8 +83,6 @@ RUN sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php5/fpm/ph
 RUN sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php5/fpm/php-fpm.conf
 RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php5/fpm/pool.d/www.conf
 
-# site specific nginx conf
-COPY  ./nginx-site.conf /etc/nginx/sites-available/default
 
 
 # Supervisor Config

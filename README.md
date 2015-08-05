@@ -177,7 +177,46 @@ On Production:
 
 ### Current Issues
 
-* Only the home page is page-cached by fastcgi-cache
+######[FIXED] Only the home page is page-cached by fastcgi-cache
+
+Whenever I load a page that is not the home page, the page is served from the server instead of the cache, always.
+The response header contains:
+```
+X-Cache-Status:BYPASS
+```
+
+Update: 
+after enabling the log at debug level:
+```
+error_log    /var/log/nginx/error.log debug;
+```
+I could see this:
+```
+2015/08/05 07:05:11 [debug] 115#0: *371 http script var: "q=/en/my-page/&"
+2015/08/05 07:05:11 [debug] 115#0: *371 http script value: ""
+2015/08/05 07:05:11 [debug] 115#0: *371 http script not equal
+2015/08/05 07:05:11 [debug] 115#0: *371 http script if
+2015/08/05 07:05:11 [debug] 115#0: *371 http script value: "1"
+2015/08/05 07:05:11 [debug] 115#0: *371 http script set $skip_cache
+
+```
+
+which is the exectution of  this block of the site specific config:
+```
+    if ($query_string != "") {
+            set $skip_cache 1;
+    }
+```
+
+which led me to look at this line of the site specific config:
+```
+	try_files $uri $uri/ /index.php?q=$uri&$args
+```
+
+that was the problem. it should be:
+```
+	try_files $uri $uri/ /index.php?$args;
+```
 
 --
  

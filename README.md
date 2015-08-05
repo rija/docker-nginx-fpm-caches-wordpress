@@ -75,18 +75,18 @@ docker run --name MyLogAnalyser --volumes-from WordpressApp -d MyLogAnalyserImag
 
 ```
 
-### Examples of deployment patterns
+### Usage patterns
 
 The typical pattern I've adopted is using a container each for Wordpress and Mysql and two data volume containers, one for each as well.
 
-For mysql:
+#####For mysql:
 
 ```bash
 $ docker create --name mysqldata -v /var/lib/mysql mysql:5.5.42
 $ docker run --name mysql --volumes-from mysqldata -e MYSQL_ROOT_PASSWORD=<root password> -e MYSQL_DATABASE=wordpress -e MYSQL_USER=<user name> -e MYSQL_PASSWORD=<user password> -d mysql:5.5.42
 ```
 
-For wordpress:
+#####For wordpress:
 ```
 $ docker create --name wwwdata -v /usr/share/nginx/www <name of your image>
 $ docker run --name wordpress --volumes-from wwwdata -d -p 80:80 --link mysql-server:db <name of your image>
@@ -94,6 +94,17 @@ $ docker run --name wordpress --volumes-from wwwdata -d -p 80:80 --link mysql-se
 
 Using data volume container for Wordpress and Mysql makes some operational task incredibly easy (backups, data migrations, cloning, developing with production data,...)
 
+#####Export a data volume container:
+
+```bash
+docker run --rm --volumes-from wwwdata -v $(pwd):/backup <name of your image> tar -cvz --exclude="*.mp3" -f /backup/wwwdata.tar.gz /usr/share/nginx/www
+
+```
+#####Import into a data volume container:
+
+```bash
+docker run --rm --volumes-from wwwdata2 -v $(pwd):/new-data <name of your image> bash -c 'cd / && tar xzvf /new-data/wwwdata.tar.gz'
+```
 
 ### Future plan
 

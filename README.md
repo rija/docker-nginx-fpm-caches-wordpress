@@ -79,38 +79,97 @@ docker run --name MyLogAnalyser --volumes-from WordpressApp -d MyLogAnalyserImag
 
 The typical pattern I've adopted is using a container each for Wordpress and Mysql and two data volume containers, one for each as well.
 
-#####For mysql:
+#### Deploying Mysql in a Docker container:
 
 ```bash
 $ docker create --name mysqldata -v /var/lib/mysql mysql:5.5.42
 $ docker run --name mysql --volumes-from mysqldata -e MYSQL_ROOT_PASSWORD=<root password> -e MYSQL_DATABASE=wordpress -e MYSQL_USER=<user name> -e MYSQL_PASSWORD=<user password> -d mysql:5.5.42
 ```
 
-#####For wordpress:
-```
+#### Deploying Wordpress in a Docker container:
+
+######Create a data volume container for the data files
+
+```bash
 $ docker create --name wwwdata -v /usr/share/nginx/www <name of your image>
+```
+
+######Instantiate Nginx, PHP4-FPM & Wordpress in a docker container
+```bash
 $ docker run --name wordpress --volumes-from wwwdata -d -p 80:80 --link mysql-server:db <name of your image>
 ```
 
 Using data volume container for Wordpress and Mysql makes some operational task incredibly easy (backups, data migrations, cloning, developing with production data,...)
 
-#####Export a data volume container:
+####Export a data volume container:
 
 ```bash
-docker run --rm --volumes-from wwwdata -v $(pwd):/backup <name of your image> tar -cvz --exclude="*.mp3" -f /backup/wwwdata.tar.gz /usr/share/nginx/www
+$ docker run --rm --volumes-from wwwdata -v $(pwd):/backup <name of your image> tar -cvz  -f /backup/wwwdata.tar.gz /usr/share/nginx/www
 
 ```
-#####Import into a data volume container:
+####Import into a data volume container:
 
 ```bash
-docker run --rm --volumes-from wwwdata2 -v $(pwd):/new-data <name of your image> bash -c 'cd / && tar xzvf /new-data/wwwdata.tar.gz'
+$ docker run --rm --volumes-from wwwdata2 -v $(pwd):/new-data <name of your image> bash -c 'cd / && tar xzvf /new-data/wwwdata.tar.gz'
 ```
+
+to verify the content:
+
+```bash
+$ docker run --rm --volumes-from wwwdata2 -v $(pwd):/new-data -it <name of your image> bash
+```
+
+
+####Import a sql database dump in Mysql running in a Docker container
+
+```bash
+
+$ <cd in the directory of the mysql dump file - which is assumed to be a *.sql.gz compressed file here >
+$ docker run --rm  --link <name of the database server container>:db -v $(pwd):/dbbackup -it <name of your wordpress image> bash
+
+/# zcat <sql dump compressed file> | mysql -h $DB_PORT_3306_TCP_ADDR -u $DB_ENV_MYSQL_USER -p $DB_ENV_MYSQL_DATABASE
+<enter the password defined in $DB_ENV_MYSQL_PASSWORD after the prompt>
+
+/# mysql -h $DB_PORT_3306_TCP_ADDR -u $DB_ENV_MYSQL_USER -p $DB_ENV_MYSQL_DATABASE
+<verify that the import worked>
+
+/# exit
+```
+
+
+####Migrating a Wordpress installation between environemnts:
+
+For example to push the web site from Test to Production, or to build a Live-like version of the web site on your development machine.
+
+Starting point: Working Wordpress install with real content deployed as shown in "Deploying Wordpress in a Docker container" and "Deploying Mysql in a Docker container".
+
+On Test:
+ 1. export Database using a Wordpress Plugin like [WP Migrate DB](https://wordpress.org/plugins/wp-migrate-db/)
+ 1. export data files from the data volume container used by Wordpress container as described above
+ 1. export themes options if it applies
+ 1. export widgets using a Wordpress plugin like [Widgets Settings Importer/Exporter](https://wordpress.org/plugins/widget-settings-importexport/)
+
+On Production:
+ 1. Instantiate a database server container as described above
+ 1. Import the mysql dump as shown in "Import a sql database dump in Mysql running in a Docker container"
+ 1. Create a data volume container for Wordpress as shown in first part of "Deploy Wordpress in a Docker container"
+ 1. Import data files as shown in "Import into a data volume container"
+ 1. verify that all files have been copied over. Remove the 'wp-config.php' file.
+ 1. Instantiate a wordpress server container as described in second part of "Deploy Wordpress in a Docker container"
+
+**Notes:**
+* When exporting data files, you can either backup the whole /usr/share/nginx/www or just /usr/share/nginx/www/wp-content
+* When exporting data files, you may want to exclude large files from the uploads directory. E.g: You can pass '--exclude "*.mp3" to the tar command to exclude all mp3
+* if you have exported /usr/share/nginx/www, Wordpress software is included which is most of the time what you want to do when migrating from Test to Production, but is rarely what you want if you were using these steps to get production data from Live installation into a newer version of the web site being developed. In that case export only wp-content
+* the last note results from the fact that a mount point from a data volume container supersedes the identically named mount point from the instantiated container. More info at [Docker Docs](http://docs.docker.com/userguide/dockervolumes/).
 
 ### Future plan
 
 * install supervisor from Ubuntu package and with one config file per service
 * have two optional subprojects (own directories/Dockerfile) for:
-	* a Mysql container
+	* a Mysql container with backup tools
+	* a container with WebDAV access to the www data volume container
+	* a container with tool to push logs to services like Splunk
 	* a container for a frontend Nginx server for SSL/WAF/Proxy
 * Test deployment on more cloud providers (so far only tested with Digital Ocean, aiming for AWS and Microsoft Azure)
 * make trusted builds

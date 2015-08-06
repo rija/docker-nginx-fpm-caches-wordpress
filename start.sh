@@ -20,5 +20,7 @@ if [ ! -f /usr/share/nginx/www/wp-config.php ]; then
 
 fi
 
+sed -i -e "s/server_name\s*localhost/server_name $SERVER_NAME/g" /etc/nginx/sites-available/default
+
 # start all the services
 /usr/local/bin/supervisord -n

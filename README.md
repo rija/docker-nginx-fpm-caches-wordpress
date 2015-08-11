@@ -163,6 +163,28 @@ On Production:
 * if you have exported /usr/share/nginx/www, Wordpress software is included which is most of the time what you want to do when migrating from Test to Production, but is rarely what you want if you were using these steps to get production data from Live installation into a newer version of the web site being developed. In that case export only wp-content
 * the last note results from the fact that a mount point from a data volume container supersedes the identically named mount point from the instantiated container. More info at [Docker Docs](http://docs.docker.com/userguide/dockervolumes/).
 
+
+### SSL
+
+The latest version of the dockerfile deploy a SSL-enabled nginx site-wide (not just for wp-admin).
+Non-https connection will be redirected to a secured connection.
+
+In Nginx config, the old SSLv* protocols are disabled to prevent BEAST and POODLE attacks.
+
+The recommended pattern to manage certificates on a dockerised installation is to have the certificates generated on the host system and mounted as a volume into the container. Containers are meant to be ephemeral/replaceable so certificates should not be stored on them.
+
+A certificate FQDN must match the server_name in Nginx configuration but the latter needs to stay generic so it can be reused. Therefore, now the server name must be passed as an environment parameter to 'docker run' when the container is instantiated.
+
+Finally the 443 port is exposed from within the container and needs to be mapped to a port on the host system.
+
+Taking all of the above into account, the command to instantiate a wordpress container now looks like:
+
+```bash
+docker run --name wordpress -e SERVER_NAME=<server name> -v <path to certificates on host system>:/etc/nginx/ssl --volumes-from wwwdata -d -p 8443:443 -p 8082:80 --link mysqlserver:db <name of your image>
+
+```
+
+
 ### Future plan
 
 * install supervisor from Ubuntu package and with one config file per service

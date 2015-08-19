@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y haproxy
 
 # HAProxy config
 COPY haproxy.cfg /etc/haproxy/haproxy.cfg
+COPY rc.local /etc/rc.local
 
 # RSYSLOG config
 COPY rsyslog.conf /etc/rsyslog.conf

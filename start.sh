@@ -23,8 +23,6 @@ s/password_here/$DB_ENV_MYSQL_PASSWORD/
 
 chown www-data:www-data /usr/share/nginx/www/wp-config.php
 
-# to make SSL work, make sure server name is replaced with correct value passed as an ENV upon docker run
-sed -i -e "s/server_name\s*localhost/server_name $SERVER_NAME/g" /etc/nginx/sites-available/default
 
 # start all the services
 /usr/local/bin/supervisord -n

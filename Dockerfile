@@ -2,7 +2,6 @@ FROM ubuntu:14.04
 MAINTAINER Rija Menage <dockerfile@rijam.sent.as>
 
 EXPOSE 80
-EXPOSE 443
 
 CMD ["/bin/bash", "/start.sh"]
 

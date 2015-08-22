@@ -137,7 +137,7 @@ $ docker run --rm  --link <name of the database server container>:db -v $(pwd):/
 ```
 
 
-####Migrating a Wordpress installation between environemnts:
+####Migrating a Wordpress installation between environments:
 
 For example to push the web site from Test to Production, or to build a Live-like version of the web site on your development machine.
 

@@ -166,7 +166,7 @@ On Production:
 
 ### SSL & Zero Downtime Deployment
 
-a child project, **ssl-proxy**, will provide a container running HAproxy for terminating SSL (TLS) connections and allow for zero downtime deployment.
+a child project, **docker-ssl-haproxy**, will provide a container running HAproxy for terminating SSL (TLS) connections and allow for zero downtime deployment.
 It's currently a work-in-progress.
 
 

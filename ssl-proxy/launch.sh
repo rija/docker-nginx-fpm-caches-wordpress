@@ -7,6 +7,8 @@ sed -i -e "s/LIVESERVER/$LIVE_PORT_80_TCP_ADDR/g" /etc/haproxy/haproxy.cfg
 
 sed -i -e "s/BACKUPSERVER/$BACKUP_PORT_80_TCP_ADDR/g" /etc/haproxy/haproxy.cfg
 
+sed -i -e "s/hauser:hauser2015/$HA_STATS_CREDENTIALS/g" /etc/haproxy/haproxy.cfg
+
 
 command="/usr/bin/supervisord"
 echo [DOCKER INFO] Executing: $command

@@ -97,6 +97,7 @@ RUN cd /usr/share/nginx/ \
     && tar -xvf wp.tar.gz   
 RUN mv /usr/share/nginx/wordpress /usr/share/nginx/www
 RUN chown -R www-data:www-data /usr/share/nginx/www
+COPY wordpress-ssl /usr/share/nginx/www/wordpress-ssl
 
 
 # Wordpress Initialization and Startup Script

@@ -1,0 +1,12 @@
+
+if (!empty($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+        $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+}
+
+if (!empty($_SERVER['HTTP_X_REAL_IP']) && (filter_var($_SERVER['HTTP_X_REAL_IP'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== FALSE || filter_var($_SERVER['HTTP_X_REAL_IP'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== FALSE)) {
+        $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_REAL_IP'];
+}
+
+if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+        $_SERVER['HTTPS'] = 'on';
+}

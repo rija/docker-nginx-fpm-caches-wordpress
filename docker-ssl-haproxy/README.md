@@ -26,7 +26,7 @@ $ docker build -t="docker-ssl-haproxy" .
 ### How to run
 
 ```bash
-$docker run -d \
+$ docker run -d \
     --name proxy \
     -e SERVER_NAME=www.example.com \
     -e HA_STATS_CREDENTIALS=<username>:<password> \

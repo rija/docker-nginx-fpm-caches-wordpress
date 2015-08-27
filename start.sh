@@ -23,7 +23,7 @@ s/password_here/$DB_ENV_MYSQL_PASSWORD/
 
 
 # Here we add support for SSL connection in Wordpress
-cat /usr/share/nginx/www/wordpress-ssl >> /usr/share/nginx/www/wp-config.php
+cat /etc/wordpress-ssl >> /usr/share/nginx/www/wp-config.php
 
 chown www-data:www-data /usr/share/nginx/www/wp-config.php
 

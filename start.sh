@@ -22,9 +22,6 @@ s/password_here/$DB_ENV_MYSQL_PASSWORD/
 /'NONCE_SALT'/s/put your unique phrase here/`pwgen -c -n -1 65`/" /usr/share/nginx/www/wp-config-sample.php > /usr/share/nginx/www/wp-config.php
 
 
-# Here we add support for SSL connection in Wordpress
-cat /etc/wordpress-ssl >> /usr/share/nginx/www/wp-config.php
-
 chown www-data:www-data /usr/share/nginx/www/wp-config.php
 
 

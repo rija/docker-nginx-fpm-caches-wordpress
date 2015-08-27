@@ -35,7 +35,7 @@ The expected usage is to link another container running the database server.
 ### How to build
 
 ```bash
-$ git clone git@github.com:rija/docker-nginx-fpm-caches-wordpress.git
+$ git clone https://github.com/rija/docker-nginx-fpm-caches-wordpress.git
 $ cd docker-nginx-fpm-caches-wordpress
 $ docker build -t="wordpress-nginx-caches-wordpress" .
 ```
@@ -127,13 +127,16 @@ $ docker run --rm --volumes-from wwwdata2 -v $(pwd):/new-data -it <name of your 
 $ <cd in the directory of the mysql dump file - which is assumed to be a *.sql.gz compressed file here >
 $ docker run --rm  --link <name of the database server container>:db -v $(pwd):/dbbackup -it <name of your wordpress image> bash
 
-/# zcat <sql dump compressed file> | mysql -h $DB_PORT_3306_TCP_ADDR -u $DB_ENV_MYSQL_USER -p $DB_ENV_MYSQL_DATABASE
-<enter the password defined in $DB_ENV_MYSQL_PASSWORD after the prompt>
-
-/# mysql -h $DB_PORT_3306_TCP_ADDR -u $DB_ENV_MYSQL_USER -p $DB_ENV_MYSQL_DATABASE
-<verify that the import worked>
-
+/# cd /dbbackup/
+/# zcat <sql dump compressed file> | mysql -h $DB_PORT_3306_TCP_ADDR -u $DB_ENV_MYSQL_USER -p$DB_ENV_MYSQL_PASSWORD $DB_ENV_MYSQL_DATABASE
 /# exit
+```
+
+to verify the content:
+
+```bash
+$ docker run --rm  --link <name of the database server container>:db -it <name of your wordpress image> bash
+$ mysql -h $DB_PORT_3306_TCP_ADDR -u $DB_ENV_MYSQL_USER -p$DB_ENV_MYSQL_PASSWORD $DB_ENV_MYSQL_DATABASE
 ```
 
 

@@ -51,7 +51,25 @@ Explanation of each line:
  1. name of the image that has been build
  
 **Notes:**
-> The two containers running the LEMP/Wordpress stack should be connected to the same Database server container and mount the same Data Volume Container for web directory (/usr/share/nginx/www). That way the stack is stateless and both backend are instances of the same application.
+
+1. The two containers running the web stack should be connected to the same Database server container and mount the same Data Volume Container for web directory (/usr/share/nginx/www). That way the web stack is stateless.
+
+
+### High Availability, Zero Downtime Deployment, A/B Testing
+
+All of these are possible with the setup above. 
+If one of the stack crashes, the web site is still available as the traffic will be directed to the running stack.
+
+If ones wants to introduce a software change, one can update each stack at a time, avoiding the need for the site to be unavailable
+
+If one wants to test how visitors behave with a particular feature in comparison another feature or the current feature set, one can enable the feature on one web stack and compare statistics for each web stack. It's better for this to modify haproxy configuration to add weighting to routing
+
+
+### Caveats and current issues
+
+1. Currently, if the web stacks are restarted or recreated,  haproxy has no way of knowing the new IP addresses and won't be able to connect to them.
+This could be solved either by using a service discovery mechanism (etcd or consul) or by generating dynamically the config for haproxy.
+
 
 
 

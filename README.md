@@ -50,7 +50,7 @@ You can choose whatever name you want for the image after the '-t=' parameter.
 upload the image in a repository, private or public, and on the target Docker enabled system, type: 
 
 ```bash
-$ docker run --name <name you want for your container> -d -p 80:80 --link <name of a database container>:db <name of the image you've built>
+$ docker run --name <name you want for your container> -d -e SERVER_NAME=<FQDN of the web site> -p 80:80 --link <name of a database container>:db <name of the image you've built>
 ```
 
 You can also build and deploy on the target machine as well. The command stays the same.

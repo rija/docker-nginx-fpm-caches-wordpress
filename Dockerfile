@@ -59,11 +59,11 @@ RUN apt-get update && apt-get install -y nginx-custom
 
 
 # Installing  Php-APCu
-RUN yes "" | pecl install APCu-beta
+#RUN yes "" | pecl install APCu-beta
 
 # Configuring APCu
-RUN echo "extension=apcu.so" >> /etc/php5/mods-available/apcu.ini
-RUN cd /etc/php5/fpm/conf.d/ && ln -s ../../mods-available/apcu.ini 20-apcu.ini
+#RUN echo "extension=apcu.so" >> /etc/php5/mods-available/apcu.ini
+#RUN cd /etc/php5/fpm/conf.d/ && ln -s ../../mods-available/apcu.ini 20-apcu.ini
 
 
 

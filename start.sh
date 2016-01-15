@@ -27,12 +27,11 @@ chown www-data:www-data /usr/share/nginx/www/wp-config.php
 
 
 # replace the placeholder in nginx site specific config for server name and cert domain name
-sed -e "s/server_fqdn/$SERVER_NAME/
-s/cert_name/$CERT_NAME/" /etc/nginx/sites-available/default
+sed -e "s/server_fqdn/$SERVER_NAME/" /etc/nginx/sites-available/default
 
 # add server name to /etc/hosts to avoid timeout when code make http call to public url
 EXT_IP=`ip route get 8.8.8.8 | awk '{print $NF; exit}'`
-echo "$EXT_IP	$CERT_NAME" >> /etc/hosts
+echo "$EXT_IP	$SERVER_NAME" >> /etc/hosts
 
 # start all the services
 /usr/local/bin/supervisord -n

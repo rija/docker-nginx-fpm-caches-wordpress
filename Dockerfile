@@ -57,6 +57,9 @@ RUN apt-get install -y php5-curl \
 RUN add-apt-repository ppa:rtcamp/nginx
 RUN apt-get update && apt-get install -y nginx-custom
 
+# Install LE's ACME client for domain validation and certificate generation and renewal
+RUN git clone https://github.com/letsencrypt/letsencrypt
+RUN mkdir -p /tmp/le
 
 # Installing  Php-APCu
 #RUN yes "" | pecl install APCu-beta
@@ -76,6 +79,7 @@ COPY  nginx.conf /etc/nginx/nginx.conf
 COPY  restrictions.conf /etc/nginx/restrictions.conf
 COPY  global-ssl.conf /etc/nginx/global-ssl.conf
 COPY  nginx-site.conf /etc/nginx/sites-available/default
+RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
 
 
 # php-fpm config

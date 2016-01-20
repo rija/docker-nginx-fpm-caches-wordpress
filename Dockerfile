@@ -77,7 +77,7 @@ RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_fil
 # nginx config
 COPY  nginx.conf /etc/nginx/nginx.conf
 COPY  restrictions.conf /etc/nginx/restrictions.conf
-COPY  global-ssl.conf /etc/nginx/global-ssl.conf
+COPY  ssl.conf /etc/nginx/ssl.conf
 COPY  nginx-site.conf /etc/nginx/sites-available/default
 RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
 

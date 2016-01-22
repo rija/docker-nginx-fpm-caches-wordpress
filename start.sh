@@ -26,7 +26,7 @@ chown www-data:www-data /usr/share/nginx/www/wp-config.php
 
 
 
-# replace the placeholder in nginx site specific config for server name and cert domain name
+# replace the placeholder in nginx config files for server name and cert domain name
 sed -i -e "s/server_fqdn/$SERVER_NAME/" /etc/nginx/sites-available/default
 sed -i -e "s/server_fqdn/$SERVER_NAME/" /etc/nginx/ssl.conf
 

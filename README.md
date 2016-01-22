@@ -6,7 +6,7 @@ Rija Ménagé
 
 ### Description
 
-Docker file to create docker container with Nginx and php5-fpm running Wordpress with fastcgi-cache (+purge) and opcache enabled. Encryption (TLS) support is included (using Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Fastcgi-cache enables page caching while opcache enables caching of code execution.
+Docker file to create docker container with Nginx and php5-fpm running Wordpress with fastcgi-cache (+purge) and opcache enabled (Fastcgi-cache enables page caching while opcache enables caching of code execution). Encryption (TLS) support is included (using Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Cron is enabled.
 
 ```bash
 $ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wordpressfiles -v /etc/letsencrypt:/etc/letsencrypt -p 443:443 -p 80:80 --link mysqlserver:db rija/docker-nginx-fpm-caches-wordpress
@@ -47,7 +47,7 @@ $ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wor
 
 **Notes:**
  * that command assumes you already have a mysql container running with name 'mysqlserver'
- * you must replace example.com with your domain name
+ * you must replace example.com with your domain name (without the www. prefix)
  * If you intend to use Docker Compose, make sure the name you choose for your container is only within [a-z][A-Z].
 
 ### How to enable Encryption (TLS)
@@ -70,10 +70,11 @@ $ docker exec -it wordpress bash -c "service nginx reload"
 
 **Notes:**
  * There is no change required to nginx configuration for standard use cases
- * It is suggested to replace example.com by your domain name although any file name that match the pattern ssl.*.conf will be recognised
+ * It is suggested to replace example.com in the file name by your domain name although any file name that match the pattern ssl.*.conf will be recognised
  * Navigating to the web site will throw a connection error until that step has been performed as encryption is enabled across the board and http connections are redirected to https. You must update nginx configuration files as needed to match your use case if that behaviour is not desirable.
  * Lets Encrypt's' ACME client configuration file is deployed to *'/etc/letsencrypt/cli.ini'*. Update that file to suit your use case regarding certificates.
- * Certificates are saved on the host server because this Dockerfile is intended for an architecture where a Wordpress container should be  stateless. If you want to keep certificates in the container, drop the *'-v /etc/letsencrypt:/etc/letsencrypt'* argument from the *'docker run'* command
+ * the generated certificate is valid for example.com and www.example.com (SAN)
+ * The certificate files are saved on the host server because this Dockerfile is intended for an architecture where a Wordpress container should be stateless. If you want to keep certificates in the container, drop the *'-v /etc/letsencrypt:/etc/letsencrypt'* argument from the *'docker run'* command
  
 ### Usage patterns
 
@@ -168,7 +169,8 @@ It's currently very much a work-in-progress (not really working).
 
 * install Supervisor as an Ubuntu package
 * install Lets Encrypt's ACME client as an Ubuntu package
-* make and derive from a base image with just nginx-custom and Let's Encrypt
+* make and derive from a base image that has just nginx-custom and Let's Encrypt
+* [derive that base image from Debian:jessie](https://imagelayers.io/?images=rija%2Fdocker-nginx-fpm-caches-wordpress:latest,nginx:latest,ubuntu:14.04,debian:jessie)
 * setup subprojects for:
 	* a container with WebDAV access to the www data volume container
 	* a container with tool to push logs to services like Splunk

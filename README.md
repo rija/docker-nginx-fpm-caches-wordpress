@@ -8,28 +8,20 @@ Rija Ménagé
 
 ###Description
 
-Docker file to create docker container with Nginx fronting php5-fpm running Wordpress with fastcgi-cache (+purge), opcache and APCu enabled.
+Docker file to create docker container with Nginx fronting php5-fpm running Wordpress with fastcgi-cache (+purge), opcache enabled. Encryption (TLS) support is included (using Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Fastcgi-cache enables page caching while opcache enables caching of code execution.
 
-fastcgi-cache enables page caching (like static page caching), opcache enables caching of code execution, and APCu provides a data cache (like Memcached but much faster and much less scalable).
-
-**No Wordpress plugins is provided** with the Dockerfile, but the following plugins are recommended to be installed through Wordpress's Admin panel to make the most out of the caching mechanisms installed:
-* Nginx Helper: <https://wordpress.org/plugins/nginx-helper/>
-* APCu Object Cache Backend: <https://wordpress.org/plugins/apcu/>
-
-The first one allow control of facgi cache (i.e: purging). 
-The second one enables Wordpress to use the APCu userland data caching
+```bash
+$ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wordpressfiles -v /etc/letsencrypt:/etc/letsencrypt -p 443:443 -p 80:80 --link mysqlserver:db rija/docker-nginx-fpm-caches-wordpress
+```
 
 
-[TODO] A visual interface to Opcode is installed under restricted access (default login/password: ocview/ocview2015) to allow for analysis and purge of Opcode caching [/oc/]
-
-
-**Please note:**
+**Notes:**
 * There is no database server included:
 The expected usage is to link another container running the database server.
 * There is no mail server.
 * Wordpress is installed from **'latest'** version
 * Wordpress is installed as a single site deployment (no multisite support)
-* Currently, the version of Nginx installed deployed to the built image is 1.8 (<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>)
+* Currently, the version of Nginx installed deployed to the built image is [1.8] (<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>)
 
 
 ### How to build
@@ -37,44 +29,55 @@ The expected usage is to link another container running the database server.
 ```bash
 $ git clone https://github.com/rija/docker-nginx-fpm-caches-wordpress.git
 $ cd docker-nginx-fpm-caches-wordpress
-$ docker build -t="wordpress-nginx-caches-wordpress" .
+$ docker build -t="docker-nginx-fpm-caches-wordpress" .
 ```
 You can choose whatever name you want for the image after the '-t=' parameter. 
 
-**Tips:**
-* If encountering problems with some package not installing, you can add the **'-no-cache'** option to **'docker build'** otherwise it will fetch package from cache. But to omit the option when you know there is no silent failure in order to accelerate build time.
-
-
-### How to deploy
-
-upload the image in a repository, private or public, and on the target Docker enabled system, type: 
+Building an image is optional, you can also pull a pre-built image from  Docker Hub that tracks any changes made to that Git repository: 
 
 ```bash
-$ docker run --name <name you want for your container> -d -e SERVER_NAME=<FQDN of the web site> -p 80:80 --link <name of a database container>:db <name of the image you've built>
+docker pull rija/docker-nginx-fpm-caches-wordpress
 ```
 
-You can also build and deploy on the target machine as well. The command stays the same.
-If you intend to use Docker Compose, make sure the name you choose for your container is only within [a-z][A-Z].
+That is optional as well. You can let Docker pull the image on-demand whenever you want to run the container. 
 
-### Logs
 
-The logs are exposed outside the container as a volume. 
-So you can deploy your own services to process, analyse or aggregate the logs from the Wordpress installation.
-
-The corresponding line in the Dockerfile is: 
-
-```
-VOLUME ["/var/log"]
-```
-
-you can mount this volume on another container with a command that looks as below (assuming your Wordpress container is called 'WordpressApp'):
+### How to run a Wordpress container
 
 ```bash
-
-docker run --name MyLogAnalyser --volumes-from WordpressApp -d MyLogAnalyserImage
-
+$ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wordpressfiles -v /etc/letsencrypt:/etc/letsencrypt -p 443:443 -p 80:80 --link mysqlserver:db rija/docker-nginx-fpm-caches-wordpress
 ```
 
+**Notes:**
+ * that command assumes you already have a mysql container running with name 'mysqlserver'
+ * you must replace example.com with your domain name
+ * If you intend to use Docker Compose, make sure the name you choose for your container is only within [a-z][A-Z].
+
+### How to enable Encryption (TLS)
+
+It is advised to have read LetsEncrypt's [FAQ](https://community.letsencrypt.org/c/docs/) and [user guide](https://letsencrypt.readthedocs.org/en/latest/index.html)  beforehand.
+
+after the Wordpress container has been started, run the following command and follow the on-screen instructions:
+
+```bash
+$ docker exec -it wordpress bash -c "cd /letsencrypt/ && ./letsencrypt-auto certonly"
+```
+
+After the command as returned with a successful message regarding acquisition of certificate, nginx needs to be restarted with encryption enabled and configured. This is done by running the following commands:
+
+```bash
+$ docker exec -it wordpress bash -c "cp /etc/nginx/ssl.conf /etc/nginx/ssl.example.com.conf"
+$ docker exec -it wordpress bash -c "nginx -t"
+$ docker exec -it wordpress bash -c "service nginx reload"
+```
+
+**Notes:**
+ * There is no change required to nginx configuration for standard use cases
+ * It is suggested to replace example.com by your domain name although any file name that match the pattern ssl.*.conf will be recognised
+ * Navigating to the web site will throw a connection error until that step has been performed as encryption is enabled across the board and http connections are redirected to https. You must update nginx configuration files as needed to match your use case if that behaviour is not desirable.
+ * Lets Encrypt's' ACME client configuration file is deployed to *'/etc/letsencrypt/cli.ini'*. Update that file to suit your use case regarding certificates.
+ * Certificates are saved on the host server because this Dockerfile is intended for an architecture where a Docker container is considered stateless. If you want to keep everything in the container, drop the *'-v /etc/letsencrypt:/etc/letsencrypt'* argument from the *'docker run'* command
+ 
 ### Usage patterns
 
 The typical pattern I've adopted is using a container each for Wordpress and Mysql and two data volume containers, one for each as well.
@@ -82,21 +85,21 @@ The typical pattern I've adopted is using a container each for Wordpress and Mys
 #### Deploying Mysql in a Docker container:
 
 ```bash
-$ docker create --name mysqldata -v /var/lib/mysql mysql:5.5.42
-$ docker run --name mysql --volumes-from mysqldata -e MYSQL_ROOT_PASSWORD=<root password> -e MYSQL_DATABASE=wordpress -e MYSQL_USER=<user name> -e MYSQL_PASSWORD=<user password> -d mysql:5.5.42
+$ docker create --name mysqldata -v /var/lib/mysql mysql:5.5.45
+$ docker run --name mysql --volumes-from mysqldata -e MYSQL_ROOT_PASSWORD=<root password> -e MYSQL_DATABASE=wordpress -e MYSQL_USER=<user name> -e MYSQL_PASSWORD=<user password> -d mysql:5.5.45
 ```
 
 #### Deploying Wordpress in a Docker container:
 
-######Create a data volume container for the data files
+######Create a data volume container for Wordpress files
 
 ```bash
 $ docker create --name wwwdata -v /usr/share/nginx/www <name of your image>
 ```
 
-######Instantiate Nginx, PHP4-FPM & Wordpress in a docker container
+######Run a wordpress container
 ```bash
-$ docker run --name wordpress --volumes-from wwwdata -d -p 80:80 --link mysql-server:db <name of your image>
+docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wwwdata -v /etc/letsencrypt:/etc/letsencrypt -p 443:443 -p 80:80 --link mysqlserver:db rija/docker-nginx-fpm-caches-wordpress
 ```
 
 Using data volume container for Wordpress and Mysql makes some operational task incredibly easy (backups, data migrations, cloning, developing with production data,...)
@@ -139,105 +142,39 @@ $ docker run --rm  --link <name of the database server container>:db -it <name o
 $ mysql -h $DB_PORT_3306_TCP_ADDR -u $DB_ENV_MYSQL_USER -p$DB_ENV_MYSQL_PASSWORD $DB_ENV_MYSQL_DATABASE
 ```
 
+#### Logs
 
-####Migrating a Wordpress installation between environments:
+The logs are exposed outside the container as a volume. 
+So you can deploy your own services to process, analyse or aggregate the logs from the Wordpress installation.
 
-For example to push the web site from Test to Production, or to build a Live-like version of the web site on your development machine.
+The corresponding line in the Dockerfile is: 
 
-Starting point: Working Wordpress install with real content deployed as shown in "Deploying Wordpress in a Docker container" and "Deploying Mysql in a Docker container".
+```
+VOLUME ["/var/log"]
+```
 
-On Test:
- 1. export Database using a Wordpress Plugin like [WP Migrate DB](https://wordpress.org/plugins/wp-migrate-db/)
- 1. export data files from the data volume container used by Wordpress container as described above
- 1. export themes options if it applies
- 1. export widgets using a Wordpress plugin like [Widgets Settings Importer/Exporter](https://wordpress.org/plugins/widget-settings-importexport/)
+you can mount this volume on another container with a command as shown below (assuming your Wordpress container is called 'wordpress'):
 
-On Production:
- 1. Instantiate a database server container as described above
- 1. Import the mysql dump as shown in "Import a sql database dump in Mysql running in a Docker container"
- 1. Create a data volume container for Wordpress as shown in first part of "Deploy Wordpress in a Docker container"
- 1. Import data files as shown in "Import into a data volume container"
- 1. verify that all files have been copied over. Remove the 'wp-config.php' file.
- 1. Instantiate a wordpress server container as described in second part of "Deploy Wordpress in a Docker container"
-
-**Notes:**
-* When exporting data files, you can either backup the whole /usr/share/nginx/www or just /usr/share/nginx/www/wp-content
-* When exporting data files, you may want to exclude large files from the uploads directory. E.g: You can pass '--exclude "*.mp3" to the tar command to exclude all mp3
-* if you have exported /usr/share/nginx/www, Wordpress software is included which is most of the time what you want to do when migrating from Test to Production, but is rarely what you want if you were using these steps to get production data from Live installation into a newer version of the web site being developed. In that case export only wp-content
-* the last note results from the fact that a mount point from a data volume container supersedes the identically named mount point from the instantiated container. More info at [Docker Docs](http://docs.docker.com/userguide/dockervolumes/).
+```bash
+docker run --name MyLogAnalyser --volumes-from wordpress -d MyLogAnalyserImage
+```
 
 
-### SSL & Zero Downtime Deployment
+### Load-balancing with HAProxy
 
-a child project, **docker-ssl-haproxy**, will provide a container running HAproxy for terminating SSL (TLS) connections and allow for zero downtime deployment.
-It's currently a work-in-progress.
+a sub-project, **docker-ssl-haproxy**, will provide a container running HAproxy for terminating encrypted connections and for load balancing multiple Wordpress containers (e.g: for scalability, availability, zero downtime deployment, A/B testing, etc...).
+It's currently very much a work-in-progress (not really working).
 
 
 
 ### Future plan
 
-* install supervisor from Ubuntu package and with one config file per service
-* have two optional subprojects (own directories/Dockerfile) for:
-	* a Mysql container with backup tools
+* install supervisor as an Ubuntu package
+* use nginx official Docker container as base image
+* setup subprojects for:
+	* a Mysql container with backup and import/export tools
 	* a container with WebDAV access to the www data volume container
 	* a container with tool to push logs to services like Splunk
-	* a container for a frontend Nginx server for SSL/WAF/Proxy
 * Test deployment on more cloud providers (so far only tested with Digital Ocean, aiming for AWS and Microsoft Azure)
-* make trusted builds
 
 
-### Current Issues
-
-######[FIXED] Only the home page is page-cached by fastcgi-cache
-
-Whenever I load a page that is not the home page, the page is served from the server instead of the cache, always.
-The response header contains:
-```
-X-Cache-Status:BYPASS
-```
-
-Update: 
-after enabling the log at debug level:
-```
-error_log    /var/log/nginx/error.log debug;
-```
-I could see this:
-```
-2015/08/05 07:05:11 [debug] 115#0: *371 http script var: "q=/en/my-page/&"
-2015/08/05 07:05:11 [debug] 115#0: *371 http script value: ""
-2015/08/05 07:05:11 [debug] 115#0: *371 http script not equal
-2015/08/05 07:05:11 [debug] 115#0: *371 http script if
-2015/08/05 07:05:11 [debug] 115#0: *371 http script value: "1"
-2015/08/05 07:05:11 [debug] 115#0: *371 http script set $skip_cache
-
-```
-
-which is the exectution of  this block of the site specific config:
-```
-    if ($query_string != "") {
-            set $skip_cache 1;
-    }
-```
-
-which led me to look at this line of the site specific config:
-```
-	try_files $uri $uri/ /index.php?q=$uri&$args
-```
-
-that was the problem. it should be:
-```
-	try_files $uri $uri/ /index.php?$args;
-```
-
---
- 
-> ###Disclaimer
-> 
-> Please, perform due diligence and research every line of the dockerfile.
-> I don't guarantee that it will work for you.
-> I don't guarantee it won't break your system.
-> You use the artefacts of this project at your own risk.
-
---
-
-*This project is inspired by the work of Eugene Ware on a Dockerfile for Wordpress deployment: <https://github.com/eugeneware/docker-wordpress-nginx>*

@@ -64,8 +64,7 @@ After the command as returned with a successful message regarding acquisition of
 
 ```bash
 $ docker exec -it wordpress bash -c "cp /etc/nginx/ssl.conf /etc/nginx/ssl.example.com.conf"
-$ docker exec -it wordpress bash -c "nginx -t"
-$ docker exec -it wordpress bash -c "service nginx reload"
+$ docker exec -it wordpress bash -c "nginx -t && service nginx reload"
 ```
 
 **Notes:**

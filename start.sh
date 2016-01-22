@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SERVER_NAME=${SERVER_NAME:-“example.com”}
+SERVER_NAME=${SERVER_NAME:-example.com}
 
 # first backup any existing config file in case variables have been manually added to it
 if [ -f /usr/share/nginx/www/wp-config.php ]; then

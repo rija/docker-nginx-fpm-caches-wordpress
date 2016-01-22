@@ -26,10 +26,6 @@ RUN apt-get update && apt-get install -y mysql-client \
 
 
 
-# to fix 'add-apt-repository: not found' in Ubuntu 14.04 LTS
-RUN apt-get -y install software-properties-common \
-						python-software-properties
-
 
 # Dependencies for APCu
 #RUN apt-get install -y php5-dev libpcre3-dev
@@ -52,6 +48,9 @@ RUN apt-get install -y php5-curl \
 						php5-xmlrpc \
 						php5-xsl
 
+# to fix 'add-apt-repository: not found' in Ubuntu 14.04 LTS
+RUN apt-get -y install software-properties-common \
+						python-software-properties
 
 # Where to find  Nginx compiled with fastcgi_cache and fastcgi_cache_purge
 RUN add-apt-repository ppa:rtcamp/nginx
@@ -104,9 +103,6 @@ RUN cd /usr/share/nginx/ \
     && tar -xvf wp.tar.gz   
 RUN mv /usr/share/nginx/wordpress /usr/share/nginx/www
 RUN chown -R www-data:www-data /usr/share/nginx/www
-
-# Configure Wordpress SSL
-COPY wordpress-ssl /etc/wordpress-ssl
 
 
 # Wordpress Initialization and Startup Script

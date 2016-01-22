@@ -32,7 +32,7 @@ RUN apt-get -y install software-properties-common \
 
 
 # Dependencies for APCu
-RUN apt-get install -y php5-dev libpcre3-dev
+#RUN apt-get install -y php5-dev libpcre3-dev
 
 # Wordpress Requirements
 RUN apt-get install -y php5-curl \
@@ -98,7 +98,8 @@ RUN /usr/bin/easy_install supervisor-stdout
 COPY  ./supervisord.conf /etc/supervisord.conf
 
 # Install Wordpress
-ENV WP_URL https://wordpress.org/latest.tar.gz
+ARG WP_URL
+ENV WP_URL ${WP_URL:https://wordpress.org/latest.tar.gz} 
 RUN cd /usr/share/nginx/ \
     && curl -o wp.tar.gz $WP_URL \
     && tar -xvf wp.tar.gz   

@@ -167,6 +167,8 @@ It's currently very much a work-in-progress (not really working).
 ### Future plan
 
 * install Supervisor as an Ubuntu package
+* install Lets Encrypt's ACME client as an Ubuntu package
+* 
 * use nginx official Docker container as base image
 * setup subprojects for:
 	* a Mysql container with backup and import/export tools

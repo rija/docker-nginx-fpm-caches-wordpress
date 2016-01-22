@@ -8,7 +8,7 @@ Rija Ménagé
 
 ###Description
 
-Docker file to create docker container with Nginx fronting php5-fpm running Wordpress with fastcgi-cache (+purge), opcache enabled. Encryption (TLS) support is included (using Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Fastcgi-cache enables page caching while opcache enables caching of code execution.
+Docker file to create docker container with Nginx and php5-fpm running Wordpress with fastcgi-cache (+purge) and opcache enabled. Encryption (TLS) support is included (using Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Fastcgi-cache enables page caching while opcache enables caching of code execution.
 
 ```bash
 $ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wordpressfiles -v /etc/letsencrypt:/etc/letsencrypt -p 443:443 -p 80:80 --link mysqlserver:db rija/docker-nginx-fpm-caches-wordpress
@@ -31,9 +31,8 @@ $ git clone https://github.com/rija/docker-nginx-fpm-caches-wordpress.git
 $ cd docker-nginx-fpm-caches-wordpress
 $ docker build -t="docker-nginx-fpm-caches-wordpress" .
 ```
-You can choose whatever name you want for the image after the '-t=' parameter. 
 
-Building an image is optional, you can also pull a pre-built image from  Docker Hub that tracks any changes made to that Git repository: 
+Building an image is optional, you can also pull a pre-built image from  Docker Hub that tracks any changes made to this Git repository: 
 
 ```bash
 docker pull rija/docker-nginx-fpm-caches-wordpress
@@ -55,7 +54,7 @@ $ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wor
 
 ### How to enable Encryption (TLS)
 
-It is advised to have read LetsEncrypt's [FAQ](https://community.letsencrypt.org/c/docs/) and [user guide](https://letsencrypt.readthedocs.org/en/latest/index.html)  beforehand.
+It is advised to have read Lets Encrypt's [FAQ](https://community.letsencrypt.org/c/docs/) and [user guide](https://letsencrypt.readthedocs.org/en/latest/index.html)  beforehand.
 
 after the Wordpress container has been started, run the following command and follow the on-screen instructions:
 

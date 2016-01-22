@@ -1,12 +1,10 @@
 # docker-nginx-fpm-caches-wordpress
---
 
-
-###Maintainer
+### Maintainer
 
 Rija Ménagé
 
-###Description
+### Description
 
 Docker file to create docker container with Nginx and php5-fpm running Wordpress with fastcgi-cache (+purge) and opcache enabled. Encryption (TLS) support is included (using Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Fastcgi-cache enables page caching while opcache enables caching of code execution.
 

@@ -30,6 +30,10 @@ chown www-data:www-data /usr/share/nginx/www/wp-config.php
 sed -i -e "s/server_fqdn/$SERVER_NAME/" /etc/nginx/sites-available/default
 sed -i -e "s/server_fqdn/$SERVER_NAME/" /etc/nginx/ssl.conf
 
+# create a config file for letsencrypt
+sed -e "s/server_fqdn/$SERVER_NAME/" /etc/nginx/le.ini > /etc/letsencrypt/cli.ini
+
+
 # add server name to /etc/hosts to avoid timeout when code make http call to public url
 EXT_IP=`ip route get 8.8.8.8 | awk '{print $NF; exit}'`
 echo "$EXT_IP	$SERVER_NAME" >> /etc/hosts

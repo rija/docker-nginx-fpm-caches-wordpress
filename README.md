@@ -168,12 +168,14 @@ It's currently very much a work-in-progress (not really working).
 
 ### Future plan
 
-* install supervisor as an Ubuntu package
+* install Supervisor as an Ubuntu package
 * use nginx official Docker container as base image
 * setup subprojects for:
 	* a Mysql container with backup and import/export tools
 	* a container with WebDAV access to the www data volume container
 	* a container with tool to push logs to services like Splunk
 * Test deployment on more cloud providers (so far only tested with Digital Ocean, aiming for AWS and Microsoft Azure)
+* Add support for PHP 7
+* re-include support for userland caching with APCu (which now requires PHP7)
 
 

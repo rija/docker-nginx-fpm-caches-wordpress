@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SERVER_NAME=${1:-“example.com”}
+
 # first backup any existing config file in case variables have been manually added to it
 if [ -f /usr/share/nginx/www/wp-config.php ]; then
   cp /usr/share/nginx/www/wp-config.php /usr/share/nginx/www/wp-config.php.orig

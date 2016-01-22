@@ -6,7 +6,7 @@ Rija Ménagé
 
 ### Description
 
-Docker file to create docker container with Nginx and php5-fpm running Wordpress with fastcgi-cache (+purge) and opcache enabled (Fastcgi-cache enables page caching while opcache enables caching of code execution). Encryption (TLS) support is included (using Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Cron is enabled.
+Docker file to create docker container with Nginx and php5-fpm running Wordpress with fastcgi-cache (+purge) and opcache enabled (Fastcgi-cache enables page caching while opcache enables caching of code execution). Encryption (TLS) support is included (using Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Cron is enabled. Database server is **not** included.
 
 ```bash
 $ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wordpressfiles -v /etc/letsencrypt:/etc/letsencrypt -p 443:443 -p 80:80 --link mysqlserver:db rija/docker-nginx-fpm-caches-wordpress
@@ -74,7 +74,7 @@ $ docker exec -it wordpress bash -c "service nginx reload"
  * Navigating to the web site will throw a connection error until that step has been performed as encryption is enabled across the board and http connections are redirected to https. You must update nginx configuration files as needed to match your use case if that behaviour is not desirable.
  * Lets Encrypt's' ACME client configuration file is deployed to *'/etc/letsencrypt/cli.ini'*. Update that file to suit your use case regarding certificates.
  * the generated certificate is valid for example.com and www.example.com (SAN)
- * The certificate files are saved on the host server because this Dockerfile is intended for an architecture where a Wordpress container should be stateless. If you want to keep certificates in the container, drop the *'-v /etc/letsencrypt:/etc/letsencrypt'* argument from the *'docker run'* command
+ * The certificate files are saved on the host server in /etc/letsencrypt
  
 ### Usage patterns
 
@@ -167,6 +167,7 @@ It's currently very much a work-in-progress (not really working).
 
 ### Future plan
 
+* replace --link by Docker network
 * install Supervisor as an Ubuntu package
 * install Lets Encrypt's ACME client as an Ubuntu package
 * make and derive from a base image that has just nginx-custom and Let's Encrypt

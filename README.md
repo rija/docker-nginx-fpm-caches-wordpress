@@ -19,7 +19,7 @@ The expected usage is to link another container running the database server.
 * There is no mail server.
 * Wordpress is installed from **'latest'** version
 * Wordpress is installed as a single site deployment (no multisite support)
-* Currently, the version of Nginx deployed to the built image is [1.8] (<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>)
+* Currently, the version of Nginx deployed to the built image is [Nginx 1.8](<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>) compiled with [cache purge](https://github.com/FRiCKLE/ngx_cache_purge)
 
 
 ### How to build

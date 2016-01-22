@@ -98,8 +98,7 @@ RUN /usr/bin/easy_install supervisor-stdout
 COPY  ./supervisord.conf /etc/supervisord.conf
 
 # Install Wordpress
-ARG WP_URL
-ENV WP_URL ${WP_URL:https://wordpress.org/latest.tar.gz} 
+ENV WP_URL https://wordpress.org/latest.tar.gz
 RUN cd /usr/share/nginx/ \
     && curl -o wp.tar.gz $WP_URL \
     && tar -xvf wp.tar.gz   

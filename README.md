@@ -168,10 +168,8 @@ It's currently very much a work-in-progress (not really working).
 
 * install Supervisor as an Ubuntu package
 * install Lets Encrypt's ACME client as an Ubuntu package
-* slim down the layers
-* use nginx official Docker container as base image
+* make and derive from a base image with just nginx-custom and Let's Encrypt
 * setup subprojects for:
-	* a Mysql container with backup and import/export tools
 	* a container with WebDAV access to the www data volume container
 	* a container with tool to push logs to services like Splunk
 * Test deployment on more cloud providers (so far only tested with Digital Ocean, aiming for AWS and Microsoft Azure)

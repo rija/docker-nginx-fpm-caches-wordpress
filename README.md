@@ -73,7 +73,7 @@ $ docker exec -it wordpress bash -c "service nginx reload"
  * It is suggested to replace example.com by your domain name although any file name that match the pattern ssl.*.conf will be recognised
  * Navigating to the web site will throw a connection error until that step has been performed as encryption is enabled across the board and http connections are redirected to https. You must update nginx configuration files as needed to match your use case if that behaviour is not desirable.
  * Lets Encrypt's' ACME client configuration file is deployed to *'/etc/letsencrypt/cli.ini'*. Update that file to suit your use case regarding certificates.
- * Certificates are saved on the host server because this Dockerfile is intended for an architecture where a Docker container is considered stateless. If you want to keep everything in the container, drop the *'-v /etc/letsencrypt:/etc/letsencrypt'* argument from the *'docker run'* command
+ * Certificates are saved on the host server because this Dockerfile is intended for an architecture where a Wordpress container should be  stateless. If you want to keep certificates in the container, drop the *'-v /etc/letsencrypt:/etc/letsencrypt'* argument from the *'docker run'* command
  
 ### Usage patterns
 
@@ -88,26 +88,26 @@ $ docker run --name mysql --volumes-from mysqldata -e MYSQL_ROOT_PASSWORD=<root 
 
 #### Deploying Wordpress in a Docker container:
 
-######Create a data volume container for Wordpress files
+###### Create a data volume container for Wordpress files
 
 ```bash
 $ docker create --name wwwdata -v /usr/share/nginx/www <name of your image>
 ```
 
-######Run a wordpress container
+###### Run a wordpress container
 ```bash
 docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wwwdata -v /etc/letsencrypt:/etc/letsencrypt -p 443:443 -p 80:80 --link mysqlserver:db rija/docker-nginx-fpm-caches-wordpress
 ```
 
 Using data volume container for Wordpress and Mysql makes some operational task incredibly easy (backups, data migrations, cloning, developing with production data,...)
 
-####Export a data volume container:
+#### Export a data volume container:
 
 ```bash
 $ docker run --rm --volumes-from wwwdata -v $(pwd):/backup <name of your image> tar -cvz  -f /backup/wwwdata.tar.gz /usr/share/nginx/www
 
 ```
-####Import into a data volume container:
+#### Import into a data volume container:
 
 ```bash
 $ docker run --rm --volumes-from wwwdata2 -v $(pwd):/new-data <name of your image> bash -c 'cd / && tar xzvf /new-data/wwwdata.tar.gz'
@@ -120,7 +120,7 @@ $ docker run --rm --volumes-from wwwdata2 -v $(pwd):/new-data -it <name of your 
 ```
 
 
-####Import a sql database dump in Mysql running in a Docker container
+#### Import a sql database dump in Mysql running in a Docker container
 
 ```bash
 

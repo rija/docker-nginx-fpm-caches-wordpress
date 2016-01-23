@@ -145,7 +145,6 @@ Please refers to the [Cookbook](https://github.com/rija/docker-nginx-fpm-caches-
 * setup subprojects for:
 	* a container with WebDAV access to the www data volume container
 	* a container with tools to push logs to services like Splunk
-	* a service discovery tool for the various tiers to find each others
 * test deployment on more cloud providers
 * test deployment on overlay networks where containers are not on the same host
 * Add support for PHP 7

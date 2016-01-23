@@ -15,7 +15,13 @@ $ docker network create -d bridge my_bnet
 
 ```bash
 $ docker create --name mysqldata -v /var/lib/mysql mysql:5.5.45
-$ docker run --name mysqlserver --volumes-from mysqldata --net=my_bnet -e MYSQL_ROOT_PASSWORD=<root password> -e MYSQL_DATABASE=wordpress -e MYSQL_USER=<user name> -e MYSQL_PASSWORD=<user password> -d mysql:5.5.45
+$ docker run -d --name mysqlserver \
+--volumes-from mysqldata \
+--net=my_bnet \
+--env MYSQL_ROOT_PASSWORD=<root password> \
+--env MYSQL_DATABASE=wordpress \
+--env MYSQL_USER=<user name> \
+--env MYSQL_PASSWORD=<user password> mysql:5.5.45
 ```
 
 #### Deploying Wordpress in a Docker container:
@@ -23,7 +29,7 @@ $ docker run --name mysqlserver --volumes-from mysqldata --net=my_bnet -e MYSQL_
 ###### Create a data volume container for Wordpress files
 
 ```bash
-$ docker create --name wwwdata -v /usr/share/nginx/www <name of your image>
+$ docker create --name wwwdata -v /usr/share/nginx/www rija/docker-nginx-fpm-caches-wordpress
 ```
 
 ###### Run a wordpress container

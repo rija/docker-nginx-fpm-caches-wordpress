@@ -15,7 +15,7 @@ $ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wor
 
 **Notes:**
 * There is no database server included:
-The expected usage is to link another container running the database server.
+The expected usage is to link another container running the database server on the same Docker network.
 * There is no mail server.
 * Wordpress is installed from **'latest'** version
 * Wordpress is installed as a single site deployment (no multisite support)

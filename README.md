@@ -56,11 +56,12 @@ $ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wor
 ```
 
 **Notes:**
- * the command assumes you already have a mysql container running with name 'mysqlserver'
- * you must replace example.com with your domain name (without the www. prefix)
+ * the command assumes you already have a mysql container running with name 'mysqlserver'.
+ * the Wordpress container will discover automatically all the credentials required to connect to the database server.
+ * you must replace example.com with your domain name (without the www. prefix).
  * If you intend to use Docker Compose, make sure the name you choose for your container is only within [a-z][A-Z].
- * the use of --link is deprecated
- * this approach exposes MySQL root user and password to the Wordpress container unnecessarily
+ * the use of --link is deprecated (meaning it will be removed in some future version of Docker).
+ * this approach exposes MySQL root user and password to the Wordpress container unnecessarily.
  
 ### How to run a Wordpress container (Method 2)
 
@@ -80,11 +81,11 @@ $ docker run -d \
 ```
 
 **Notes:**
- * that command assumes you already have a mysql container running in a container within the same Docker network whose hostname is '2bd6c04457e2'
- * you must replace example.com with your domain name (without the www. prefix)
- * you can find the IP of the database server running on the default docker network with the command *'docker network inspect bridge'*
+ * you must replace example.com with your domain name (without the www. prefix).
+ * you can find the IP of the database server running on the default docker network with the command *'docker network inspect bridge'*.
+ * if you don't want to use IP address and prefer using hostname, you should create your own Docker network to which the Wordpress container and the database server container are connected to.
  * If you intend to use Docker Compose, make sure the name you choose for your container is only within [a-z][A-Z].
- * This method keep database user and password in the shell history, unless the command is preceded by a space
+ * This method keep database user and password in the shell history, unless the command is preceded by a space.
  
 
 ### How to run a Wordpress container (Method 3)

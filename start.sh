@@ -1,6 +1,13 @@
 #!/bin/bash
 
+
+# setting up default for environment variables
 SERVER_NAME=${SERVER_NAME:-example.com}
+DB_HOSTNAME=${DB_HOSTNAME:-$DB_PORT_3306_TCP_ADDR}
+DB_USER=${DB_USER:-$DB_ENV_MYSQL_USER}
+DB_PASSWORD=${DB_PASSWORD:-$DB_ENV_MYSQL_PASSWORD}
+DB_DATABASE=${DB_DATABASE:-$DB_ENV_MYSQL_DATABASE}
+
 
 # first backup any existing config file in case variables have been manually added to it
 if [ -f /usr/share/nginx/www/wp-config.php ]; then
@@ -10,10 +17,10 @@ fi
 
 # Here we generate random passwords (thank you pwgen!). The first two are for mysql users, the last batch for random keys in wp-config.php
 # configuring wp-config with DB connection details from linked container then generate random password for keys
-sed -e "s/database_name_here/$DB_ENV_MYSQL_DATABASE/
-s/localhost/$DB_PORT_3306_TCP_ADDR/
-s/username_here/$DB_ENV_MYSQL_USER/
-s/password_here/$DB_ENV_MYSQL_PASSWORD/
+sed -e "s/database_name_here/$DB_DATABASE/
+s/localhost/$DB_HOSTNAME/
+s/username_here/$DB_USER/
+s/password_here/$DB_PASSWORD/
 /'AUTH_KEY'/s/put your unique phrase here/`pwgen -c -n -1 65`/
 /'SECURE_AUTH_KEY'/s/put your unique phrase here/`pwgen -c -n -1 65`/
 /'LOGGED_IN_KEY'/s/put your unique phrase here/`pwgen -c -n -1 65`/

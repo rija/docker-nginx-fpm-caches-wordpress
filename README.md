@@ -6,16 +6,25 @@ Rija Ménagé
 
 ### Description
 
-Docker file to create docker container with Nginx and php5-fpm running Wordpress with fastcgi-cache (+purge) and opcache enabled (Fastcgi-cache enables page caching while opcache enables caching of code execution). Encryption (TLS) support is included (using Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Cron is enabled. Database server is **not** included.
+Docker file to create docker container with Nginx and php5-fpm running Wordpress with fastcgi-cache (+purge) and opcache enabled (Fastcgi-cache enables page caching while opcache enables caching of code execution). Encryption (TLS) support is included (using Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Cron is enabled.
 
 ```bash
-$ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wordpressfiles -v /etc/letsencrypt:/etc/letsencrypt -p 443:443 -p 80:80 --link mysqlserver:db rija/docker-nginx-fpm-caches-wordpress
+$ docker run -d \
+	--name wordpress \
+	--env SERVER_NAME=example.com \
+	--env DB_HOSTNAME=2bd6c04457e2 \
+	--env DB_USER=wpuser \
+	--env DB_PASSWORD=changeme \
+	--env DB_DATABASE=wordpress \
+	--volumes-from wordpressfiles \
+	-v /etc/letsencrypt:/etc/letsencrypt \
+	-p 443:443 -p 80:80 \
+	rija/docker-nginx-fpm-caches-wordpress
 ```
 
 
 **Notes:**
-* There is no database server included:
-The expected usage is to link another container running the database server on the same Docker network.
+* Database server is **not** included.
 * There is no mail server.
 * Wordpress is installed from **'latest'** version
 * Wordpress is installed as a single site deployment (no multisite support)

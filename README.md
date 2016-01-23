@@ -12,7 +12,7 @@ Docker file to create docker container with Nginx and php5-fpm running Wordpress
 $ docker run -d \
 	--name wordpress \
 	--env SERVER_NAME=example.com \
-	--env DB_HOSTNAME=2bd6c04457e2 \
+	--env DB_HOSTNAME=172.17.0.8 \
 	--env DB_USER=wpuser \
 	--env DB_PASSWORD=changeme \
 	--env DB_DATABASE=wordpress \
@@ -46,7 +46,7 @@ Building an image is optional, you can also pull a pre-built image from  Docker 
 docker pull rija/docker-nginx-fpm-caches-wordpress
 ```
 
-That is optional as well. You can let Docker pull the image on-demand whenever you want to run the container. 
+That is optional as well but it is useful for updating the local image to a more recent version. You can let Docker pull the image on-demand whenever you want to run a new container. 
 
 
 ### How to run a Wordpress container (Method 1)
@@ -68,7 +68,7 @@ $ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wor
 $ docker run -d \
 	--name wordpress \
 	--env SERVER_NAME=example.com \
-	--env DB_HOSTNAME=2bd6c04457e2 \
+	--env DB_HOSTNAME=172.17.0.8 \
 	--env DB_USER=wpuser \
 	--env DB_PASSWORD=changeme \
 	--env DB_DATABASE=wordpress \
@@ -82,6 +82,7 @@ $ docker run -d \
 **Notes:**
  * that command assumes you already have a mysql container running in a container within the same Docker network whose hostname is '2bd6c04457e2'
  * you must replace example.com with your domain name (without the www. prefix)
+ * you can find the IP of the database server running on the default docker network with the command *'docker network inspect bridge'*
  * If you intend to use Docker Compose, make sure the name you choose for your container is only within [a-z][A-Z].
  * This method keep database user and password in the shell history, unless the command is preceded by a space
  

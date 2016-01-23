@@ -135,12 +135,6 @@ $ docker exec -it wordpress bash -c "nginx -t && service nginx reload"
 
 Please refers to the [Cookbook](https://github.com/rija/docker-nginx-fpm-caches-wordpress/wiki/Cookbook) or raise an issue
 
-### Load-balancing with HAProxy
-
-a sub-project, **docker-ssl-haproxy**, will provide a container running HAproxy for terminating encrypted connections and for load balancing multiple Wordpress containers (e.g: for scalability, availability, zero downtime deployment, A/B testing, etc...).
-It's currently very much a work-in-progress (not really working).
-
-
 
 ### Future plan
 

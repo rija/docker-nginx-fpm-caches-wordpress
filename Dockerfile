@@ -74,7 +74,7 @@ RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php5/fpm/php.ini
 RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php5/fpm/php.ini
 
 # nginx config
-RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login www-front
+RUN adduser --system --no-create-home --shell /bin/false --ingroup www-data --disabled-login www-front
 COPY  nginx.conf /etc/nginx/nginx.conf
 COPY  restrictions.conf /etc/nginx/restrictions.conf
 COPY  ssl.conf /etc/nginx/ssl.conf

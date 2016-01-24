@@ -47,5 +47,8 @@ sed -e "s/server_fqdn/$SERVER_NAME/g" /etc/nginx/le.ini > /etc/letsencrypt/cli.i
 EXT_IP=`ip route get 8.8.8.8 | awk '{print $NF; exit}'`
 echo "$EXT_IP	$SERVER_NAME" >> /etc/hosts
 
+# we want to be able to curl the web site from the localhost using https (for purging the cache, and for the cron)
+echo "127.0.0.1	$SERVER_NAME" >> /etc/hosts
+
 # start all the services
 /usr/local/bin/supervisord -n

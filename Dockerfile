@@ -74,7 +74,7 @@ RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php5/fpm/php.ini
 RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php5/fpm/php.ini
 
 # nginx config
-RUN adduser --system --no-create-home --shell /bin/false --ingroup www-data --disabled-login www-front
+RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login www-front
 COPY  nginx.conf /etc/nginx/nginx.conf
 COPY  restrictions.conf /etc/nginx/restrictions.conf
 COPY  ssl.conf /etc/nginx/ssl.conf
@@ -91,6 +91,8 @@ RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc
 RUN sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php5/fpm/php.ini
 RUN sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php5/fpm/php-fpm.conf
 RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php5/fpm/pool.d/www.conf
+RUN sed -i -e "s/listen\s*=\s*/var/run/php5-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php5/fpm/pool.d/www.conf
+RUN sed -i -e "s/;listen.allowed_clients\s*=\s*127.0.0.1/listen.allowed_clients = 127.0.0.1/g" /etc/php5/fpm/pool.d/www.conf
 
 
 

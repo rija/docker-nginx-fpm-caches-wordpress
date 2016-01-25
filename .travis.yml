@@ -1,3 +1,4 @@
+group: edge
 language: bash
 services: docker
 

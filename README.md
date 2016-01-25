@@ -150,4 +150,11 @@ Please refers to the [Cookbook](https://github.com/rija/docker-nginx-fpm-caches-
 * Add support for PHP 7
 * re-include support for userland caching with APCu (which now requires PHP7)
 
+### Credits
+
+* Eugene Ware for the original work on a [Nginx/Wordpress Dockerfile](https://github.com/eugeneware/docker-wordpress-nginx), whose ideas I've extended upon in this project
+* [@renchap](https://community.letsencrypt.org/t/howto-easy-cert-generation-and-renewal-with-nginx/3491/5) and [@DrPain](https://community.letsencrypt.org/t/nginx-installation/3502/5) from [Let's Encrypt Community](https://community.letsencrypt.org/), whose ideas put me on the path of a working and elegant solution for Nginx/LetsEncrypt integration
+* Bjørn Johansen for his blog articles on hardening a Wordpress installation that informed some of the choices I made
+* Rahul Bansal of [EasyEngine](https://easyengine.io/wordpress-nginx/tutorials/) for his tutorials on Nginx/Wordpress integration that informed some of the choices I made
+* All the the other people whose blog articles I've directly added in the comments in the relevant artefacts of this project
 

@@ -7,3 +7,4 @@ before_install:
 
 script:
   - docker build -t rija/docker-nginx-fpm-caches-wordpress .
+  - docker run -d --name rijaweb --net=rijanet --env SERVER_NAME=dockerfiletest.cinecinetique.com --env DB_HOSTNAME=rijamysql --env DB_USER=wordpress --env DB_PASSWORD=changemeuser --env DB_DATABASE=wordpress -v /etc/letsencrypt:/etc/letsencrypt -p 443:443 -p 80:80 rija/docker-nginx-fpm-caches-wordpress

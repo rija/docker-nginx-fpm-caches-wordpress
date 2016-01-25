@@ -50,6 +50,39 @@ docker run -d \
 
 Using data volume container for Wordpress and Mysql makes some operational task incredibly easy (backups, data migrations, cloning, developing with production data,...)
 
+A quick way of extracting database connection information from the previously instanciated Mysql container is by running the following command:
+
+```bash
+docker exec -it mysqlserver bash -c "env" | grep -v ROOT | grep -v HOME | grep -v PWD | grep -v SHLVL | grep -v PATH | grep -v _=| sed "s/^/DB_/"
+```
+
+###### Enabling Encryption (TLS)
+
+It is advised to have read Lets Encrypt's [FAQ](https://community.letsencrypt.org/c/docs/) and [user guide](https://letsencrypt.readthedocs.org/en/latest/index.html)  beforehand.
+
+after the Wordpress container has been started, run the following command and follow the on-screen instructions:
+
+```bash
+$ docker exec -it wordpress bash -c "cd /letsencrypt/ && ./letsencrypt-auto certonly"
+```
+
+After the command as returned with a successful message regarding acquisition of certificate, nginx needs to be restarted with encryption enabled and configured. This is done by running the following commands:
+
+```bash
+$ docker exec -it wordpress bash -c "cp /etc/nginx/ssl.conf /etc/nginx/ssl.example.com.conf"
+$ docker exec -it wordpress bash -c "nginx -t && service nginx reload"
+```
+It's the same command to run in order to renew the certificate, to duplicate them or to add sub-domains. The above read the content of *'/etc/letsencrypt/cli.ini'*. Most customisation of the certificate would involve changing that configuration file.
+
+**Notes:**
+ * There is no change required to nginx configuration for standard use cases
+ * It is suggested to replace example.com in the file name by your domain name although any file name that match the pattern ssl.*.conf will be recognised
+ * Navigating to the web site will throw a connection error until that step has been performed as encryption is enabled across the board and http connections are redirected to https. You must update nginx configuration files as needed to match your use case if that behaviour is not desirable.
+ * Lets Encrypt's' ACME client configuration file is deployed to *'/etc/letsencrypt/cli.ini'*. Update that file to suit your use case regarding certificates.
+ * the generated certificate is valid for <domain>.<tld> and www.<domain>.<tld> (SAN)
+ * The certificate files are saved on the host server in /etc/letsencrypt and they have a 3 months lifespan before they need to be renewed
+
+
 #### Export a data volume container:
 
 ```bash

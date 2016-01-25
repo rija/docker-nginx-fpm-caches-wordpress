@@ -1,0 +1,33 @@
+TODO
+
+ * enable /status and /ping for php-fpm
+ * setup build on Travis CI
+
+
+ * add wp-cli to the install
+ * add a wordpress user on the container's OS
+ * strict file ownership (uploads is only dir writable, all files owned by wordpress user and restricted)
+
+ * make sure it work with IPv6, make appropriate changes
+ * make sure it work with Docker overlay networks, make appropriate changes
+ * make sure it work behind a proxy server, make appropriate changes
+
+ * upgrade to PHP7
+ * add APCu
+ * add GUI to opcode
+
+
+ * add support for HTTP/2
+ * build a Dockerfile for nginx-custom and with Let's Encrypt and derive this Dockerfile from it
+
+ * extend RDBMS in doc and elsewhere relevant with how to deploy to MySQL, Percona, MariaDB and Aurora
+ * run an Nginx or HAProxy instance as db proxy on the container to front connection to database server
+
+ * change the db proxy to find database servers through service discovery (Consul or Etcd)
+
+ * integrate with a remote log analyser
+
+ * customise download endpoint for Wordpress package
+
+
+

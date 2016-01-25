@@ -1,7 +1,7 @@
 # docker-nginx-fpm-caches-wordpress
 
 [![](https://badge.imagelayers.io/rija/docker-nginx-fpm-caches-wordpress:latest.svg)](https://imagelayers.io/?images=rija/docker-nginx-fpm-caches-wordpress:latest 'Get your own badge on imagelayers.io')
-[![](https://travis-ci.org/rija/docker-nginx-fpm-caches-wordpress.svg?branch=master)]()
+[![](https://travis-ci.org/rija/docker-nginx-fpm-caches-wordpress.svg?branch=master)](https://travis-ci.org/rija/docker-nginx-fpm-caches-wordpress.svg?branch=master)
 
 
 ### Maintainer

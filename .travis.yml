@@ -32,5 +32,5 @@ before_script:
     rija/docker-nginx-fpm-caches-wordpress
 
 script:
- - docker exec -it rijaweb bash -c 'curl --head http://dockerfiletest.cinecinetique.com' | grep 301
+  - docker exec -it rijaweb bash -c 'curl --head http://dockerfiletest.cinecinetique.com' | grep 301
 

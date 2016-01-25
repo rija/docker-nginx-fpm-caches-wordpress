@@ -141,19 +141,6 @@ $ docker exec -it wordpress bash -c "nginx -t && service nginx reload"
 Please refers to the [Cookbook](https://github.com/rija/docker-nginx-fpm-caches-wordpress/blob/master/Cookbook.md) or raise an issue
 
 
-### Future plan
-
-* install Supervisor as an Ubuntu package
-* install Lets Encrypt's ACME client as an Ubuntu package
-* make and derive from a base image that has just nginx-custom and Let's Encrypt
-* [derive that base image from Debian:jessie](https://imagelayers.io/?images=rija%2Fdocker-nginx-fpm-caches-wordpress:latest,nginx:latest,ubuntu:14.04,debian:jessie)
-* setup subprojects for:
-	* a container with WebDAV access to the www data volume container
-	* a container with tools to push logs to services like Splunk
-* test deployment on more cloud providers
-* test deployment on overlay networks where containers are not on the same host
-* Add support for PHP 7
-* re-include support for userland caching with APCu (which now requires PHP7)
 
 ### Credits
 

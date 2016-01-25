@@ -1,12 +1,16 @@
 # docker-nginx-fpm-caches-wordpress
 
+[![](https://badge.imagelayers.io/rija/docker-nginx-fpm-caches-wordpress:latest.svg)](https://imagelayers.io/?images=rija/docker-nginx-fpm-caches-wordpress:latest 'Get your own badge on imagelayers.io')
+[![](https://travis-ci.org/rija/docker-nginx-fpm-caches-wordpress.svg?branch=master)]()
+
+
 ### Maintainer
 
 Rija Ménagé
 
 ### Description
 
-Docker file to create docker container with Nginx and php5-fpm running Wordpress with fastcgi-cache (+purge) and opcache enabled (Fastcgi-cache enables page caching while opcache enables caching of code execution). Encryption (TLS) support is included (using Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Cron is enabled.
+Dockerfile to create a container with Nginx and php5-fpm running Wordpress with fastcgi-cache and fastcgi\_cache\_purge. Opcache is also enabled (Fastcgi-cache enables page caching while Opcache enables caching of code execution). Encryption (TLS) is included and enabled by default (configured with Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Cron is enabled.
 
 ```bash
 $ docker run -d \

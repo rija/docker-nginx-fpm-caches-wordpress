@@ -19,6 +19,3 @@ script:
   - docker exec -it rijaweb bash -c "ps -e" | grep "cron"
   - docker exec -it rijaweb bash -c "curl --head http://dockerfiletest.cinecinetique.com"
   - docker exec -it rijaweb bash -c "curl --head http://dockerfiletest.cinecinetique.com" | grep 301
-after_script:
-  - echo "TRAVIS_BRANCH: $TRAVIS_BRANCH  - TRAVIS_TAG: $TRAVIS_TAG"
-  - docker images

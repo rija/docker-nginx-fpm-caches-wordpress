@@ -79,7 +79,7 @@ It's the same command to run in order to renew the certificate, to duplicate the
  * It is suggested to replace example.com in the file name by your domain name although any file name that match the pattern ssl.*.conf will be recognised
  * Navigating to the web site will throw a connection error until that step has been performed as encryption is enabled across the board and http connections are redirected to https. You must update nginx configuration files as needed to match your use case if that behaviour is not desirable.
  * Lets Encrypt's' ACME client configuration file is deployed to *'/etc/letsencrypt/cli.ini'*. Update that file to suit your use case regarding certificates.
- * the generated certificate is valid for <domain>.<tld> and www.<domain>.<tld> (SAN)
+ * the generated certificate is valid for domain.tld and www.domain.tld (SAN)
  * The certificate files are saved on the host server in /etc/letsencrypt and they have a 3 months lifespan before they need to be renewed
 
 

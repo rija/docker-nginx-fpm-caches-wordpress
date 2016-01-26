@@ -1,11 +1,14 @@
 TODO
 
+ * add a test for certificate creation
+ * add a test for certificate renewal
  * enable /status and /ping for php-fpm
- * include a Docker compose file for instantiating both Web server and Database server on a new bridge network
+ * include a Docker compose file for instantiating both web server and database server on a new bridge network
 
- * Docker Hub images automated build that tracks Github tags (stable, latest, v#)
 
- * add wp-cli to the install
+ * Docker Hub images automated build that tracks Github tags (v#)
+
+ * add wp-cli to the container
  * add a wordpress user on the container's OS
  * strict file ownership (uploads is only dir writable, all files owned by wordpress user and restricted)
 
@@ -27,9 +30,9 @@ TODO
  * use Debian 8 as base for the above base image
 
  * extend RDBMS in doc and elsewhere relevant with how to deploy to MySQL, Percona, MariaDB and Aurora
- * run an instance of Nginx or HAProxy or Mysql Proxy as db proxy on the container to front connection to database server
+ * run an instance of Nginx or HAProxy or Mysql Proxy as db proxy on the container to front connection to database server(s)
 
- * change the db proxy to find database servers through service discovery (Consul or Etcd)
+ * enhance the db proxy to find database servers through service discovery (Consul or Etcd)
 
  * all logs go to syslog
  * integrate with a remote log analyser

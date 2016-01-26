@@ -13,6 +13,8 @@ Rija Ménagé
 
 Dockerfile to create a container with Nginx and php5-fpm running Wordpress with fastcgi-cache and fastcgi\_cache\_purge. Opcache is also enabled (Fastcgi-cache enables page caching while Opcache enables caching of code execution). Encryption (TLS) is included and enabled by default (configured with Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Cron is enabled.
 
+*Available Docker tags:* **v1, stable, latest**
+
 ```bash
 $ docker run -d \
 	--name wordpress \
@@ -32,7 +34,7 @@ $ docker run -d \
 * Database server is **not** included.
 * a MySQL database server must run on the same network as this container
 * There is no mail server.
-* Wordpress is installed from **'latest'** version
+* The version of Wordpress installed is **'latest'**
 * Wordpress is installed as a single site deployment (no multisite support)
 * Currently, the version of Nginx deployed to the built image is [Nginx 1.8](<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>) compiled with [cache purge](https://github.com/FRiCKLE/ngx_cache_purge)
 
@@ -133,14 +135,20 @@ $ docker exec -it wordpress bash -c "nginx -t && service nginx reload"
  * It is suggested to replace example.com in the file name by your domain name although any file name that match the pattern ssl.*.conf will be recognised
  * Navigating to the web site will throw a connection error until that step has been performed as encryption is enabled across the board and http connections are redirected to https. You must update nginx configuration files as needed to match your use case if that behaviour is not desirable.
  * Lets Encrypt's' ACME client configuration file is deployed to *'/etc/letsencrypt/cli.ini'*. Update that file to suit your use case regarding certificates.
- * the generated certificate is valid for example.com and www.example.com (SAN)
+ * the generated certificate is valid for domain.tld and www.domain.tld (SAN)
  * The certificate files are saved on the host server in /etc/letsencrypt
  
 ### Usage Patterns and questions
 
-Please refers to the [Cookbook](https://github.com/rija/docker-nginx-fpm-caches-wordpress/blob/master/Cookbook.md) or raise an issue
+* Please refers to the [Cookbook](https://github.com/rija/docker-nginx-fpm-caches-wordpress/blob/master/Cookbook.md) for tips and usage patterns.
+* Check the [CHANGELOG](https://github.com/rija/docker-nginx-fpm-caches-wordpress/blob/master/CHANGELOG.md) for what's in each version
+* Follow through the links in the [Credits](https://github.com/rija/docker-nginx-fpm-caches-wordpress#credits) and in the project's files
+* Check out the [TODO](https://github.com/rija/docker-nginx-fpm-caches-wordpress/blob/master/TODO) for what things I want add or change next
+* Raise an issue on Github
 
+### License
 
+MIT (see the [LICENSE](https://github.com/rija/docker-nginx-fpm-caches-wordpress/blob/master/LICENSE) file)
 
 ### Credits
 
@@ -148,5 +156,7 @@ Please refers to the [Cookbook](https://github.com/rija/docker-nginx-fpm-caches-
 * [@renchap](https://community.letsencrypt.org/t/howto-easy-cert-generation-and-renewal-with-nginx/3491/5) and [@DrPain](https://community.letsencrypt.org/t/nginx-installation/3502/5) from [Let's Encrypt Community](https://community.letsencrypt.org/), whose ideas put me on the path of a working and elegant solution for Nginx/LetsEncrypt integration
 * [Bjørn Johansen](https://bjornjohansen.no) for his blog articles on hardening a Wordpress installation that informed some of the choices I made
 * Rahul Bansal of [EasyEngine](https://easyengine.io/wordpress-nginx/tutorials/) for his tutorials on Nginx/Wordpress integration that informed some of the choices I made
+* All the contributors to the [Wordpress.org's Nginx support](http://codex.wordpress.org/Nginx) page
+* Mozilla for their awesome [SSL configuration generator](https://mozilla.github.io/server-side-tls/ssl-config-generator/)
 * All the the other people whose blog articles I've directly added in the comments in the relevant artefacts of this project
 

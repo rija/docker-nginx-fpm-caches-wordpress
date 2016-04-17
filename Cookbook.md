@@ -15,7 +15,7 @@ $ docker network create -d bridge my_bnet
 
 ```bash
 $ docker create --name mysqldata -v /var/lib/mysql mysql:5.5.45
-$ docker run -d --name mysqlserver \
+$ docker run --restart=unless-stopped -d --name mysqlserver \
 --volumes-from mysqldata \
 --net=my_bnet \
 --env MYSQL_ROOT_PASSWORD=<root password> \
@@ -34,7 +34,7 @@ $ docker create --name wwwdata -v /usr/share/nginx/www rija/docker-nginx-fpm-cac
 
 ###### Run a wordpress container
 ```bash
-docker run -d \
+docker run --restart=unless-stopped -d \
 	--name wordpress \
 	--net=my_bnet \
 	--env SERVER_NAME=example.com \

@@ -52,7 +52,8 @@ echo "127.0.0.1	$SERVER_NAME" >> /etc/hosts
 
 
 # retrieve the IP address of the database server
-DB_IP=$(curl --silent --unix-socket /var/run/docker.sock http:/containers/$DB_HOSTNAME/json | jq .NetworkSettings.Networks.hkims_net.IPAddress | sed -e 's/\"/*/g' | cut -s -f2 -d "*")
+NETWORK=$(curl --silent --unix-socket /var/run/docker.sock http:/containers/$HOSTNAME/json | jq .NetworkSettings.Networks | jq keys | jq .[0] | sed -e 's/\"/*/g' | cut -s -f2 -d "*")
+DB_IP=$(curl --silent --unix-socket /var/run/docker.sock http:/containers/$DB_HOSTNAME/json | jq .NetworkSettings.Networks.$NETWORK.IPAddress | sed -e 's/\"/*/g' | cut -s -f2 -d "*")
 echo "$DB_IP	$DB_HOSTNAME" >> /etc/hosts
 
 

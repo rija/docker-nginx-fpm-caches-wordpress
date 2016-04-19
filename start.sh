@@ -50,5 +50,11 @@ echo "$EXT_IP	$SERVER_NAME" >> /etc/hosts
 # we want to be able to curl the web site from the localhost using https (for purging the cache, and for the cron)
 echo "127.0.0.1	$SERVER_NAME" >> /etc/hosts
 
+
+# retrieve the IP address of the database server
+DB_IP=$(curl --silent --unix-socket /var/run/docker.sock http:/containers/$DB_HOSTNAME/json | jq .NetworkSettings.Networks.hkims_net.IPAddress | sed -e 's/\"/*/g' | cut -s -f2 -d "*")
+echo "$DB_IP	$DB_HOSTNAME" >> /etc/hosts
+
+
 # start all the services
 /usr/local/bin/supervisord -n

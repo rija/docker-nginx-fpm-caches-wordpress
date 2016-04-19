@@ -1,5 +1,5 @@
-FROM ubuntu:14.04
-MAINTAINER Rija Menage <dockerfile@rijam.sent.as>
+FROM ubuntu:15.10
+MAINTAINER Rija Menage <dockerfiles@rija.cinecinetique.com>
 
 EXPOSE 80
 EXPOSE 443
@@ -22,6 +22,8 @@ RUN apt-get update && apt-get install -y mysql-client \
 						python-setuptools \
 						curl \
 						git \
+						jq \
+						vim \
 						unzip
 
 
@@ -49,12 +51,13 @@ RUN apt-get install -y php5-curl \
 						php5-xsl
 
 # to fix 'add-apt-repository: not found' in Ubuntu 14.04 LTS
-RUN apt-get -y install software-properties-common \
-						python-software-properties
+#RUN apt-get -y install software-properties-common \
+#						python-software-properties
 
 # Where to find  Nginx compiled with fastcgi_cache and fastcgi_cache_purge
-RUN add-apt-repository ppa:rtcamp/nginx
-RUN apt-get update && apt-get install -y nginx-custom
+#RUN add-apt-repository ppa:rtcamp/nginx
+#RUN apt-get update && apt-get install -y nginx-custom
+RUN apt-get update && apt-get install -y nginx-full
 
 # Install LE's ACME client for domain validation and certificate generation and renewal
 RUN git clone https://github.com/letsencrypt/letsencrypt

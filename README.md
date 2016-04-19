@@ -19,12 +19,13 @@ Dockerfile to create a container with Nginx and php5-fpm running Wordpress with 
 $ docker run -d \
 	--name wordpress \
 	--env SERVER_NAME=example.com \
-	--env DB_HOSTNAME=172.17.0.8 \
+	--env DB_HOSTNAME=4abbef615af7 \
 	--env DB_USER=wpuser \
 	--env DB_PASSWORD=changeme \
 	--env DB_DATABASE=wordpress \
 	--volumes-from wordpressfiles \
 	-v /etc/letsencrypt:/etc/letsencrypt \
+	-v /var/run/docker.sock:/var/run/docker.sock \
 	-p 443:443 -p 80:80 \
 	rija/docker-nginx-fpm-caches-wordpress
 ```
@@ -36,7 +37,9 @@ $ docker run -d \
 * There is no mail server.
 * The version of Wordpress installed is **'latest'**
 * Wordpress is installed as a single site deployment (no multisite support)
-* Currently, the version of Nginx deployed to the built image is [Nginx 1.8](<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>) compiled with [cache purge](https://github.com/FRiCKLE/ngx_cache_purge)
+* Currently, the version of Nginx deployed to the built image is [Nginx 1.9]
+(<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>)
+* The container talks to the Docker host to find the current IP address  of the database server whose hostname is passed to the docker run command
 
 
 ### How to build
@@ -56,32 +59,20 @@ docker pull rija/docker-nginx-fpm-caches-wordpress
 That is optional as well but it is useful for updating the local image to a more recent version. You can let Docker pull the image on-demand whenever you want to run a new container. 
 
 
-### How to run a Wordpress container (Method 1)
-
-```bash
-$ docker run --name wordpress -d -e SERVER_NAME='example.com' --volumes-from wordpressfiles -v /etc/letsencrypt:/etc/letsencrypt -p 443:443 -p 80:80 --link mysqlserver:db rija/docker-nginx-fpm-caches-wordpress
-```
-
-**Notes:**
- * the command assumes you already have a mysql container running with name 'mysqlserver'.
- * the Wordpress container will discover automatically all the credentials required to connect to the database server.
- * you must replace example.com with your domain name (without the www. prefix).
- * If you intend to use Docker Compose, make sure the name you choose for your container is only within [a-z][A-Z].
- * the use of --link is deprecated (meaning it will be removed in some future version of Docker).
- * this approach exposes MySQL root user and password to the Wordpress container unnecessarily.
  
-### How to run a Wordpress container (Method 2)
+### How to run a Wordpress container (Method 1)
 
 ```bash
 $ docker run -d \
 	--name wordpress \
 	--env SERVER_NAME=example.com \
-	--env DB_HOSTNAME=172.17.0.8 \
+	--env DB_HOSTNAME=4abbef615af7 \
 	--env DB_USER=wpuser \
 	--env DB_PASSWORD=changeme \
 	--env DB_DATABASE=wordpress \
 	--volumes-from wordpressfiles \
 	-v /etc/letsencrypt:/etc/letsencrypt \
+	-v /var/run/docker.sock:/var/run/docker.sock \
 	-p 443:443 -p 80:80 \
 	rija/docker-nginx-fpm-caches-wordpress
 
@@ -95,7 +86,7 @@ $ docker run -d \
  * This method keep database user and password in the shell history, unless the command is preceded by a space.
  
 
-### How to run a Wordpress container (Method 3)
+### How to run a Wordpress container (Method 2)
 
 ```bash
 $ docker run -d \
@@ -103,6 +94,7 @@ $ docker run -d \
 	--env-file /etc/wordpress_env_variables.txt \
 	--volumes-from wordpressfiles \
 	-v /etc/letsencrypt:/etc/letsencrypt \
+	-v /var/run/docker.sock:/var/run/docker.sock \
 	-p 443:443 -p 80:80 \
 	rija/docker-nginx-fpm-caches-wordpress
 

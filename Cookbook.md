@@ -38,7 +38,7 @@ docker run --restart=unless-stopped -d \
 	--name wordpress \
 	--net=my_bnet \
 	--env SERVER_NAME=example.com \
-	--env DB_HOSTNAME=mysqlserver \
+	--env DB_HOSTNAME=4abbef615af7 \
 	--env DB_USER=wpuser \
 	--env DB_PASSWORD=changeme \
 	--env DB_DATABASE=wordpress \
@@ -55,6 +55,47 @@ A quick way of extracting database connection information from the previously in
 ```bash
 docker exec -it mysqlserver bash -c "env" | grep -v ROOT | grep -v HOME | grep -v PWD | grep -v SHLVL | grep -v PATH | grep -v _=| sed "s/^/DB_/"
 ```
+
+However the database server hostname obtained that way is useless as the Wordpress container has now way to resolve it. 
+
+so you can retrieve the IP of the database server with:
+
+```bash
+$ docker inspect -f '{{range  .NetworkSettings.Networks }}{{.IPAddress}}{{end}}' mysqlserver
+```
+
+and use that as value for DB_HOSTNAME instead.
+
+It's a better way, but still not satisfying as the IP address may change over reboots of the host but the instantiated Wordpress container will be hard-wired with that initial IP address.
+
+A better approach is to bind mount the docker daemon unix socket (typically  **/var/run/docker.sock** ) to the Wordpress container and from within the container, connect to the Docker Remote API and retrieve the current IP address for the mysql server, then add the hostname/ip pair to the /etc/hosts. This is done by the start.sh script upon container startup.
+
+An alternative approach is to pass to 'docker run' the following option
+
+```bash
+	--add-host=dockerhost:$(ip route | awk '/docker0/ { print $NF }')
+```
+
+instead of bind mounting the socket. The advantage is that it works with old versions of curl (< 7.40) for connecting to the Docker API. The downside is that it requires the Docker daemon to be available on a TCP port which is not the default configuration and it's less secure than the unix socket approach.
+
+
+```bash
+docker run --restart=unless-stopped -d \
+	--name wordpress \
+	--net=my_bnet \
+	--env SERVER_NAME=example.com \
+	--env DB_HOSTNAME=4abbef615af7 \
+	--env DB_USER=wpuser \
+	--env DB_PASSWORD=changeme \
+	--env DB_DATABASE=wordpress \
+	--volumes-from wwwdata \
+	-v /etc/letsencrypt:/etc/letsencrypt \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	-p 443:443 -p 80:80 \
+	rija/docker-nginx-fpm-caches-wordpress
+```
+
+
 
 ###### Enabling Encryption (TLS)
 

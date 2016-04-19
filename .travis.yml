@@ -4,7 +4,8 @@ services: docker
 before_install:
   - docker network create -d bridge rijanet
   - docker run -d --name rijamysql --net=rijanet --env MYSQL_ROOT_PASSWORD=changemeroot --env MYSQL_DATABASE=wordpress --env MYSQL_USER=wordpress --env MYSQL_PASSWORD=changemeuser mysql:5.5.45
-  - RIJAMYSQL=docker inspect -f '{{.Config.Hostname }}' rijamysql
+  - RIJAMYSQL=$(docker inspect -f '{{.Config.Hostname }}' rijamysql)
+  - echo "$RIJAMYSQL"
 
 script:
   - docker build -t rija/docker-nginx-fpm-caches-wordpress .

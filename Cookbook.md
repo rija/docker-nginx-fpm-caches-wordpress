@@ -38,7 +38,7 @@ docker run --restart=unless-stopped -d \
 	--name wordpress \
 	--net=my_bnet \
 	--env SERVER_NAME=example.com \
-	--env DB_HOSTNAME=4abbef615af7 \
+	--env DB_HOSTNAME=172.0.8.2 \
 	--env DB_USER=wpuser \
 	--env DB_PASSWORD=changeme \
 	--env DB_DATABASE=wordpress \
@@ -56,7 +56,7 @@ A quick way of extracting database connection information from the previously in
 docker exec -it mysqlserver bash -c "env" | grep -v ROOT | grep -v HOME | grep -v PWD | grep -v SHLVL | grep -v PATH | grep -v _=| sed "s/^/DB_/"
 ```
 
-However the database server hostname obtained that way is useless as the Wordpress container has now way to resolve it. 
+However the database server hostname obtained that way is useless as the Wordpress container has now way to resolve that hostname on its own.
 
 so you can retrieve the IP of the database server with:
 
@@ -66,17 +66,21 @@ $ docker inspect -f '{{range  .NetworkSettings.Networks }}{{.IPAddress}}{{end}}'
 
 and use that as value for DB_HOSTNAME instead.
 
-It's a better way, but still not satisfying as the IP address may change over reboots of the host but the instantiated Wordpress container will be hard-wired with that initial IP address.
+It's a better way, but still not satisfying as the IP address may change over reboots of the host while the instantiated Wordpress container will be hard-wired with that initial IP address.
 
-A better approach is to bind mount the docker daemon unix socket (typically  **/var/run/docker.sock** ) to the Wordpress container and from within the container, connect to the Docker Remote API and retrieve the current IP address for the mysql server, then add the hostname/ip pair to the /etc/hosts. This is done by the start.sh script upon container startup.
-
-An alternative approach is to pass to 'docker run' the following option
+A better  approach is to ask the Docker host the IP and hostname of the database server container on the same bridge network, then add the hostname/ip pair to /etc/hosts.
+To do so, one can pass to 'docker run' the following option:
 
 ```bash
 	--add-host=dockerhost:$(ip route | awk '/docker0/ { print $NF }')
 ```
 
-instead of bind mounting the socket. The advantage is that it works with old versions of curl (< 7.40) for connecting to the Docker API. The downside is that it requires the Docker daemon to be available on a TCP port which is not the default configuration and it's less secure than the unix socket approach.
+then from within the container make an HTTP call to the Docker Remote API on the host using **dockerhost** as basis for the endpoint url.
+The REST call can be made using the curl (any version) command in a script. The issue of this method is that it requires the Docker daemon to be available on a TCP port which is not the default configuration and it increases the attack surface of the deployment.
+
+A better way for connecting to the Docker host is to bind mount the docker daemon unix socket (typically  **/var/run/docker.sock** ) to the Wordpress container and from within the container, connect to the Docker Remote API and retrieve the current IP address for the mysql server, then add the hostname/ip pair to the /etc/hosts. This is done by the start.sh script upon container startup. (curl > 7.40+ is needed to make a connection to a Unix socket).
+
+The whole command to instantiate a container using that method becomes:
 
 
 ```bash
@@ -95,7 +99,25 @@ docker run --restart=unless-stopped -d \
 	rija/docker-nginx-fpm-caches-wordpress
 ```
 
+or if one wants less typing:
 
+
+```bash
+$ docker exec -it mysqlserver bash -c "env" | grep -v ROOT | grep -v HOME | grep -v PWD | grep -v SHLVL | grep -v PATH | grep -v _=| sed "s/^/DB_/" > dsn.txt
+
+$ docker run -d \
+    --name wordpress \
+    --env SERVER_NAME=example.com \
+    --env-file .dsn.txt \
+    --volumes-from wwwdata \
+    -v /etc/letsencrypt:/etc/letsencrypt \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -p 443:443 -p 80:80 \
+    rija/docker-nginx-fpm-caches-wordpress
+
+```
+
+**TODO:** this is a good place to add something about Docker compose
 
 ###### Enabling Encryption (TLS)
 

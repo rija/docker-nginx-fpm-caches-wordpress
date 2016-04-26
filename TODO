@@ -21,7 +21,6 @@ TODO
  * add GUI to opcode
  * integrate with NewRelics
 
- * install Supervisor from OS package
  * install ACME client from OS package
  * review packages installed in Dockerfile, drop the unecessary ones
 

@@ -101,6 +101,9 @@ RUN cd /usr/share/nginx/ \
 RUN mv /usr/share/nginx/wordpress /usr/share/nginx/www
 RUN chown -R www-data:www-data /usr/share/nginx/www
 
+# cronjob for certificate auto renewal
+COPY crontab /etc/certs.cron
+RUN crontab /etc/certs.cron
 
 # Wordpress Initialization and Startup Script
 COPY  ./start.sh /start.sh

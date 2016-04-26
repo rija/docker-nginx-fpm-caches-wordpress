@@ -25,14 +25,14 @@ RUN apt-get update && apt-get install -y mysql-client \
 						jq \
 						vim \
 						cron \
-						supervisor \
 						unzip
 
 
+# install unattended upgrades and supervisor
+RUN apt-get update && apt-get install -y supervisor \
+						unattended-upgrades
 
 
-# Dependencies for APCu
-#RUN apt-get install -y php5-dev libpcre3-dev
 
 # Wordpress Requirements
 RUN apt-get install -y php5-curl \
@@ -73,6 +73,9 @@ COPY  le.ini /etc/nginx/le.ini
 COPY  acme.challenge.le.conf /etc/nginx/acme.challenge.le.conf
 COPY  nginx-site.conf /etc/nginx/sites-available/default
 RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
+
+# unattended upgrade configuration
+COPY 02periodic /etc/apt/apt.conf.d/02periodic
 
 
 # php-fpm config

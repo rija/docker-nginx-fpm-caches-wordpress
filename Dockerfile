@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y mysql-client \
 						jq \
 						vim \
 						cron \
+						supervisor \
 						unzip
 
 
@@ -51,27 +52,13 @@ RUN apt-get install -y php5-curl \
 						php5-xmlrpc \
 						php5-xsl
 
-# to fix 'add-apt-repository: not found' in Ubuntu 14.04 LTS
-#RUN apt-get -y install software-properties-common \
-#						python-software-properties
 
-# Where to find  Nginx compiled with fastcgi_cache and fastcgi_cache_purge
-#RUN add-apt-repository ppa:rtcamp/nginx
-#RUN apt-get update && apt-get install -y nginx-custom
+# install nginx
 RUN apt-get update && apt-get install -y nginx-full
 
 # Install LE's ACME client for domain validation and certificate generation and renewal
 RUN git clone https://github.com/letsencrypt/letsencrypt
 RUN mkdir -p /tmp/le
-
-# Installing  Php-APCu
-#RUN yes "" | pecl install APCu-beta
-
-# Configuring APCu
-#RUN echo "extension=apcu.so" >> /etc/php5/mods-available/apcu.ini
-#RUN cd /etc/php5/fpm/conf.d/ && ln -s ../../mods-available/apcu.ini 20-apcu.ini
-
-
 
 # Opcode config
 RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php5/fpm/php.ini
@@ -102,9 +89,9 @@ RUN sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/lo
 
 
 # Supervisor Config
-RUN /usr/bin/easy_install supervisor
 RUN /usr/bin/easy_install supervisor-stdout
-COPY  ./supervisord.conf /etc/supervisord.conf
+COPY  ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 
 # Install Wordpress
 ENV WP_URL https://wordpress.org/latest.tar.gz

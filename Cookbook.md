@@ -105,10 +105,11 @@ or if one wants less typing:
 ```bash
 $ docker exec -it mysqlserver bash -c "env" | grep -v ROOT | grep -v HOME | grep -v PWD | grep -v SHLVL | grep -v PATH | grep -v _=| sed "s/^/DB_/" > dsn.txt
 
-$ docker run -d \
+$ docker run --restart=unless-stopped -d \
     --name wordpress \
+    --net=my_bnet \
     --env SERVER_NAME=example.com \
-    --env-file .dsn.txt \
+    --env-file ./dsn.txt \
     --volumes-from wwwdata \
     -v /etc/letsencrypt:/etc/letsencrypt \
     -v /var/run/docker.sock:/var/run/docker.sock \

@@ -4,9 +4,9 @@
 # setting up default for environment variables
 SERVER_NAME=${SERVER_NAME:-example.com}
 DB_HOSTNAME=${DB_HOSTNAME:-$DB_PORT_3306_TCP_ADDR}
-DB_USER=${DB_USER:-$DB_ENV_MYSQL_USER}
-DB_PASSWORD=${DB_PASSWORD:-$DB_ENV_MYSQL_PASSWORD}
-DB_DATABASE=${DB_DATABASE:-$DB_ENV_MYSQL_DATABASE}
+DB_USER=${DB_USER:-$DB_MYSQL_USER}
+DB_PASSWORD=${DB_PASSWORD:-$DB_MYSQL_PASSWORD}
+DB_DATABASE=${DB_DATABASE:-$DB_MYSQL_DATABASE}
 
 
 # first backup any existing config file in case variables have been manually added to it

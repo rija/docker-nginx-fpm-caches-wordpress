@@ -15,11 +15,9 @@ ENV DEBIAN_FRONTEND noninteractive
 
 
 # Basic Dependencies
-RUN apt-get update && apt-get install -y mysql-client \
-						php5-fpm \
-						php5-mysql \
-						pwgen \
+RUN apt-get update && apt-get install -y pwgen \
 						python-setuptools \
+						apt-utils \
 						curl \
 						git \
 						jq \
@@ -28,30 +26,44 @@ RUN apt-get update && apt-get install -y mysql-client \
 						unzip
 
 
-# install unattended upgrades and supervisor
-RUN apt-get update && apt-get install -y supervisor \
-						unattended-upgrades
+RUN apt-get update && apt-get install -y mysql-client
 
+# php 7 installation
+
+RUN locale-gen en_US.UTF-8
+ENV  LANG en_US.UTF-8
+ENV  LC_ALL en_US.UTF-8
+RUN apt-get install -y software-properties-common
+RUN LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php
+RUN apt-get update && apt-get install -y php7.0 \
+						php7.0-fpm \
+						php7.0-mysql
 
 
 # Wordpress Requirements
-RUN apt-get install -y php5-curl \
-						php5-gd \
-						php5-intl \
+RUN apt-get install -y php7.0-curl \
+						php7.0-gd \
+						php7.0-intl \
 						php-pear \
-						php5-imagick \
-						php5-imap \
-						php5-mcrypt \
-						php5-memcache \
-						php5-ming \
-						php5-ps \
-						php5-pspell \
-						php5-recode \
-						php5-sqlite \
-						php5-tidy \
-						php5-xmlrpc \
-						php5-xsl
+						php7.0-imagick \
+						php7.0-imap \
+						php7.0-mcrypt \
+						php7.0-memcache \
+						php7.0-ps \
+						php7.0-pspell \
+						php7.0-recode \
+						php7.0-sqlite \
+						php7.0-tidy \
+						php7.0-xmlrpc \
+						php7.0-xml \
+						php7.0-xsl \
+						php7.0-opcache
 
+
+
+# install unattended upgrades and supervisor
+RUN apt-get update && apt-get install -y supervisor \
+						unattended-upgrades
 
 # install nginx
 RUN apt-get update && apt-get install -y nginx-full
@@ -61,8 +73,8 @@ RUN git clone https://github.com/letsencrypt/letsencrypt
 RUN mkdir -p /tmp/le
 
 # Opcode config
-RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php5/fpm/php.ini
-RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php5/fpm/php.ini
+RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/7.0/fpm/php.ini
+RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/7.0/fpm/php.ini
 
 # nginx config
 RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login www-front
@@ -79,17 +91,18 @@ COPY 02periodic /etc/apt/apt.conf.d/02periodic
 
 
 # php-fpm config
-RUN sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php5/fpm/php.ini
-RUN sed -i -e "s/expose_php = On/expose_php = Off/g" /etc/php5/fpm/php.ini
-RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc/php5/fpm/php.ini
-RUN sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php5/fpm/php.ini
-RUN sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php5/fpm/php-fpm.conf
-RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php5/fpm/pool.d/www.conf
-RUN sed -i -e "s/listen\s*=\s*\/var\/run\/php5-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php5/fpm/pool.d/www.conf
-RUN sed -i -e "s/;listen.allowed_clients\s*=\s*127.0.0.1/listen.allowed_clients = 127.0.0.1/g" /etc/php5/fpm/pool.d/www.conf
-RUN sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/log\/\$pool.access.log/g" /etc/php5/fpm/pool.d/www.conf
+RUN sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php/7.0/fpm/php.ini
+RUN sed -i -e "s/expose_php = On/expose_php = Off/g" /etc/php/7.0/fpm/php.ini
+RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc/php/7.0/fpm/php.ini
+RUN sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php/7.0/fpm/php.ini
+RUN sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php/7.0/fpm/php-fpm.conf
+RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/7.0/fpm/pool.d/www.conf
+RUN sed -i -e "s/listen\s*=\s*\/var\/run\/php5-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php/7.0/fpm/pool.d/www.conf
+RUN sed -i -e "s/;listen.allowed_clients\s*=\s*127.0.0.1/listen.allowed_clients = 127.0.0.1/g" /etc/php/7.0/fpm/pool.d/www.conf
+RUN sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/log\/\$pool.access.log/g" /etc/php/7.0/fpm/pool.d/www.conf
 
-
+# create the pid and sock file for php-fpm
+RUN service php7.0-fpm start
 
 # Supervisor Config
 RUN /usr/bin/easy_install supervisor-stdout
@@ -100,7 +113,7 @@ COPY  ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ENV WP_URL https://wordpress.org/latest.tar.gz
 RUN cd /usr/share/nginx/ \
     && curl -o wp.tar.gz $WP_URL \
-    && tar -xvf wp.tar.gz   
+    && tar -xvf wp.tar.gz
 RUN mv /usr/share/nginx/wordpress /usr/share/nginx/www
 RUN chown -R www-data:www-data /usr/share/nginx/www
 
@@ -113,5 +126,3 @@ COPY  ./start.sh /start.sh
 RUN chmod 755 /start.sh
 
 VOLUME ["/var/log"]
-
-

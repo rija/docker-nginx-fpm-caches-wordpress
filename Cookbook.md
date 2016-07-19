@@ -94,7 +94,7 @@ docker run --restart=unless-stopped -d \
 	--env DB_DATABASE=wordpress \
 	--volumes-from wwwdata \
 	-v /etc/letsencrypt:/etc/letsencrypt \
-	-v /var/run/docker.sock:/var/run/docker.sock \
+	-v /var/run/docker.sock:/var/run/docker.sock:ro \
 	-p 443:443 -p 80:80 \
 	rija/docker-nginx-fpm-caches-wordpress
 ```
@@ -112,7 +112,7 @@ $ docker run --restart=unless-stopped -d \
     --env-file ./dsn.txt \
     --volumes-from wwwdata \
     -v /etc/letsencrypt:/etc/letsencrypt \
-    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /var/run/docker.sock:/var/run/docker.sock:ro \
     -p 443:443 -p 80:80 \
     rija/docker-nginx-fpm-caches-wordpress
 
@@ -187,10 +187,10 @@ $ mysql -h $DB_HOSTNAME -u $DB_USER -p$DB_PASSWORD $DB_DATABASE
 
 #### Logs
 
-The logs are exposed outside the container as a volume. 
+The logs are exposed outside the container as a volume.
 So you can deploy your own services to process, analyse or aggregate the logs from the Wordpress installation.
 
-The corresponding line in the Dockerfile is: 
+The corresponding line in the Dockerfile is:
 
 ```
 VOLUME ["/var/log"]
@@ -201,4 +201,3 @@ you can mount this volume on another container with a command as shown below (as
 ```bash
 docker run --name MyLogAnalyser --volumes-from wordpress -d MyLogAnalyserImage
 ```
-

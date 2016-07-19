@@ -25,7 +25,7 @@ $ docker run -d \
 	--env DB_DATABASE=wordpress \
 	--volumes-from wordpressfiles \
 	-v /etc/letsencrypt:/etc/letsencrypt \
-	-v /var/run/docker.sock:/var/run/docker.sock \
+	-v /var/run/docker.sock:/var/run/docker.sock:ro \
 	-p 443:443 -p 80:80 \
 	rija/docker-nginx-fpm-caches-wordpress
 ```
@@ -50,16 +50,16 @@ $ cd docker-nginx-fpm-caches-wordpress
 $ docker build -t="docker-nginx-fpm-caches-wordpress" .
 ```
 
-Building an image is optional, you can also pull a pre-built image from  Docker Hub that tracks any changes made to this Git repository: 
+Building an image is optional, you can also pull a pre-built image from  Docker Hub that tracks any changes made to this Git repository:
 
 ```bash
 docker pull rija/docker-nginx-fpm-caches-wordpress
 ```
 
-That is optional as well but it is useful for updating the local image to a more recent version. You can let Docker pull the image on-demand whenever you want to run a new container. 
+That is optional as well but it is useful for updating the local image to a more recent version. You can let Docker pull the image on-demand whenever you want to run a new container.
 
 
- 
+
 ### How to run a Wordpress container (Method 1)
 
 ```bash
@@ -72,7 +72,7 @@ $ docker run -d \
 	--env DB_DATABASE=wordpress \
 	--volumes-from wordpressfiles \
 	-v /etc/letsencrypt:/etc/letsencrypt \
-	-v /var/run/docker.sock:/var/run/docker.sock \
+	-v /var/run/docker.sock:/var/run/docker.sock:ro \
 	-p 443:443 -p 80:80 \
 	rija/docker-nginx-fpm-caches-wordpress
 
@@ -84,7 +84,7 @@ $ docker run -d \
  * if you don't want to use IP address and prefer using hostname, you should create your own Docker network to which the Wordpress container and the database server container are connected to.
  * If you intend to use Docker Compose, make sure the name you choose for your container is only within [a-z][A-Z].
  * This method keep database user and password in the shell history, unless the command is preceded by a space.
- 
+
 
 ### How to run a Wordpress container (Method 2)
 
@@ -94,7 +94,7 @@ $ docker run -d \
 	--env-file /etc/wordpress_env_variables.txt \
 	--volumes-from wordpressfiles \
 	-v /etc/letsencrypt:/etc/letsencrypt \
-	-v /var/run/docker.sock:/var/run/docker.sock \
+	-v /var/run/docker.sock:/var/run/docker.sock:ro \
 	-p 443:443 -p 80:80 \
 	rija/docker-nginx-fpm-caches-wordpress
 
@@ -103,7 +103,7 @@ $ docker run -d \
 **Notes:**
  * This method is similar to the previous one except all environment variables are stored in a text file. It's possible to mix --env and --env-file as well.
  * this method leaves database user and password on the host file system, unless the file is removed after the container is launched
- 
+
 
 ### How to enable Encryption (TLS)
 
@@ -129,7 +129,7 @@ $ docker exec -it wordpress bash -c "nginx -t && service nginx reload"
  * Lets Encrypt's' ACME client configuration file is deployed to *'/etc/letsencrypt/cli.ini'*. Update that file to suit your use case regarding certificates.
  * the generated certificate is valid for domain.tld and www.domain.tld (SAN)
  * The certificate files are saved on the host server in /etc/letsencrypt
- 
+
 ### Usage Patterns and questions
 
 * Please refers to the [Cookbook](https://github.com/rija/docker-nginx-fpm-caches-wordpress/blob/master/Cookbook.md) for tips and usage patterns.
@@ -151,4 +151,3 @@ MIT (see the [LICENSE](https://github.com/rija/docker-nginx-fpm-caches-wordpress
 * All the contributors to the [Wordpress.org's Nginx support](http://codex.wordpress.org/Nginx) page
 * Mozilla for their awesome [SSL configuration generator](https://mozilla.github.io/server-side-tls/ssl-config-generator/)
 * All the the other people whose blog articles I've directly added in the comments in the relevant artefacts of this project
-

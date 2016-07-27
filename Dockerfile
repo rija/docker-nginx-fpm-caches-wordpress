@@ -118,7 +118,7 @@ RUN ln -fs /usr/share/nginx/sbin/nginx /usr/sbin/nginx
 
 
 # Install LE's ACME client for domain validation and certificate generation and renewal
-RUN apt-get install -y letsencrypt 
+RUN apt-get install -y letsencrypt
 RUN mkdir -p /tmp/le
 
 

@@ -112,7 +112,7 @@ It is advised to have read Lets Encrypt's [FAQ](https://community.letsencrypt.or
 after the Wordpress container has been started, run the following command and follow the on-screen instructions:
 
 ```bash
-$ docker exec -it wordpress bash -c "cd /letsencrypt/ && ./letsencrypt-auto certonly"
+$ docker exec -it wordpress bash -c "letsencrypt certonly"
 ```
 
 After the command as returned with a successful message regarding acquisition of certificate, nginx needs to be restarted with encryption enabled and configured. This is done by running the following commands:

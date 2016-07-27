@@ -14,6 +14,7 @@ script:
   - docker exec -it rijaweb bash -c "cat /etc/hosts"
   - docker exec -it rijaweb bash -c "cat /etc/letsencrypt/cli.ini"
   - docker exec -it rijaweb bash -c "cat /usr/share/nginx/www/wp-config.php"
+  - sleep 10
   - docker exec -it rijaweb bash -c "ps -e"
   - docker exec -it rijaweb bash -c "ps -e" | grep "supervisor"
   - docker exec -it rijaweb bash -c "ps -e" | grep "nginx"

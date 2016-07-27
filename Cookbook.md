@@ -14,14 +14,14 @@ $ docker network create -d bridge my_bnet
 #### Deploying Mysql in a Docker container:
 
 ```bash
-$ docker create --name mysqldata -v /var/lib/mysql mysql:5.5.45
+$ docker create --name mysqldata -v /var/lib/mysql mariadb:latest
 $ docker run --restart=unless-stopped -d --name mysqlserver \
 --volumes-from mysqldata \
 --net=my_bnet \
 --env MYSQL_ROOT_PASSWORD=<root password> \
 --env MYSQL_DATABASE=wordpress \
 --env MYSQL_USER=<user name> \
---env MYSQL_PASSWORD=<user password> mysql:5.5.45
+--env MYSQL_PASSWORD=<user password> mariadb:latest
 ```
 
 #### Deploying Wordpress in a Docker container:

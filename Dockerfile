@@ -1,4 +1,4 @@
-FROM ubuntu:15.10
+FROM ubuntu:16.04
 MAINTAINER Rija Menage <dockerfiles@rija.cinecinetique.com>
 
 EXPOSE 80
@@ -65,16 +65,18 @@ RUN apt-get install -y php7.0-curl \
 RUN apt-get update && apt-get install -y supervisor \
 						unattended-upgrades
 
+# unattended upgrade configuration
+COPY 02periodic /etc/apt/apt.conf.d/02periodic
+
+
 # install nginx
+RUN add-apt-repository ppa:nginx/stable
 RUN apt-get update && apt-get install -y nginx-full
 
 # Install LE's ACME client for domain validation and certificate generation and renewal
 RUN git clone https://github.com/letsencrypt/letsencrypt
 RUN mkdir -p /tmp/le
 
-# Opcode config
-RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/7.0/fpm/php.ini
-RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/7.0/fpm/php.ini
 
 # nginx config
 RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login www-front
@@ -86,8 +88,16 @@ COPY  acme.challenge.le.conf /etc/nginx/acme.challenge.le.conf
 COPY  nginx-site.conf /etc/nginx/sites-available/default
 RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
 
-# unattended upgrade configuration
-COPY 02periodic /etc/apt/apt.conf.d/02periodic
+
+# fastcgi cache config
+RUN addgroup --system www-cache
+RUN mkdir -p /tmp/nginx-cache
+RUN chown -R www-front:www-cache /tmp/nginx-cache
+RUN chmod -R 770 /tmp/nginx-cache
+
+# php-fpm config: Opcode cache config
+RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/7.0/fpm/php.ini
+RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/7.0/fpm/php.ini
 
 
 # php-fpm config
@@ -100,6 +110,7 @@ RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /
 RUN sed -i -e "s/listen\s*=\s*\/run\/php\/php7.0-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php/7.0/fpm/pool.d/www.conf
 RUN sed -i -e "s/;listen.allowed_clients\s*=\s*127.0.0.1/listen.allowed_clients = 127.0.0.1/g" /etc/php/7.0/fpm/pool.d/www.conf
 RUN sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/log\/\$pool.access.log/g" /etc/php/7.0/fpm/pool.d/www.conf
+RUN sed -i -e "s/group\s*=\s*www-data/group = www-cache/g" /etc/php/7.0/fpm/pool.d/www.conf
 
 # create the pid and sock file for php-fpm
 RUN service php7.0-fpm start

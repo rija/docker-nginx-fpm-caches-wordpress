@@ -10,7 +10,7 @@ before_install:
 script:
   - docker build -t rija/docker-nginx-fpm-caches-wordpress .
   - docker run --privileged -d --name rijaweb --net=rijanet --env SERVER_NAME=dockerfiletest.cinecinetique.com --env DB_HOSTNAME=$RIJAMYSQL --env DB_USER=wordpress --env DB_PASSWORD=changemeuser --env DB_DATABASE=wordpress -v /etc/letsencrypt:/etc/letsencrypt -v /var/run/docker.sock:/var/run/docker.sock -p 443:443 -p 80:80 rija/docker-nginx-fpm-caches-wordpress
-  - docker exec -it rijaweb bash -c "cd /letsencrypt/ && ./letsencrypt-auto certonly --help"
+  - docker exec -it rijaweb bash -c "letsencrypt certonly --help"
   - docker exec -it rijaweb bash -c "cat /etc/hosts"
   - docker exec -it rijaweb bash -c "cat /etc/letsencrypt/cli.ini"
   - docker exec -it rijaweb bash -c "cat /usr/share/nginx/www/wp-config.php"

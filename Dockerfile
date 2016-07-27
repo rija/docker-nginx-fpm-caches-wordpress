@@ -69,9 +69,53 @@ RUN apt-get update && apt-get install -y supervisor \
 COPY 02periodic /etc/apt/apt.conf.d/02periodic
 
 
-# install nginx
-RUN add-apt-repository ppa:nginx/stable
-RUN apt-get update && apt-get install -y nginx-full
+# install nginx with ngx_http_upstream_fair_module and ngx_cache_purge
+
+
+RUN apt-get update && apt-get install -y build-essential zlib1g-dev libpcre3 libpcre3-dev unzip libssl-dev libgeoip-dev
+RUN apt-get update && apt-get install -y nginx-light
+RUN cd /tmp \
+		&& curl -O https://nginx.org/download/nginx-1.10.1.tar.gz \
+		&& tar xzvf nginx-1.10.1.tar.gz \
+		&& git clone https://github.com/gnosek/nginx-upstream-fair \
+		&& curl -O http://labs.frickle.com/files/ngx_cache_purge-2.3.tar.gz \
+		&& test `openssl sha1 ngx_cache_purge-2.3.tar.gz | cut -d"=" -f2` = 69ed46a23435e8dfd5579422c0c3996cf9a44291 \
+		&& tar xzvf ngx_cache_purge-2.3.tar.gz
+
+RUN cd /tmp/nginx-1.10.1 \
+		&& ./configure --prefix=/usr/share/nginx \
+		--with-cc-opt='-g -O2 -fPIE -fstack-protector-strong -Wformat \
+		-Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2' \
+		--with-ld-opt='-Wl,-Bsymbolic-functions -fPIE -pie -Wl,-z,relro -Wl,-z,now' \
+		--conf-path=/etc/nginx/nginx.conf \
+		--http-log-path=/var/log/nginx/access.log \
+		--error-log-path=/var/log/nginx/error.log \
+		--lock-path=/var/lock/nginx.lock \
+		--pid-path=/run/nginx.pid \
+		--http-client-body-temp-path=/var/lib/nginx/body \
+		--http-fastcgi-temp-path=/var/lib/nginx/fastcgi \
+		--http-proxy-temp-path=/var/lib/nginx/proxy  \
+		--with-debug \
+		--with-pcre-jit \
+		--with-ipv6 \
+		--with-http_ssl_module \
+		--with-http_stub_status_module \
+		--with-http_realip_module \
+		--with-http_auth_request_module \
+		--with-http_addition_module \
+		--with-http_geoip_module \
+		--with-http_gunzip_module \
+		--with-http_gzip_static_module \
+		--with-http_v2_module \
+		--with-http_sub_module \
+		--with-stream \
+		--with-stream_ssl_module \
+		--with-threads  \
+		--add-module=/tmp/nginx-upstream-fair \
+		--add-module=/tmp/ngx_cache_purge-2.3 \
+		&& make && make install
+RUN ln -fs /usr/share/nginx/sbin/nginx /usr/sbin/nginx
+
 
 # Install LE's ACME client for domain validation and certificate generation and renewal
 RUN git clone https://github.com/letsencrypt/letsencrypt
@@ -89,11 +133,6 @@ COPY  nginx-site.conf /etc/nginx/sites-available/default
 RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
 
 
-# fastcgi cache config
-RUN addgroup --system www-cache
-RUN mkdir -p /tmp/nginx-cache
-RUN chown -R www-front:www-cache /tmp/nginx-cache
-RUN chmod -R 770 /tmp/nginx-cache
 
 # php-fpm config: Opcode cache config
 RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/7.0/fpm/php.ini
@@ -110,7 +149,6 @@ RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /
 RUN sed -i -e "s/listen\s*=\s*\/run\/php\/php7.0-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php/7.0/fpm/pool.d/www.conf
 RUN sed -i -e "s/;listen.allowed_clients\s*=\s*127.0.0.1/listen.allowed_clients = 127.0.0.1/g" /etc/php/7.0/fpm/pool.d/www.conf
 RUN sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/log\/\$pool.access.log/g" /etc/php/7.0/fpm/pool.d/www.conf
-RUN sed -i -e "s/group\s*=\s*www-data/group = www-cache/g" /etc/php/7.0/fpm/pool.d/www.conf
 
 # create the pid and sock file for php-fpm
 RUN service php7.0-fpm start

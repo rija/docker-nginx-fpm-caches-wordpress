@@ -129,6 +129,15 @@ COPY  le.ini /etc/nginx/le.ini
 COPY  acme.challenge.le.conf /etc/nginx/acme.challenge.le.conf
 COPY  nginx-site.conf /etc/nginx/sites-available/default
 RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
+RUN mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper && mkdir -p /var/log/nginx
+RUN touch /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log \
+		&& touch /var/log/nginx/error.log \
+		&& touch /var/log/nginx/access.log
+
+RUN chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
+RUN chown -R www-front:www-front /var/log/nginx \
+		&& chown www-front:www-front /var/log/nginx/error.log \
+		&& chown www-front:www-front /var/log/nginx/access.log
 
 
 # php-fpm config: Opcode cache config
@@ -149,6 +158,7 @@ RUN sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/lo
 
 # create the pid and sock file for php-fpm
 RUN service php7.0-fpm start
+RUN touch /var/log/php7.0-fpm.log && chown www-data:www-data /var/log/php7.0-fpm.log
 
 # Supervisor Config
 RUN /usr/bin/easy_install supervisor-stdout
@@ -161,8 +171,9 @@ ENV WP_URL https://wordpress.org/latest.tar.gz
 RUN cd /usr/share/nginx/ \
     && curl -o wp.tar.gz $WP_URL \
     && tar -xvf wp.tar.gz
-RUN mv /usr/share/nginx/wordpress /usr/share/nginx/www
-RUN chown -R www-data:www-data /usr/share/nginx/www
+RUN cp -r /usr/share/nginx/wordpress/* /usr/share/nginx/www/ \
+	&& rm -rf /usr/share/nginx/wordpress \
+	&& chown -R www-data:www-data /usr/share/nginx/www
 
 # cronjob for certificate auto renewal
 COPY crontab /etc/certs.cron

@@ -1,0 +1,38 @@
+version: '2'
+services:
+  web:
+    networks:
+      - wp_net
+    build: .
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 443:443
+      - 80:80
+    environment:
+      SERVER_NAME: wp.local
+      DB_HOSTNAME: dbs
+      DB_USER: wordpress
+      DB_PASSWORD: wordpress
+      DB_DATABASE: wordpress
+    links:
+      - database:dbs
+  database:
+    networks:
+      - wp_net
+    image: mariadb:latest
+    volumes_from:
+      - dbdata
+    environment:
+      MYSQL_ROOT_PASSWORD: wordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+  dbdata:
+    volumes:
+      - /var/lib/mysql
+    image: mariadb:latest
+networks:
+  wp_net:
+    driver: bridge

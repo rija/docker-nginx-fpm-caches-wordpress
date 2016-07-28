@@ -53,7 +53,7 @@ echo "127.0.0.1	$SERVER_NAME" >> /etc/hosts
 echo "Retrieving the IP address of the database server"
 NETWORK=$(curl --silent --unix-socket /var/run/docker.sock http:/containers/$HOSTNAME/json | jq .NetworkSettings.Networks | jq keys | jq .[0] | sed -e 's/\"/*/g' | cut -s -f2 -d "*")
 DB_IP=$(curl --silent --unix-socket /var/run/docker.sock http:/containers/$DB_HOSTNAME/json | jq .NetworkSettings.Networks.$NETWORK.IPAddress | sed -e 's/\"/*/g' | cut -s -f2 -d "*")
-echo "$DB_IP	$DB_HOSTNAME" >> /etc/hosts
-echo "Wrote in /etc/hosts: $DB_IP	$DB_HOSTNAME"
+
+test "$DB_IP" != '' && echo "$DB_IP	$DB_HOSTNAME" >> /etc/hosts && echo "Wrote in /etc/hosts: $DB_IP	$DB_HOSTNAME"
 
 echo "bootsrapped on $(date)" > /tmp/last_bootstrap

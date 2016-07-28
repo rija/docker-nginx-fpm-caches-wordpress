@@ -131,7 +131,6 @@ COPY  nginx-site.conf /etc/nginx/sites-available/default
 RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
 
 
-
 # php-fpm config: Opcode cache config
 RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/7.0/fpm/php.ini
 RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/7.0/fpm/php.ini
@@ -170,8 +169,5 @@ COPY crontab /etc/certs.cron
 RUN crontab /etc/certs.cron
 
 # Wordpress Initialization and Startup Script
-COPY  ./start.sh /start.sh
 COPY  ./bootstrap.sh /bootstrap.sh
-RUN chmod 755 /start.sh && chmod 755 /bootstrap.sh
-
-VOLUME ["/var/log"]
+RUN chmod 755 /bootstrap.sh

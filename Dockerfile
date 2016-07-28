@@ -4,7 +4,7 @@ MAINTAINER Rija Menage <dockerfiles@rija.cinecinetique.com>
 EXPOSE 80
 EXPOSE 443
 
-CMD ["/bin/bash", "/start.sh"]
+CMD ["/usr/bin/supervisord"]
 
 # Keep upstart from complaining
 RUN dpkg-divert --local --rename --add /sbin/initctl

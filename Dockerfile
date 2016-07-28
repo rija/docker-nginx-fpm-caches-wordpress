@@ -171,6 +171,7 @@ RUN crontab /etc/certs.cron
 
 # Wordpress Initialization and Startup Script
 COPY  ./start.sh /start.sh
-RUN chmod 755 /start.sh
+COPY  ./bootstrap.sh /bootstrap.sh
+RUN chmod 755 /start.sh && chmod 755 /bootstrap.sh
 
 VOLUME ["/var/log"]

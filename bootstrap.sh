@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # setting up default for environment variables
 SERVER_NAME=${SERVER_NAME:-example.com}
 DB_HOSTNAME=${DB_HOSTNAME:-$DB_PORT_3306_TCP_ADDR}
@@ -8,6 +7,7 @@ DB_USER=${DB_USER:-$DB_MYSQL_USER}
 DB_PASSWORD=${DB_PASSWORD:-$DB_MYSQL_PASSWORD}
 DB_DATABASE=${DB_DATABASE:-$DB_MYSQL_DATABASE}
 
+echo "$(date): Boostraping a new Wordpress instance for $SERVER_NAME"
 
 echo "Backing up existing wp-config in case variables have been manually added to it"
 if [ -f /usr/share/nginx/www/wp-config.php ]; then
@@ -55,3 +55,5 @@ NETWORK=$(curl --silent --unix-socket /var/run/docker.sock http:/containers/$HOS
 DB_IP=$(curl --silent --unix-socket /var/run/docker.sock http:/containers/$DB_HOSTNAME/json | jq .NetworkSettings.Networks.$NETWORK.IPAddress | sed -e 's/\"/*/g' | cut -s -f2 -d "*")
 echo "$DB_IP	$DB_HOSTNAME" >> /etc/hosts
 echo "Wrote in /etc/hosts: $DB_IP	$DB_HOSTNAME"
+
+echo "bootsrapped on $(date)" > /tmp/last_bootstrap

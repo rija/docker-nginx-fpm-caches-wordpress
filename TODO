@@ -1,45 +1,57 @@
 TODO
 
- * add a test for certificate creation
- * add a test for certificate renewal
- * enable /status and /ping for php-fpm
- * include a Docker compose file for instantiating both web server and database server on a new bridge network
+SECURITY:
 
-
- * Docker Hub images automated build that tracks Github tags (v#)
-
+ * create a non-root user for supervisor to drop privileges to
+ * reverse start.sh/supervisord relationship so that supervisord is the init process and start.sh is under its control
+ * make sure no daemons run as root in the container
  * add wp-cli to the container
- * add a wordpress user on the container's OS
+
+ * create an apparmor profile for nginx/php-fpm/wp-cli
+ * add a wordpress user on the container's host
  * strict file ownership (uploads is only dir writable, all files owned by wordpress user and restricted)
+ * obfuscate Wordpress URL structure and headers.
+ * verify PGP signature of the downloaded nginx source code
+
+DEPLOYMENT:
+
+ * create a Dockerfile project for a nginx proxy with  fair balancer, streaming, cache purging LE TLS and apparmor profile
+ * include a Docker compose file for instantiating an nginx proxy,  a web server and database server on a new network
+ * include Ansible playbooks for deploying above setup to GCE, DO and AWS
+
+
+ANALYTICS:
+
+ * send all logs to syslog and send them to splunk on the cloud
+ * put google analytic agent away from the application (maybe in nginx using ngx_pagespeed)
+ * integrate with NewRelics for system monitoring
+
+
+
+MISC:
+
+ [DONE]* Docker Hub images automated build that tracks Github tags (v#)
+
 
  * make sure it work with IPv6, make appropriate changes
  * make sure it work with Docker overlay networks, make appropriate changes
  * make sure it work behind a proxy server, make appropriate changes (it works behind CloudFlare so far)
 
- * upgrade to PHP7
- * add APCu
+ [DONE]* upgrade to PHP7
+ * add support for APCu in-memory, in-process key/value useraland object caching
  * add GUI to opcode
- * integrate with NewRelics
 
- * install ACME client from OS package
- * review packages installed in Dockerfile, drop the unecessary ones
+ * enable /status and /ping for php-fpm
 
- * add support for HTTP/2 (wait for nginx 2.0)
- * build a Dockerfile for nginx-custom and with Let's Encrypt and derive this Dockerfile from it
- * use Debian 8 as base for the above base image
+ * look into Kubernetes on GCE
 
- * extend RDBMS in doc and elsewhere relevant with how to deploy to MySQL, Percona, MariaDB and Aurora
- * run an instance of Nginx or HAProxy or Mysql Proxy as db proxy on the container to front connection to database server(s)
+ [DONE]* install ACME client from OS package
+ [DONE]* review packages installed in Dockerfile, drop the unecessary ones
 
- * enhance the db proxy to find database servers through service discovery (Consul or Etcd)
-
- * all logs go to syslog
- * integrate with a remote log analyser
+ [DONE]* add support for HTTP/2
+ * use Docker Slim to shrink the size of the image
 
  * customise download endpoint for Wordpress package
  * checksum verification of Wordpress package when downloading specific version
 
  * find an easily configurable way to allow access to xmlrpc.php for staff who can't be tied to one specific IP
-
-
-

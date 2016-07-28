@@ -77,7 +77,6 @@ RUN apt-get update && apt-get install -y nginx-light
 RUN cd /tmp \
 		&& curl -O https://nginx.org/download/nginx-1.10.1.tar.gz \
 		&& tar xzvf nginx-1.10.1.tar.gz \
-		&& git clone https://github.com/gnosek/nginx-upstream-fair \
 		&& curl -O http://labs.frickle.com/files/ngx_cache_purge-2.3.tar.gz \
 		&& test `openssl sha1 ngx_cache_purge-2.3.tar.gz | cut -d"=" -f2` = 69ed46a23435e8dfd5579422c0c3996cf9a44291 \
 		&& tar xzvf ngx_cache_purge-2.3.tar.gz
@@ -111,7 +110,6 @@ RUN cd /tmp/nginx-1.10.1 \
 		--with-stream \
 		--with-stream_ssl_module \
 		--with-threads  \
-		--add-module=/tmp/nginx-upstream-fair \
 		--add-module=/tmp/ngx_cache_purge-2.3 \
 		&& make && make install
 RUN ln -fs /usr/share/nginx/sbin/nginx /usr/sbin/nginx

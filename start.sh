@@ -58,5 +58,4 @@ echo "$DB_IP	$DB_HOSTNAME" >> /etc/hosts
 
 
 # start all the services
-mkdir -p /var/log/supervisor
-/usr/bin/supervisord -n
+/usr/bin/supervisord

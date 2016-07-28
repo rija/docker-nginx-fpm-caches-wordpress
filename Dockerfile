@@ -153,6 +153,7 @@ RUN service php7.0-fpm start
 
 # Supervisor Config
 RUN /usr/bin/easy_install supervisor-stdout
+RUN mkdir -p /var/log/supervisor
 COPY  ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 

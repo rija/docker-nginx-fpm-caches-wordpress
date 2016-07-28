@@ -1,8 +1,7 @@
 TODO
 
 SECURITY:
-
- * create a non-root user for supervisor to drop privileges to
+ * replace cron by an supervisord event listener listening on TICK_* events (see http://stackoverflow.com/questions/27341846/using-supervisor-as-cron)
  * reverse start.sh/supervisord relationship so that supervisord is the init process and start.sh is under its control
  * make sure no daemons run as root in the container
  * add wp-cli to the container

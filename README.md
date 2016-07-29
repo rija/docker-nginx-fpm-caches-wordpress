@@ -130,6 +130,33 @@ $ docker exec -it wordpress bash -c "nginx -t && service nginx reload"
  * the generated certificate is valid for domain.tld and www.domain.tld (SAN)
  * The certificate files are saved on the host server in /etc/letsencrypt
 
+### Using Docker compose
+
+commands in this section assume you have an .env file with the following environment variables:
+```
+SERVER_NAME=wp.local
+COMPOSE_PROJECT_NAME=mywebapp
+DB_USER=<database user>
+DB_PASSWORD=<database password>
+DB_DATABASE=<database name>
+MYSQL_ROOT_PASSWORD=<password for the root user of the database server>
+
+```
+
+##### Instantiating a custom network, two containers: one with the project's image pulled from Docker Hub, one with a MariaDB server pulled from Docker Hub
+
+```
+docker-compose  -f docker-compose.yml up -d
+```
+
+##### Instantiating a custom network, two containers: one that will be built from local project files, one with MariaDB server pulled from Docker Hub
+
+```
+docker-compose up --build -d
+```
+
+
+
 ### Usage Patterns and questions
 
 * Please refers to the [Cookbook](https://github.com/rija/docker-nginx-fpm-caches-wordpress/blob/master/Cookbook.md) for tips and usage patterns.

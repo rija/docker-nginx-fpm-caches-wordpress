@@ -3,7 +3,7 @@ services:
   web:
     networks:
       - wp_net
-    build: .
+    image: rija/docker-nginx-fpm-caches-wordpress
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -11,11 +11,11 @@ services:
       - 443:443
       - 80:80
     environment:
-      SERVER_NAME: wp.local
+      SERVER_NAME:
       DB_HOSTNAME: dbs
-      DB_USER: wordpress
-      DB_PASSWORD: wordpress
-      DB_DATABASE: wordpress
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
     links:
       - database:dbs
   database:
@@ -25,10 +25,10 @@ services:
     volumes_from:
       - dbdata
     environment:
-      MYSQL_ROOT_PASSWORD: wordpress
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
   dbdata:
     volumes:
       - /var/lib/mysql

@@ -28,3 +28,5 @@ after_script:
 
 after_failure:
   - docker exec -it rijaweb bash -c "supervisorctl tail bootstrap"
+  - docker exec -it rijaweb bash -c "cat /etc/hosts"
+  - docker exec -it rijaweb bash -c "cat /etc/letsencrypt/cli.ini"

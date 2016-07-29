@@ -27,4 +27,4 @@ after_script:
   - docker logs rijaweb
 
 after_failure:
-  - docker exec -it rijaweb bash -c "cd / && . bootstrap.sh"
+  - docker exec -it rijaweb bash -c "supervisorctl tail bootstrap"

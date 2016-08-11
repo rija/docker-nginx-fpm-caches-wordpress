@@ -12,10 +12,11 @@ services:
       - 80:80
     environment:
       SERVER_NAME:
+      LE_EMAIL:
       DB_HOSTNAME: dbs
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${WP_DB_USER}
+      DB_PASSWORD: ${WP_DB_PASSWORD}
+      DB_DATABASE: ${WP_DB_NAME}
     links:
       - database:dbs
   database:
@@ -26,9 +27,9 @@ services:
       - dbdata
     environment:
       MYSQL_ROOT_PASSWORD:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${WP_DB_USER}
+      MYSQL_PASSWORD: ${WP_DB_PASSWORD}
+      MYSQL_DATABASE: ${WP_DB_NAME}
   dbdata:
     volumes:
       - /var/lib/mysql

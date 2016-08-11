@@ -38,7 +38,10 @@ sed -i -e "s/server_fqdn/$SERVER_NAME/" /etc/nginx/sites-available/default
 sed -i -e "s/server_fqdn/$SERVER_NAME/" /etc/nginx/ssl.conf
 
 echo "Creating a config file for letsencrypt for $SERVER_NAME"
-sed -e "s/server_fqdn/$SERVER_NAME/g" /etc/nginx/le.ini > /etc/letsencrypt/cli.ini
+sed -i -e "s/server_fqdn/$SERVER_NAME/g" /etc/nginx/le.ini
+sed -i -e "s/to_be_replaced_email/$LE_EMAIL/g" /etc/nginx/le.ini
+
+cp /etc/nginx/le.ini /etc/letsencrypt/cli.ini
 
 
 echo "add server name to /etc/hosts to avoid timeout when code make http call to public url"

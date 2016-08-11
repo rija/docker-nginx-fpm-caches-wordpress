@@ -22,7 +22,7 @@ services:
   database:
     networks:
       - wp_net
-    image: mariadb:latest
+    image: mariadb:10.1.16
     volumes_from:
       - dbdata
     environment:
@@ -33,7 +33,7 @@ services:
   dbdata:
     volumes:
       - /var/lib/mysql
-    image: mariadb:latest
+    image: mariadb:10.1.16
 networks:
   wp_net:
     driver: bridge

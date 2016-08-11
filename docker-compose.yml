@@ -10,6 +10,8 @@ services:
     ports:
       - 443:443
       - 80:80
+    depends_on:
+      - db
     environment:
       SERVER_NAME:
       LE_EMAIL:
@@ -18,22 +20,22 @@ services:
       DB_PASSWORD: ${WP_DB_PASSWORD}
       DB_DATABASE: ${WP_DB_NAME}
     links:
-      - database:dbs
-  database:
+      - db:dbs
+  db:
     networks:
       - wp_net
     image: mariadb:10.1.16
-    volumes_from:
-      - dbdata
+    volumes:
+      - mariadb_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD:
       MYSQL_USER: ${WP_DB_USER}
       MYSQL_PASSWORD: ${WP_DB_PASSWORD}
       MYSQL_DATABASE: ${WP_DB_NAME}
-  dbdata:
-    volumes:
-      - /var/lib/mysql
-    image: mariadb:10.1.16
+
 networks:
   wp_net:
     driver: bridge
+
+volumes:
+  mariadb_data:

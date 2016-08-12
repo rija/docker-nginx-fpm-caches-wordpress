@@ -129,15 +129,6 @@ COPY  le.ini /etc/nginx/le.ini
 COPY  acme.challenge.le.conf /etc/nginx/acme.challenge.le.conf
 COPY  nginx-site.conf /etc/nginx/sites-available/default
 RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
-RUN mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper && mkdir -p /var/log/nginx
-RUN touch /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log \
-		&& touch /var/log/nginx/error.log \
-		&& touch /var/log/nginx/access.log
-
-RUN chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
-RUN chown -R www-front:www-front /var/log/nginx \
-		&& chown www-front:www-front /var/log/nginx/error.log \
-		&& chown www-front:www-front /var/log/nginx/access.log
 
 
 # php-fpm config: Opcode cache config
@@ -166,14 +157,39 @@ RUN mkdir -p /var/log/supervisor
 COPY  ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 
+# Select Vanilla Wordpress or Git install
+
+ARG WP_VANILLA
+ARG GIT_SSH_URL
+ENV WP_VANILLA ${WP_VANILLA:-1}
+ENV GIT_SSH_URL ${GIT_SSH_URL:-''}
+
+
+# Download Wordpress
+
+ARG WP_VERSION
+ENV WP_VERSION ${WP_VERSION:-4.5.3}
+
+COPY download_wordpress /download_wordpress
+RUN chmod 755 /download_wordpress
+RUN test $WP_VANILLA && test ! $GIT_SSH_URL && /download_wordpress
+
 # Install Wordpress
-ENV WP_URL https://wordpress.org/latest.tar.gz
-RUN cd /usr/share/nginx/ \
-    && curl -o wp.tar.gz $WP_URL \
-    && tar -xvf wp.tar.gz
-RUN cp -r /usr/share/nginx/wordpress/* /usr/share/nginx/www/ \
-	&& rm -rf /usr/share/nginx/wordpress \
-	&& chown -R www-data:www-data /usr/share/nginx/www
+
+COPY install_wordpress /install_wordpress
+RUN chmod 755 /install_wordpress
+RUN /install_wordpress
+
+# Bootstrap logs for Nginx Helper Wordpress plugin
+RUN mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper && mkdir -p /var/log/nginx
+RUN touch /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log \
+		&& touch /var/log/nginx/error.log \
+		&& touch /var/log/nginx/access.log
+
+RUN chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
+RUN chown -R www-front:www-front /var/log/nginx \
+		&& chown www-front:www-front /var/log/nginx/error.log \
+		&& chown www-front:www-front /var/log/nginx/access.log
 
 # cronjob for certificate auto renewal
 COPY crontab /etc/certs.cron

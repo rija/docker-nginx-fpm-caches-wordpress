@@ -1,0 +1,29 @@
+#!/bin/bash
+
+
+# Installing wordpress
+
+if [ "$GIT_SSH_URL" != '' ]; then
+  # from a git repository using SSH. It is assumed appropriate credentials are set up
+
+  git clone $GIT_SSH_URL /usr/share/nginx/www
+
+  echo "cloned git repository at /usr/share/nginx/www"
+
+elif [ "$WP_VANILLA" != '' ]; then
+  # use a previously downloaded and unpacked tarball release of Wordpress
+
+  test -d /usr/share/nginx/wordpress \
+  && mkdir -p /usr/share/nginx/www \
+  && cp -r /usr/share/nginx/wordpress/* /usr/share/nginx/www/ \
+  && rm -rf /usr/share/nginx/wordpress \
+  && chown -R www-data:www-data /usr/share/nginx/www
+
+  echo "Installed vanilla Wordpress at /usr/share/nginx/www"
+
+else
+  # nothing to install, not necessarily an error condition
+
+  echo "Nothing to do"
+
+fi

@@ -180,13 +180,11 @@ COPY install_wordpress /install_wordpress
 RUN chmod 755 /install_wordpress
 RUN /install_wordpress
 
-# Bootstrap logs for Nginx Helper Wordpress plugin
-RUN mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper && mkdir -p /var/log/nginx
-RUN touch /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log \
+# Bootstrap logs 
+RUN mkdir -p /var/log/nginx \
 		&& touch /var/log/nginx/error.log \
 		&& touch /var/log/nginx/access.log
 
-RUN chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
 RUN chown -R www-front:www-front /var/log/nginx \
 		&& chown www-front:www-front /var/log/nginx/error.log \
 		&& chown www-front:www-front /var/log/nginx/access.log

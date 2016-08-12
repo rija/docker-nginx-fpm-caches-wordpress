@@ -1,12 +1,14 @@
 #!/bin/bash
 
 
+# Creating webroot directory
+mkdir -p /usr/share/nginx/www
+
 # Installing wordpress
 
 if [ "$GIT_SSH_URL" != '' ]; then
   # from a git repository using SSH. It is assumed appropriate credentials are set up
 
-  mkdir -p /usr/share/nginx/www
   cd /usr/share/nginx/www && git init
   git remote add origin $GIT_SSH_URL
 
@@ -16,7 +18,6 @@ elif [ "$WP_VANILLA" != '' ]; then
   # use a previously downloaded and unpacked tarball release of Wordpress
 
   test -d /usr/share/nginx/wordpress \
-  && mkdir -p /usr/share/nginx/www \
   && cp -r /usr/share/nginx/wordpress/* /usr/share/nginx/www/ \
   && rm -rf /usr/share/nginx/wordpress \
   && chown -R www-data:www-data /usr/share/nginx/www
@@ -29,3 +30,8 @@ else
   echo "Nothing to do"
 
 fi
+
+# Boostraping Nginx Helper Wordpress plugin's log
+mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper
+touch /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
+chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log

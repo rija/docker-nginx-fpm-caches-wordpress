@@ -6,9 +6,11 @@
 if [ "$GIT_SSH_URL" != '' ]; then
   # from a git repository using SSH. It is assumed appropriate credentials are set up
 
-  git clone $GIT_SSH_URL /usr/share/nginx/www
+  mkdir -p /usr/share/nginx/www
+  cd /usr/share/nginx/www && git init
+  git remote add origin $GIT_SSH_URL
 
-  echo "cloned git repository at /usr/share/nginx/www"
+  echo "create a local git repository at /usr/share/nginx/www linked to the web app remote repository"
 
 elif [ "$WP_VANILLA" != '' ]; then
   # use a previously downloaded and unpacked tarball release of Wordpress

@@ -172,7 +172,7 @@ ENV WP_VERSION ${WP_VERSION:-4.5.3}
 
 COPY download_wordpress /download_wordpress
 RUN chmod 755 /download_wordpress
-RUN test $WP_VANILLA && test ! $GIT_SSH_URL && /download_wordpress
+RUN /download_wordpress
 
 # Install Wordpress
 

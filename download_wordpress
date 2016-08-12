@@ -8,9 +8,13 @@ WP_4_3_5_SHA1=6ffccdcb59102d0d2c9232c93f4771363849b453
 
 WP_URL=https://wordpress.org/wordpress-${WP_VERSION}.tar.gz
 
-cd /usr/share/nginx/ \
-    && curl -o wp.tar.gz ${WP_URL} \
-		&& SELECTED_VERSION_CHECKSUM=$(echo "WP_${WP_VERSION}_SHA1" | sed "s/\./_/g") \
-		&& test `openssl sha1 wp.tar.gz | cut -d"=" -f2` = ${!SELECTED_VERSION_CHECKSUM} \
-		&& tar -xvf wp.tar.gz \
-		&& rm wp.tar.gz
+if [[ $WP_VANILLA && ! $GIT_SSH_URL ]]; then
+
+  cd /usr/share/nginx/ \
+      && curl -o wp.tar.gz ${WP_URL} \
+      && SELECTED_VERSION_CHECKSUM=$(echo "WP_${WP_VERSION}_SHA1" | sed "s/\./_/g") \
+      && test `openssl sha1 wp.tar.gz | cut -d"=" -f2` = ${!SELECTED_VERSION_CHECKSUM} \
+      && tar -xvf wp.tar.gz \
+      && rm wp.tar.gz
+
+fi

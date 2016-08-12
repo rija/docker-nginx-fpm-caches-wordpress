@@ -1,6 +1,9 @@
 version: '2'
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        GIT_SSH_URL: ${GIT_REPO_SSH_URL}
     environment:
       DEBUG: 'true'

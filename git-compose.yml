@@ -1,0 +1,42 @@
+version: '2'
+services:
+  web:
+    networks:
+      - wp_net
+    image: ${IMAGE_NAME}
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/${COMPOSE_PROJECT_NAME}/.ssh:/root/.ssh
+    ports:
+      - 443:443
+      - 80:80
+    depends_on:
+      - db
+    environment:
+      SERVER_NAME:
+      LE_EMAIL:
+      DB_HOSTNAME: dbs
+      DB_USER: ${WP_DB_USER}
+      DB_PASSWORD: ${WP_DB_PASSWORD}
+      DB_DATABASE: ${WP_DB_NAME}
+    links:
+      - db:dbs
+  db:
+    networks:
+      - wp_net
+    image: mariadb:10.1.16
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_USER: ${WP_DB_USER}
+      MYSQL_PASSWORD: ${WP_DB_PASSWORD}
+      MYSQL_DATABASE: ${WP_DB_NAME}
+
+networks:
+  wp_net:
+    driver: bridge
+
+volumes:
+  mariadb_data:

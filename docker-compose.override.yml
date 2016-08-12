@@ -7,3 +7,4 @@ services:
         GIT_SSH_URL: ${GIT_REPO_SSH_URL}
     environment:
       DEBUG: 'true'
+    image: ${IMAGE_NAME}

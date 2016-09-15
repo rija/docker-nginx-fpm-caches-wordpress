@@ -127,6 +127,7 @@ RUN adduser --system --no-create-home --shell /bin/false --group --disabled-logi
 COPY  nginx.conf /etc/nginx/nginx.conf
 COPY  restrictions.conf /etc/nginx/restrictions.conf
 COPY  ssl.conf /etc/nginx/ssl.conf
+COPY  security_headers.conf /etc/nginx/security_headers.conf
 COPY  le.ini /etc/nginx/le.ini
 COPY  acme.challenge.le.conf /etc/nginx/acme.challenge.le.conf
 COPY  nginx-site.conf /etc/nginx/sites-available/default

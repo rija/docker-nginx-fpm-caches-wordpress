@@ -196,7 +196,9 @@ RUN chown -R www-front:www-front /var/log/nginx \
 
 # cronjob for certificate auto renewal
 COPY crontab /etc/certs.cron
+RUN touch /var/log/certs.log
 RUN crontab /etc/certs.cron
+
 
 # Wordpress Initialization and Startup Script
 COPY  ./bootstrap.sh /bootstrap.sh

@@ -36,7 +36,7 @@ MISC:
  * make sure it work behind a proxy server, make appropriate changes (it works behind CloudFlare so far)
 
  [DONE]* upgrade to PHP7
- * add support for APCu in-memory, in-process key/value useraland object caching
+ * add support for APCu in-memory, in-process key/value userland object caching
  * add GUI to opcode
 
  * enable /status and /ping for php-fpm

@@ -40,6 +40,10 @@ RUN apt-get update && apt-get install -y php7.0 \
 						php7.0-mysql
 
 
+# installing Fail2ban
+RUN apt-get update && apt-get install -y fail2ban
+
+
 # Wordpress Requirements
 RUN apt-get update && apt-get install -y php7.0-curl \
 						php7.0-gd \
@@ -77,8 +81,8 @@ COPY 02periodic /etc/apt/apt.conf.d/02periodic
 RUN apt-get update && apt-get install -y build-essential zlib1g-dev libpcre3 libpcre3-dev unzip libssl-dev libgeoip-dev
 RUN apt-get update && apt-get install -y nginx-light
 RUN cd /tmp \
-		&& curl -O https://nginx.org/download/nginx-1.11.3.tar.gz \
-		&& tar xzvf nginx-1.11.3.tar.gz \
+		&& curl -O https://nginx.org/download/nginx-1.13.0.tar.gz \
+		&& tar xzvf nginx-1.13.0.tar.gz \
 		&& curl -O http://labs.frickle.com/files/ngx_cache_purge-2.3.tar.gz \
 		&& test `openssl sha1 ngx_cache_purge-2.3.tar.gz | cut -d"=" -f2` = 69ed46a23435e8dfd5579422c0c3996cf9a44291 \
 		&& tar xzvf ngx_cache_purge-2.3.tar.gz

@@ -1,3 +1,2 @@
 #crontab
-
-0 1 * * 1    ( date ; letsencrypt certonly"  ) >> /var/log/certs.log 2>&1
+0 1 * * 1    ( date ; letsencrypt certonly && nginx -t && service nginx reload  ) >> /var/log/certs.log 2>&1

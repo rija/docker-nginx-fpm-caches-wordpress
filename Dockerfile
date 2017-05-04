@@ -87,7 +87,7 @@ RUN cd /tmp \
 		&& test `openssl sha1 ngx_cache_purge-2.3.tar.gz | cut -d"=" -f2` = 69ed46a23435e8dfd5579422c0c3996cf9a44291 \
 		&& tar xzvf ngx_cache_purge-2.3.tar.gz
 
-RUN cd /tmp/nginx-1.11.3 \
+RUN cd /tmp/nginx-1.13.0 \
 		&& ./configure --prefix=/usr/share/nginx \
 		--with-cc-opt='-g -O2 -fPIE -fstack-protector-strong -Wformat \
 		-Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2' \

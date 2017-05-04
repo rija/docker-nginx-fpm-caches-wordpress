@@ -26,9 +26,13 @@ RUN apt-get update && apt-get install -y pwgen \
 						unzip
 
 
+# mysql
+
 RUN apt-get update && apt-get install -y mysql-client
 
 # php 7 installation
+
+RUN apt-get clean && apt-get -y update && apt-get install -y locales 
 
 RUN locale-gen en_US.UTF-8
 ENV  LANG en_US.UTF-8

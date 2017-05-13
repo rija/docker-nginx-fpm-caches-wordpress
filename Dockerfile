@@ -38,9 +38,9 @@ ENV  LANG en_US.UTF-8
 ENV  LC_ALL en_US.UTF-8
 RUN apt-get install -y software-properties-common
 RUN LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php
-RUN apt-get update && apt-get install -y php7.0 \
-						php7.0-fpm \
-						php7.0-mysql
+RUN apt-get update && apt-get install -y php7.1 \
+						php7.1-fpm \
+						php7.1-mysql
 
 
 # installing Fail2ban
@@ -48,24 +48,24 @@ RUN apt-get update && apt-get install -y fail2ban
 
 
 # Wordpress Requirements
-RUN apt-get update && apt-get install -y php7.0-curl \
-						php7.0-gd \
-						php7.0-intl \
+RUN apt-get update && apt-get install -y php7.1-curl \
+						php7.1-gd \
+						php7.1-intl \
 						php-pear \
-						php7.0-imagick \
-						php7.0-imap \
-						php7.0-mcrypt \
-						php7.0-memcache \
-						php7.0-ps \
-						php7.0-pspell \
-						php7.0-recode \
-						php7.0-sqlite \
-						php7.0-tidy \
-						php7.0-xmlrpc \
-						php7.0-xml \
-						php7.0-xsl \
-						php7.0-opcache \
-						php7.0-mbstring \
+						php7.1-imagick \
+						php7.1-imap \
+						php7.1-mcrypt \
+						php7.1-memcache \
+						php7.1-ps \
+						php7.1-pspell \
+						php7.1-recode \
+						php7.1-sqlite \
+						php7.1-tidy \
+						php7.1-xmlrpc \
+						php7.1-xml \
+						php7.1-xsl \
+						php7.1-opcache \
+						php7.1-mbstring \
 						php-gettext
 
 
@@ -80,17 +80,33 @@ COPY 02periodic /etc/apt/apt.conf.d/02periodic
 
 # install nginx with ngx_http_upstream_fair_module and ngx_cache_purge
 
+ENV NGINX_VERSION 1.13.0
 
 RUN apt-get update && apt-get install -y build-essential zlib1g-dev libpcre3 libpcre3-dev unzip libssl-dev libgeoip-dev
 RUN apt-get update && apt-get install -y nginx-light
-RUN cd /tmp \
-		&& curl -O https://nginx.org/download/nginx-1.13.0.tar.gz \
-		&& tar xzvf nginx-1.13.0.tar.gz \
-		&& curl -O http://labs.frickle.com/files/ngx_cache_purge-2.3.tar.gz \
-		&& test `openssl sha1 ngx_cache_purge-2.3.tar.gz | cut -d"=" -f2` = 69ed46a23435e8dfd5579422c0c3996cf9a44291 \
+RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
+		&& cd /tmp \
+		&& curl -O -fsSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz \
+		&& curl -O -fsSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc \
+		&& export GNUPGHOME="$(mktemp -d)" \
+		&& found=''; \
+		for server in \
+			ha.pool.sks-keyservers.net \
+			hkp://keyserver.ubuntu.com:80 \
+			hkp://p80.pool.sks-keyservers.net:80 \
+			pgp.mit.edu \
+		; do \
+			echo "Fetching GPG key $GPG_KEYS from $server"; \
+			gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$GPG_KEYS" && found=yes && break; \
+		done; \
+		test -z "$found" && echo >&2 "error: failed to fetch GPG key $GPG_KEYS" && exit 1; \
+		gpg --batch --verify nginx-$NGINX_VERSION.tar.gz.asc nginx-$NGINX_VERSION.tar.gz \
+		&& rm -r "$GNUPGHOME" nginx-$NGINX_VERSION.tar.gz.asc \
+		&& tar xzvf nginx-$NGINX_VERSION.tar.gz \
+		&& curl -o ngx_cache_purge-2.3.tar.gz -fsSL https://github.com/FRiCKLE/ngx_cache_purge/archive/2.3.tar.gz \
 		&& tar xzvf ngx_cache_purge-2.3.tar.gz
 
-RUN cd /tmp/nginx-1.13.0 \
+RUN cd /tmp/nginx-$NGINX_VERSION \
 		&& ./configure --prefix=/usr/share/nginx \
 		--with-cc-opt='-g -O2 -fPIE -fstack-protector-strong -Wformat \
 		-Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2' \
@@ -142,26 +158,26 @@ RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
 
 
 # php-fpm config: Opcode cache config
-RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/7.0/fpm/php.ini
-RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/7.0/fpm/php.ini
+RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/7.1/fpm/php.ini
+RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/7.1/fpm/php.ini
 
 
 # php-fpm config
-RUN sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php/7.0/fpm/php.ini
-RUN sed -i -e "s/expose_php = On/expose_php = Off/g" /etc/php/7.0/fpm/php.ini
-RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc/php/7.0/fpm/php.ini
-RUN sed -i -e "s/;session.cookie_secure\s*=\s*/session.cookie_secure = True/g" /etc/php/7.0/fpm/php.ini
-RUN sed -i -e "s/session.cookie_httponly\s*=\s*/session.cookie_httponly = True/g" /etc/php/7.0/fpm/php.ini
-RUN sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php/7.0/fpm/php.ini
-RUN sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php/7.0/fpm/php-fpm.conf
-RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/7.0/fpm/pool.d/www.conf
-RUN sed -i -e "s/listen\s*=\s*\/run\/php\/php7.0-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php/7.0/fpm/pool.d/www.conf
-RUN sed -i -e "s/;listen.allowed_clients\s*=\s*127.0.0.1/listen.allowed_clients = 127.0.0.1/g" /etc/php/7.0/fpm/pool.d/www.conf
-RUN sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/log\/\$pool.access.log/g" /etc/php/7.0/fpm/pool.d/www.conf
+RUN sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php/7.1/fpm/php.ini
+RUN sed -i -e "s/expose_php = On/expose_php = Off/g" /etc/php/7.1/fpm/php.ini
+RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc/php/7.1/fpm/php.ini
+RUN sed -i -e "s/;session.cookie_secure\s*=\s*/session.cookie_secure = True/g" /etc/php/7.1/fpm/php.ini
+RUN sed -i -e "s/session.cookie_httponly\s*=\s*/session.cookie_httponly = True/g" /etc/php/7.1/fpm/php.ini
+RUN sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php/7.1/fpm/php.ini
+RUN sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php/7.1/fpm/php-fpm.conf
+RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/7.1/fpm/pool.d/www.conf
+RUN sed -i -e "s/listen\s*=\s*\/run\/php\/php7.1-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php/7.1/fpm/pool.d/www.conf
+RUN sed -i -e "s/;listen.allowed_clients\s*=\s*127.0.0.1/listen.allowed_clients = 127.0.0.1/g" /etc/php/7.1/fpm/pool.d/www.conf
+RUN sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/log\/\$pool.access.log/g" /etc/php/7.1/fpm/pool.d/www.conf
 
 # create the pid and sock file for php-fpm
-RUN service php7.0-fpm start
-RUN touch /var/log/php7.0-fpm.log && chown www-data:www-data /var/log/php7.0-fpm.log
+RUN service php7.1-fpm start
+RUN touch /var/log/php7.1-fpm.log && chown www-data:www-data /var/log/php7.1-fpm.log
 
 # Supervisor Config
 RUN /usr/bin/easy_install supervisor-stdout

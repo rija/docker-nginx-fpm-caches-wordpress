@@ -6,9 +6,8 @@ EXPOSE 443
 
 CMD ["/usr/bin/supervisord"]
 
-# Keep upstart from complaining
-RUN dpkg-divert --local --rename --add /sbin/initctl
-RUN ln -sf /bin/true /sbin/initctl
+# Keep upstart from complaining (see https://ubuntuforums.org/showthread.php?t=1997229)
+RUN dpkg-divert --local --rename --add /sbin/initctl && ln -sf /bin/true /sbin/initctl
 
 # Let the container know that there is no tty
 ENV DEBIAN_FRONTEND noninteractive
@@ -32,7 +31,7 @@ RUN apt-get update && apt-get install -y mysql-client
 
 # php 7 installation
 
-RUN apt-get clean && apt-get -y update && apt-get install -y locales 
+RUN apt-get clean && apt-get -y update && apt-get install -y locales
 
 RUN locale-gen en_US.UTF-8
 ENV  LANG en_US.UTF-8

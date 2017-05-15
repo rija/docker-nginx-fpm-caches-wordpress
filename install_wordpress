@@ -1,10 +1,10 @@
 #!/bin/bash
 
-
+set -ev
 
 # allowing the certs to be accessed
 
-ssh-keyscan -t rsa github.com  >> /root/.ssh/known_hosts
+ssh-keyscan -t rsa github.com  > /root/.ssh/known_hosts
 
 cp /root/deploykeys/$GIT_DEPLOY_KEY /root/.ssh/
 cp /root/deploykeys/$GIT_DEPLOY_KEY.pub /root/.ssh/
@@ -32,3 +32,6 @@ ls -alrt /root/.ssh/
 mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper
 touch /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
 chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
+
+
+echo "Wordpress installed on $(date)" > /tmp/last_wordpress

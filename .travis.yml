@@ -24,7 +24,8 @@ script:
   - docker exec -it rijaweb bash -c "ps -e" | grep "cron"
   - docker exec -it rijaweb bash -c "curl --head http://dockerfiletest.cinecinetique.com"
   - docker exec -it rijaweb bash -c "curl --head http://dockerfiletest.cinecinetique.com" | grep 301
-  - docker exec -it rijaweb bash -c "ls -alrt /usr/share/nginx/www/"
+  - sleep 30
+  - docker exec -it rijaweb bash -c "ls -alrt /usr/share/nginx/www/" | grep "wp-content"
 
 after_failure:
   - docker exec -it rijaweb bash -c "supervisorctl tail bootstrap"

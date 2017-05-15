@@ -9,9 +9,6 @@ DB_DATABASE=${DB_DATABASE:-$DB_MYSQL_DATABASE}
 
 echo "$(date): Boostraping a new Wordpress instance for $SERVER_NAME"
 
-echo "Cloning a new Wodpress install from a remote GIT repository"
-
-/install_wordpress
 
 echo "Backing up existing wp-config in case variables have been manually added to it"
 if [ -f /usr/share/nginx/www/wp-config.php ]; then

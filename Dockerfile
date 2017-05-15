@@ -184,29 +184,15 @@ RUN /usr/bin/easy_install supervisor-stdout
 RUN mkdir -p /var/log/supervisor
 COPY  ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-
-# Select Vanilla Wordpress or Git install
-
-ARG WP_VANILLA
-ARG GIT_SSH_URL
-ENV WP_VANILLA ${WP_VANILLA:-1}
-ENV GIT_SSH_URL ${GIT_SSH_URL:-''}
-
-
-# Download Wordpress
-
-ARG WP_VERSION
-ENV WP_VERSION ${WP_VERSION:-4.5.3}
-
-COPY download_wordpress /download_wordpress
-RUN chmod 755 /download_wordpress
-RUN /download_wordpress
-
 # Install Wordpress
 
+ARG GIT_SSH_URL
+ENV GIT_SSH_URL ${GIT_SSH_URL:-"git@github.com:WordPress/WordPress.git"}
+
 COPY install_wordpress /install_wordpress
+COPY ssh_config /root/.ssh/config
+RUN chmod 700 /root/.ssh/config
 RUN chmod 755 /install_wordpress
-RUN /install_wordpress
 
 # Bootstrap logs
 RUN mkdir -p /var/log/nginx \

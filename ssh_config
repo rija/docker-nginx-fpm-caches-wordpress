@@ -1,0 +1,4 @@
+host github.com
+ HostName github.com
+ IdentityFile ~/.ssh/git_deploy_key
+ User git

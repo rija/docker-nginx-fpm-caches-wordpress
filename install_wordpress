@@ -1,35 +1,32 @@
 #!/bin/bash
 
 
-# Creating webroot directory
-mkdir -p /usr/share/nginx/www
+
+# allowing the certs to be accessed
+
+ssh-keyscan -t rsa github.com  >> /root/.ssh/known_hosts
+
+cp /root/deploykeys/$GIT_DEPLOY_KEY /root/.ssh/
+cp /root/deploykeys/$GIT_DEPLOY_KEY.pub /root/.ssh/
+chown root:root /root/.ssh/$GIT_DEPLOY_KEY
+
+ls -alrt /root/.ssh/ | grep $GIT_DEPLOY_KEY
+
 
 # Installing wordpress
 
 if [ "$GIT_SSH_URL" != '' ]; then
-  # from a git repository using SSH. It is assumed appropriate credentials are set up
+    # from a git repository using SSH. It is assumed appropriate credentials are set up
 
-  cd /usr/share/nginx/www && git init
-  git remote add origin $GIT_SSH_URL
-
-  echo "create a local git repository at /usr/share/nginx/www linked to the web app remote repository"
-
-elif [ "$WP_VANILLA" != '' ]; then
-  # use a previously downloaded and unpacked tarball release of Wordpress
-
-  test -d /usr/share/nginx/wordpress \
-  && cp -r /usr/share/nginx/wordpress/* /usr/share/nginx/www/ \
-  && rm -rf /usr/share/nginx/wordpress \
-  && chown -R www-data:www-data /usr/share/nginx/www
-
-  echo "Installed vanilla Wordpress at /usr/share/nginx/www"
-
-else
-  # nothing to install, not necessarily an error condition
-
-  echo "Nothing to do"
-
+    cd /usr/share/nginx
+    git clone $GIT_SSH_URL www
 fi
+
+#  Removing the deploy key
+rm /root/.ssh/$GIT_DEPLOY_KEY.pub
+rm /root/.ssh/$GIT_DEPLOY_KEY
+
+ls -alrt /root/.ssh/
 
 # Boostraping Nginx Helper Wordpress plugin's log
 mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper

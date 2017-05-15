@@ -15,7 +15,6 @@ script:
   - docker exec -it rijaweb bash -c "test -f /tmp/last_bootstrap"
   - docker exec -it rijaweb bash -c "cat /etc/hosts"
   - docker exec -it rijaweb bash -c "cat /etc/letsencrypt/cli.ini"
-  - docker exec -it rijaweb bash -c "cat /usr/share/nginx/www/wp-config.php"
   - sleep 10
   - docker exec -it rijaweb bash -c "ps -e"
   - docker exec -it rijaweb bash -c "ps -e" | grep "supervisor"
@@ -24,7 +23,8 @@ script:
   - docker exec -it rijaweb bash -c "ps -e" | grep "cron"
   - docker exec -it rijaweb bash -c "curl --head http://dockerfiletest.cinecinetique.com"
   - docker exec -it rijaweb bash -c "curl --head http://dockerfiletest.cinecinetique.com" | grep 301
-  - sleep 30
+  - sleep 20
+  - docker exec -it rijaweb bash -c "cat /usr/share/nginx/www/wp-config.php"
   - docker exec -it rijaweb bash -c "ls -alrt /usr/share/nginx/www/" | grep "wp-content"
 
 after_failure:

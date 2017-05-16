@@ -14,7 +14,7 @@ services:
     depends_on:
       - db
     environment:
-      GIT_DEPLOY_KEY: 'git_deploy_key'
+      GIT_DEPLOY_KEY: ${GIT_DEPLOY_KEY}
       SERVER_NAME:
       LE_EMAIL:
       DB_HOSTNAME: dbs
@@ -26,7 +26,7 @@ services:
   db:
     networks:
       - wp_net
-    image: mariadb:10.1.16
+    image: mariadb:10.1.23
     volumes:
       - mariadb_data:/var/lib/mysql
     environment:

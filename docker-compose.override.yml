@@ -7,7 +7,7 @@ services:
         GIT_SSH_URL: ${GIT_SSH_URL}
     environment:
       DEBUG: 'true'
-      GIT_DEPLOY_KEY: 'git_deploy_key'
+      GIT_DEPLOY_KEY: ${GIT_DEPLOY_KEY}
     image: ${IMAGE_NAME}
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt

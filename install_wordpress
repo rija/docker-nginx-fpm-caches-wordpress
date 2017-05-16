@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ev
+set -e
 
 # setting up default for environment variables
 SERVER_NAME=${SERVER_NAME:-example.com}
@@ -105,6 +105,12 @@ mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper
 touch /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
 chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
 
+# Installing WP-CLI
+
+echo "Installing WP-CLI"
+cd /tmp && curl -O -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar &&  mv wp-cli.phar /usr/local/bin/wp
+wp --info && echo "WP-CLI installed"
 
 echo "Wordpress installed on $(date)" > /tmp/last_wordpress
 

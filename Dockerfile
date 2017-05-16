@@ -179,6 +179,28 @@ RUN sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/lo
 RUN service php7.1-fpm start
 RUN touch /var/log/php7.1-fpm.log && chown www-data:www-data /var/log/php7.1-fpm.log
 
+# grab gosu for easy step-down from root
+ENV GOSU_VERSION 1.7
+RUN GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+               && curl -o /usr/local/bin/gosu -fsSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
+               && curl -o /usr/local/bin/gosu.asc -fsSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
+               && export GNUPGHOME="$(mktemp -d)" \
+               && found=''; \
+               for server in \
+                       ha.pool.sks-keyservers.net \
+                       hkp://keyserver.ubuntu.com:80 \
+                       hkp://p80.pool.sks-keyservers.net:80 \
+                       pgp.mit.edu \
+               ; do \
+                       echo "Fetching GPG key $GPG_KEYS from $server"; \
+                       gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$GPG_KEYS" && found=yes && break; \
+               done; \
+               test -z "$found" && echo >&2 "error: failed to fetch GPG key $GPG_KEYS" && exit 1; \
+               gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+               && rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+               && chmod +x /usr/local/bin/gosu \
+               && gosu nobody true
+
 # Supervisor Config
 RUN /usr/bin/easy_install supervisor-stdout
 RUN mkdir -p /var/log/supervisor

@@ -23,13 +23,16 @@ echo "$(date): Installing  Wordpress from repository $GIT_SSH_URL for $SERVER_NA
 
 # setting ssh key auth to the remote repository
 
-ssh-keyscan -t rsa github.com  > /root/.ssh/known_hosts
+ssh-keyscan -t rsa github.com gitlab.com bitbucket.com  > /root/.ssh/known_hosts
+sed -i -e "s/key_to_use/$GIT_DEPLOY_KEY/" /root/.ssh/config
+
 
 if [ -d "/root/deploykeys" ];then
     cp /root/deploykeys/$GIT_DEPLOY_KEY /root/.ssh/
     cp /root/deploykeys/$GIT_DEPLOY_KEY.pub /root/.ssh/
     chown root:root /root/.ssh/$GIT_DEPLOY_KEY
 fi
+
 
 
 # test wether it is an install from scratch or an upgrade

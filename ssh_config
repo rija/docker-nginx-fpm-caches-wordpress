@@ -1,4 +1,19 @@
 host github.com
  HostName github.com
- IdentityFile ~/.ssh/git_deploy_key
+ IdentityFile ~/.ssh/key_to_use
  User git
+
+host gitlab.com
+ HostName gitlab.com
+ IdentityFile ~/.ssh/key_to_use
+ User git
+
+host bitbucket.com
+ HostName bitbucket.com
+ IdentityFile ~/.ssh/key_to_use
+ User git
+
+host server_to_use
+ HostName server_to_use
+ IdentityFile ~/.ssh/key_to_use
+ User user_to_use

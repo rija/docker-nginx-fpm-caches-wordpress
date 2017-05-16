@@ -18,7 +18,6 @@ Dockerfile to create a container with Nginx and php5-fpm running Wordpress with 
 ```bash
 $ docker run -d \
 	--name wordpress \
-	--env GIT_SSH_URL=https://github.com/WordPress/WordPress.git \
 	--env SERVER_NAME=example.com \
 	--env DB_HOSTNAME=4abbef615af7 \
 	--env DB_USER=wpuser \
@@ -65,7 +64,6 @@ That is optional as well but it is useful for updating the local image to a more
 ```bash
 $ docker run -d \
 	--name wordpress \
-	--env GIT_SSH_URL=https://github.com/WordPress/WordPress.git \
 	--env SERVER_NAME=example.com \
 	--env DB_HOSTNAME=4abbef615af7 \
 	--env DB_USER=wpuser \

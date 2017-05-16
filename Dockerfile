@@ -187,7 +187,7 @@ COPY  ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Install Wordpress
 
 ARG GIT_SSH_URL
-ENV GIT_SSH_URL ${GIT_SSH_URL:-"git@github.com:WordPress/WordPress.git"}
+ENV GIT_SSH_URL ${GIT_SSH_URL:-"https://github.com/WordPress/WordPress.git"}
 
 COPY install_wordpress /install_wordpress
 COPY ssh_config /root/.ssh/config

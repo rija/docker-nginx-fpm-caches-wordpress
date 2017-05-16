@@ -9,7 +9,17 @@ DB_USER=${DB_USER:-$DB_MYSQL_USER}
 DB_PASSWORD=${DB_PASSWORD:-$DB_MYSQL_PASSWORD}
 DB_DATABASE=${DB_DATABASE:-$DB_MYSQL_DATABASE}
 
+# making sure only one instance of this script run
+
+if [ ! -f /var/run/install_worpress.pid ];then
+    echo $$ > /var/run/install_wordpress.pid
+else
+    echo "install_wordpress is already running"
+    exit 1
+fi
+
 echo "$(date): Installing  Wordpress from repository $GIT_SSH_URL for $SERVER_NAME"
+
 
 # setting ssh key auth to the remote repository
 
@@ -54,11 +64,13 @@ fi
 
 #  Removing the deployed key
 
-if [ -f "/root/.ssh/$GIT_DEPLOY_KEY.pub"]; then
+if [ -f "/root/.ssh/$GIT_DEPLOY_KEY.pub" ]; then
+    echo "removing the public key"
     rm /root/.ssh/$GIT_DEPLOY_KEY.pub
 fi
 
-if [ -f "/root/.ssh/$GIT_DEPLOY_KEY"]; then
+if [ -f "/root/.ssh/$GIT_DEPLOY_KEY" ]; then
+    echo "removing the private key"
     rm /root/.ssh/$GIT_DEPLOY_KEY
 fi
 
@@ -92,3 +104,9 @@ chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/ngi
 
 
 echo "Wordpress installed on $(date)" > /tmp/last_wordpress
+
+if [ -f /var/run/install_worpress.pid ];then
+    rm /var/run/install_wordpress.pid
+fi
+
+exit 0

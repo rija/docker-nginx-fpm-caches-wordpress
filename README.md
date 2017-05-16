@@ -18,12 +18,12 @@ Dockerfile to create a container with Nginx and php5-fpm running Wordpress with 
 ```bash
 $ docker run -d \
 	--name wordpress \
+	--env GIT_SSH_URL=https://github.com/WordPress/WordPress.git \
 	--env SERVER_NAME=example.com \
 	--env DB_HOSTNAME=4abbef615af7 \
 	--env DB_USER=wpuser \
 	--env DB_PASSWORD=changeme \
 	--env DB_DATABASE=wordpress \
-	--volumes-from wordpressfiles \
 	-v /etc/letsencrypt:/etc/letsencrypt \
 	-v /var/run/docker.sock:/var/run/docker.sock:ro \
 	-p 443:443 -p 80:80 \
@@ -32,12 +32,12 @@ $ docker run -d \
 
 
 **Notes:**
-* Database server is **not** included.
+* Database server is **not** included, but if you use ``docker-compose`` one will be deployed and linked to this container
 * a MySQL database server must run on the same network as this container
 * There is no mail server.
-* The version of Wordpress installed is **'latest'**
+* The version of Wordpress installed is **'latest'** and is installed from Wordpress's official github mirror
 * Wordpress is installed as a single site deployment (no multisite support)
-* Currently, the version of Nginx deployed to the built image is [Nginx 1.9]
+* Currently, the version of Nginx deployed to the built image is [Nginx 1.13]
 (<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>)
 * The container talks to the Docker host to find the current IP address  of the database server whose hostname is passed to the docker run command
 
@@ -65,12 +65,12 @@ That is optional as well but it is useful for updating the local image to a more
 ```bash
 $ docker run -d \
 	--name wordpress \
+	--env GIT_SSH_URL=https://github.com/WordPress/WordPress.git \
 	--env SERVER_NAME=example.com \
 	--env DB_HOSTNAME=4abbef615af7 \
 	--env DB_USER=wpuser \
 	--env DB_PASSWORD=changeme \
 	--env DB_DATABASE=wordpress \
-	--volumes-from wordpressfiles \
 	-v /etc/letsencrypt:/etc/letsencrypt \
 	-v /var/run/docker.sock:/var/run/docker.sock:ro \
 	-p 443:443 -p 80:80 \
@@ -92,7 +92,6 @@ $ docker run -d \
 $ docker run -d \
 	--name wordpress \
 	--env-file /etc/wordpress_env_variables.txt \
-	--volumes-from wordpressfiles \
 	-v /etc/letsencrypt:/etc/letsencrypt \
 	-v /var/run/docker.sock:/var/run/docker.sock:ro \
 	-p 443:443 -p 80:80 \

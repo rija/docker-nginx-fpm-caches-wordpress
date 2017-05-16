@@ -9,17 +9,18 @@ DB_USER=${DB_USER:-$DB_MYSQL_USER}
 DB_PASSWORD=${DB_PASSWORD:-$DB_MYSQL_PASSWORD}
 DB_DATABASE=${DB_DATABASE:-$DB_MYSQL_DATABASE}
 
-echo "$(date): Installing  Wordpress for $SERVER_NAME"
+echo "$(date): Installing  Wordpress from repository $GIT_SSH_URL for $SERVER_NAME"
 
-# allowing the certs to be accessed
+# setting ssh key auth to the remote repository
 
 ssh-keyscan -t rsa github.com  > /root/.ssh/known_hosts
 
-cp /root/deploykeys/$GIT_DEPLOY_KEY /root/.ssh/
-cp /root/deploykeys/$GIT_DEPLOY_KEY.pub /root/.ssh/
-chown root:root /root/.ssh/$GIT_DEPLOY_KEY
+if [ -d "/root/deploykeys" ];then
+    cp /root/deploykeys/$GIT_DEPLOY_KEY /root/.ssh/
+    cp /root/deploykeys/$GIT_DEPLOY_KEY.pub /root/.ssh/
+    chown root:root /root/.ssh/$GIT_DEPLOY_KEY
+fi
 
-ls -alrt /root/.ssh/ | grep $GIT_DEPLOY_KEY
 
 # test wether it is an install from scratch or an upgrade
 if [ -f "/tmp/last_wordpress" ]; then
@@ -51,11 +52,16 @@ else
     echo "nothing installed"
 fi
 
-#  Removing the deploy key
-rm /root/.ssh/$GIT_DEPLOY_KEY.pub
-rm /root/.ssh/$GIT_DEPLOY_KEY
+#  Removing the deployed key
 
-ls -alrt /root/.ssh/
+if [ -f "/root/.ssh/$GIT_DEPLOY_KEY.pub"]; then
+    rm /root/.ssh/$GIT_DEPLOY_KEY.pub
+fi
+
+if [ -f "/root/.ssh/$GIT_DEPLOY_KEY"]; then
+    rm /root/.ssh/$GIT_DEPLOY_KEY
+fi
+
 
 echo "Backing up existing wp-config in case variables have been manually added to it"
 if [ -f /usr/share/nginx/www/wp-config.php ]; then

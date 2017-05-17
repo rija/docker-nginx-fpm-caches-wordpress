@@ -204,7 +204,8 @@ RUN GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
 # Supervisor Config
 RUN /usr/bin/easy_install supervisor-stdout
 RUN mkdir -p /var/log/supervisor
-COPY  ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN mkdir -p /var/run/supervisor
+COPY  ./supervisord.conf /etc/supervisor/supervisord.conf
 
 # Install Wordpress
 
@@ -225,10 +226,12 @@ RUN chown -R www-front:www-front /var/log/nginx \
 		&& chown www-front:www-front /var/log/nginx/error.log \
 		&& chown www-front:www-front /var/log/nginx/access.log
 
-# cronjob for certificate auto renewal
-COPY crontab /etc/certs.cron
 RUN touch /var/log/certs.log
-RUN crontab /etc/certs.cron
+
+# Setting up cronjob
+COPY crontab /etc/wordpress.cron
+RUN crontab /etc/wordpress.cron
+
 
 
 # Wordpress Initialization and Startup Script

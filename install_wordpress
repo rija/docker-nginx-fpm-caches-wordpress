@@ -102,7 +102,7 @@ s/password_here/$DB_PASSWORD/
 
 # Boostraping Nginx Helper Wordpress plugin's log
 mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper
-touch /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
+echo "Start logging" >> /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
 chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
 
 # Installing WP-CLI

@@ -36,7 +36,7 @@ fi
 
 
 # test wether it is an install from scratch or an upgrade
-if [ -f "/tmp/last_wordpress" ]; then
+if [ -f "/tmp/git_installed" ]; then
     NEW_INSTALL=0
 else
     NEW_INSTALL=1
@@ -52,6 +52,8 @@ if [ "$NEW_INSTALL" = 1 ]; then
 
         cd /usr/share/nginx
         git clone $GIT_SSH_URL www
+        chown -R www-data:www-data www
+        touch /tmp/git_installed
     fi
     echo "performed: git clone $GIT_SSH_URL www"
 
@@ -110,7 +112,16 @@ chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/ngi
 echo "Installing WP-CLI"
 cd /tmp && curl -O -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 chmod +x wp-cli.phar &&  mv wp-cli.phar /usr/local/bin/wp
-wp --info && echo "WP-CLI installed"
+gosu www-data wp --info && echo "WP-CLI installed"
+
+# installing WPFail2Ban plugin
+cd /usr/share/nginx/www
+gosu www-data wp plugin install wp-fail2ban
+
+# copying wordpress filters for fail2ban
+cd /etc/fail2ban/filter.d/ \
+	&& curl -O -fsSL https://plugins.svn.wordpress.org/wp-fail2ban/trunk/filters.d/wordpress-hard.conf \
+	&& curl -O -fsSL https://plugins.svn.wordpress.org/wp-fail2ban/trunk/filters.d/wordpress-soft.conf
 
 echo "Wordpress installed on $(date)" > /tmp/last_wordpress
 

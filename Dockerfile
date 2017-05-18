@@ -6,7 +6,6 @@ EXPOSE 443
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
-
 # Basic Dependencies
 RUN install_packages pwgen \
 						ssh \
@@ -17,19 +16,17 @@ RUN install_packages pwgen \
 						cron \
 						unzip
 
-
-# mysql
-
-RUN install_packages mysql-client
+# install unattended upgrades, supervisor, mysql-client and fail2ban
+RUN install_packages supervisor \
+						unattended-upgrades \
+						fail2ban \
+						mysql-client
 
 # php 7.1 installation
 
 RUN install_packages apt-transport-https lsb-release ca-certificates
-
-RUN curl  -o /etc/apt/trusted.gpg.d/php.gpg -fsSL https://packages.sury.org/php/apt.gpg
-
-RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
-
+RUN curl  -o /etc/apt/trusted.gpg.d/php.gpg -fsSL https://packages.sury.org/php/apt.gpg \
+	&& echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
 
 RUN install_packages php7.1 \
 						php7.1-fpm \
@@ -50,13 +47,6 @@ RUN install_packages php7.1 \
 						php7.1-mbstring
 
 
-# install unattended upgrades, supervisor and fail2ban
-RUN install_packages supervisor \
-						unattended-upgrades \
-						fail2ban
-
-# unattended upgrade configuration
-COPY 02periodic /etc/apt/apt.conf.d/02periodic
 
 
 # install nginx from source with ngx_http_v2_module, ngx_http_realip_module and ngx_cache_purge
@@ -117,16 +107,15 @@ RUN cd /tmp/nginx-$NGINX_VERSION \
 		--with-stream_ssl_module \
 		--with-threads  \
 		--add-module=/tmp/ngx_cache_purge-2.3 \
-		&& make && make install
-RUN ln -fs /usr/share/nginx/sbin/nginx /usr/sbin/nginx
+		&& make && make install \
+		&& ln -fs /usr/share/nginx/sbin/nginx /usr/sbin/nginx
 
 
 # Install LE's ACME client for domain validation and certificate generation and renewal
 
-RUN echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/php.list
-
-RUN apt-get update && apt-get -t jessie-backports install -y certbot
-RUN mkdir -p /tmp/le
+RUN echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/php.list \
+	&& apt-get update && apt-get -t jessie-backports install -y certbot \
+	&& mkdir -p /tmp/le
 
 
 # nginx config
@@ -187,8 +176,7 @@ RUN GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
 
 # Supervisor Config
 RUN /usr/bin/easy_install supervisor-stdout
-RUN mkdir -p /var/log/supervisor
-RUN mkdir -p /var/run/supervisor
+RUN mkdir -p /var/log/supervisor && mkdir -p /var/run/supervisor
 COPY  ./supervisord.conf /etc/supervisor/supervisord.conf
 RUN chmod 700 /etc/supervisor/supervisord.conf
 
@@ -199,8 +187,7 @@ ENV GIT_SSH_URL ${GIT_SSH_URL:-"https://github.com/WordPress/WordPress.git"}
 
 COPY install_wordpress /install_wordpress
 COPY ssh_config /root/.ssh/config
-RUN chmod 700 /root/.ssh/config
-RUN chmod 700 /install_wordpress
+RUN chmod 700 /root/.ssh/config && chmod 700 /install_wordpress
 
 # Bootstrap logs
 RUN mkdir -p /var/log/nginx \
@@ -217,7 +204,8 @@ RUN touch /var/log/certs.log
 COPY crontab /etc/wordpress.cron
 RUN crontab /etc/wordpress.cron
 
-
+# unattended upgrade configuration
+COPY 02periodic /etc/apt/apt.conf.d/02periodic
 
 # Wordpress Initialization and Startup Script
 COPY  ./bootstrap.sh /bootstrap.sh

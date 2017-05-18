@@ -1,21 +1,15 @@
-FROM ubuntu:16.04
+FROM bitnami/minideb:jessie
 MAINTAINER Rija Menage <dockerfiles@rija.cinecinetique.com>
 
 EXPOSE 80
 EXPOSE 443
 
-CMD ["/usr/bin/supervisord"]
-
-# Keep upstart from complaining (see https://ubuntuforums.org/showthread.php?t=1997229)
-RUN dpkg-divert --local --rename --add /sbin/initctl && ln -sf /bin/true /sbin/initctl
-
-# Let the container know that there is no tty
-ENV DEBIAN_FRONTEND noninteractive
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
 
 # Basic Dependencies
-RUN apt-get update && apt-get install -y pwgen \
-						python-setuptools \
+RUN install_packages pwgen \
+						ssh \
 						apt-utils \
 						curl \
 						git \
@@ -27,28 +21,28 @@ RUN apt-get update && apt-get install -y pwgen \
 
 # mysql
 
-RUN apt-get update && apt-get install -y mysql-client
+RUN install_packages mysql-client
 
-# php 7 installation
+# php 7.1 installation
 
-RUN apt-get clean && apt-get -y update && apt-get install -y locales
+RUN install_packages apt-transport-https lsb-release ca-certificates
 
-RUN locale-gen en_US.UTF-8
-ENV  LANG en_US.UTF-8
-ENV  LC_ALL en_US.UTF-8
-RUN apt-get install -y software-properties-common
-RUN LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php
-RUN apt-get update && apt-get install -y php7.1 \
+RUN curl  -o /etc/apt/trusted.gpg.d/php.gpg -fsSL https://packages.sury.org/php/apt.gpg
+
+RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
+
+
+RUN install_packages php7.1 \
 						php7.1-fpm \
 						php7.1-mysql
 
 
 # installing Fail2ban
-RUN apt-get update && apt-get install -y fail2ban
+RUN install_packages fail2ban
 
 
 # Wordpress Requirements
-RUN apt-get update && apt-get install -y php7.1-curl \
+RUN install_packages php7.1-curl \
 						php7.1-gd \
 						php7.1-intl \
 						php-pear \
@@ -71,7 +65,7 @@ RUN apt-get update && apt-get install -y php7.1-curl \
 
 
 # install unattended upgrades and supervisor
-RUN apt-get update && apt-get install -y supervisor \
+RUN install_packages supervisor \
 						unattended-upgrades
 
 # unattended upgrade configuration
@@ -82,8 +76,8 @@ COPY 02periodic /etc/apt/apt.conf.d/02periodic
 
 ENV NGINX_VERSION 1.13.0
 
-RUN apt-get update && apt-get install -y build-essential zlib1g-dev libpcre3 libpcre3-dev unzip libssl-dev libgeoip-dev
-RUN apt-get update && apt-get install -y nginx-light
+RUN install_packages build-essential zlib1g-dev libpcre3 libpcre3-dev unzip libssl-dev libgeoip-dev
+RUN install_packages nginx-light
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		&& cd /tmp \
 		&& curl -O -fsSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz \
@@ -141,7 +135,10 @@ RUN ln -fs /usr/share/nginx/sbin/nginx /usr/sbin/nginx
 
 
 # Install LE's ACME client for domain validation and certificate generation and renewal
-RUN apt-get install -y letsencrypt
+
+RUN echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/php.list
+
+RUN apt-get update && apt-get -t jessie-backports install -y certbot
 RUN mkdir -p /tmp/le
 
 

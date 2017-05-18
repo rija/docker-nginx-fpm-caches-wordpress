@@ -13,7 +13,7 @@ script:
   - docker exec -it rijaweb bash -c "letsencrypt certonly --help"
   - sleep 15
   - docker exec -it rijaweb bash -c "test -f /tmp/last_bootstrap"
-  - docker exec -it rijaweb bash -c "test `cat /etc/hosts | grep dockerfiletest.cinecinetique.com | wc -l` = 2"
+  - docker exec -it rijaweb bash -c "cat /etc/hosts"
   - docker exec -it rijaweb bash -c "cat /etc/letsencrypt/cli.ini"
   - sleep 10
   - docker exec -it rijaweb bash -c "ps -e"

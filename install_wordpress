@@ -27,10 +27,9 @@ ssh-keyscan -t rsa github.com gitlab.com bitbucket.com  > /root/.ssh/known_hosts
 sed -i -e "s/key_to_use/$GIT_DEPLOY_KEY/" /root/.ssh/config
 
 
-if [ -d "/root/deploykeys" ];then
+if [ -d /root/deploykeys -a -f /root/deploykeys/$GIT_DEPLOY_KEY -a -f /root/deploykeys/$GIT_DEPLOY_KEY.pub ];then
     cp /root/deploykeys/$GIT_DEPLOY_KEY /root/.ssh/
     cp /root/deploykeys/$GIT_DEPLOY_KEY.pub /root/.ssh/
-    chown root:root /root/.ssh/$GIT_DEPLOY_KEY
 fi
 
 # Installing WP-CLI
@@ -62,15 +61,6 @@ if [ "$NEW_INSTALL" = 1 ]; then
         echo "performed: git clone $GIT_SSH_URL www"
 
     fi
-
-    if [ "$GIT_SSH_URL" = "https://github.com/WordPress/WordPress.git" ]; then
-        # it's a fresh wordpress install, so we need to run Wordpress installation program
-        cd /usr/share/nginx/www
-        gosu www-data wp core install
-        echo "performed: wp core install"
-    fi
-
-
 
 
 elif [ "$NEW_INSTALL" = 0 ]; then
@@ -118,7 +108,16 @@ s/password_here/$DB_PASSWORD/
 /'LOGGED_IN_SALT'/s/put your unique phrase here/`pwgen -c -n -1 65`/
 /'NONCE_SALT'/s/put your unique phrase here/`pwgen -c -n -1 65`/" /usr/share/nginx/www/wp-config-sample.php > /usr/share/nginx/www/wp-config.php
 
-# Boostraping Nginx Helper Wordpress plugin's log
+echo "performed: created wp-config.php"
+
+if [ "$GIT_SSH_URL" = "https://github.com/WordPress/WordPress.git" -a "$NEW_INSTALL" = 1 ]; then
+    # it's a fresh wordpress install, so we need to run Wordpress installation program
+    cd /usr/share/nginx/www
+    gosu www-data wp core install --url https://$SERVER_NAME --title $SERVER_NAME --admin_user admin --admin_email $LE_EMAIL
+    echo "performed: wp core install"
+fi
+
+# Bootstraping Nginx Helper Wordpress plugin's log
 mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper
 echo "Start logging" >> /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
 chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log

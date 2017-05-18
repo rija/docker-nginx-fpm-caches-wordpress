@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # setting up default for environment variables
 SERVER_NAME=${SERVER_NAME:-example.com}
 DB_HOSTNAME=${DB_HOSTNAME:-$DB_PORT_3306_TCP_ADDR}
@@ -29,11 +31,5 @@ echo "Wrote in /etc/hosts: $EXT_IP	$SERVER_NAME"
 echo "We want to be able to curl the web site from the localhost using https (for purging the cache, and for the cron)"
 echo "127.0.0.1	$SERVER_NAME" >> /etc/hosts
 
-
-echo "Retrieving the IP address of the database server"
-NETWORK=$(curl --silent --unix-socket /var/run/docker.sock http:/containers/$HOSTNAME/json | jq .NetworkSettings.Networks | jq keys | jq .[0] | sed -e 's/\"/*/g' | cut -s -f2 -d "*")
-DB_IP=$(curl --silent --unix-socket /var/run/docker.sock http:/containers/$DB_HOSTNAME/json | jq .NetworkSettings.Networks.$NETWORK.IPAddress | sed -e 's/\"/*/g' | cut -s -f2 -d "*")
-
-test "$DB_IP" != '' && echo "$DB_IP	$DB_HOSTNAME" >> /etc/hosts && echo "Wrote in /etc/hosts: $DB_IP	$DB_HOSTNAME"
 
 echo "bootsrapped on $(date)" > /tmp/last_bootstrap

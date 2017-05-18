@@ -10,11 +10,10 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 # Basic Dependencies
 RUN install_packages pwgen \
 						ssh \
-						apt-utils \
 						curl \
 						git \
 						jq \
-						vim \
+						iproute2 \
 						cron \
 						unzip
 
@@ -34,50 +33,38 @@ RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc
 
 RUN install_packages php7.1 \
 						php7.1-fpm \
-						php7.1-mysql
-
-
-# installing Fail2ban
-RUN install_packages fail2ban
-
-
-# Wordpress Requirements
-RUN install_packages php7.1-curl \
+						php7.1-mysql \
 						php7.1-gd \
 						php7.1-intl \
-						php-pear \
 						php7.1-imagick \
 						php7.1-imap \
 						php7.1-mcrypt \
-						php7.1-memcache \
-						php7.1-ps \
 						php7.1-pspell \
 						php7.1-recode \
-						php7.1-sqlite \
 						php7.1-tidy \
 						php7.1-xmlrpc \
 						php7.1-xml \
+						php7.1-json \
 						php7.1-xsl \
 						php7.1-opcache \
-						php7.1-mbstring \
-						php-gettext
+						php7.1-mbstring
 
 
-
-# install unattended upgrades and supervisor
+# install unattended upgrades, supervisor and fail2ban
 RUN install_packages supervisor \
-						unattended-upgrades
+						unattended-upgrades \
+						fail2ban
 
 # unattended upgrade configuration
 COPY 02periodic /etc/apt/apt.conf.d/02periodic
 
 
-# install nginx with ngx_http_upstream_fair_module and ngx_cache_purge
+# install nginx from source with ngx_http_v2_module, ngx_http_realip_module and ngx_cache_purge
 
 ENV NGINX_VERSION 1.13.0
 
-RUN install_packages build-essential zlib1g-dev libpcre3 libpcre3-dev unzip libssl-dev libgeoip-dev
-RUN install_packages nginx-light
+RUN install_packages build-essential zlib1g-dev libpcre3 libpcre3-dev libssl-dev libgeoip-dev
+RUN install_packages nginx-common
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		&& cd /tmp \
 		&& curl -O -fsSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz \
@@ -203,6 +190,7 @@ RUN /usr/bin/easy_install supervisor-stdout
 RUN mkdir -p /var/log/supervisor
 RUN mkdir -p /var/run/supervisor
 COPY  ./supervisord.conf /etc/supervisor/supervisord.conf
+RUN chmod 700 /etc/supervisor/supervisord.conf
 
 # Install Wordpress
 
@@ -212,7 +200,7 @@ ENV GIT_SSH_URL ${GIT_SSH_URL:-"https://github.com/WordPress/WordPress.git"}
 COPY install_wordpress /install_wordpress
 COPY ssh_config /root/.ssh/config
 RUN chmod 700 /root/.ssh/config
-RUN chmod 755 /install_wordpress
+RUN chmod 700 /install_wordpress
 
 # Bootstrap logs
 RUN mkdir -p /var/log/nginx \
@@ -233,4 +221,4 @@ RUN crontab /etc/wordpress.cron
 
 # Wordpress Initialization and Startup Script
 COPY  ./bootstrap.sh /bootstrap.sh
-RUN chmod 755 /bootstrap.sh
+RUN chmod 700 /bootstrap.sh

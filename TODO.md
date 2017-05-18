@@ -2,8 +2,8 @@
 
 ## SECURITY:
 
-* deroot cron
-* deroot supervisord
+* ~~deroot cron~~
+* ~~deroot supervisord~~ _see http://stackoverflow.com/questions/13905861/supervisor-as-non-root-user_
 * ~~replace cron by an supervisord event listener listening on TICK_* events (see http://stackoverflow.com/questions/27341846/using-supervisor-as-cron)~~
 * reverse start.sh/supervisord relationship so that supervisord is the init process and start.sh is under its control **[DONE]** _(Edit: start.sh is now bootstrap.sh)_
 * create an apparmor profile for the project
@@ -28,8 +28,9 @@
 
 ## OPERATIONS:
 
-* make Ansible playbooks for deploying container host **[IN PROGRESS]**
+* make Ansible playbooks for setting up container host **[IN PROGRESS]**
 * automated daily backup of the database
+* add restart policies in docker compose file
 
 ## ANALYTICS:
 

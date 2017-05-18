@@ -33,10 +33,15 @@ if [ -d "/root/deploykeys" ];then
     chown root:root /root/.ssh/$GIT_DEPLOY_KEY
 fi
 
+# Installing WP-CLI
 
+echo "Installing WP-CLI"
+cd /tmp && curl -O -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar &&  mv wp-cli.phar /usr/local/bin/wp
+gosu www-data wp --info && echo "WP-CLI installed"
 
 # test wether it is an install from scratch or an upgrade
-if [ -f "/tmp/git_installed" ]; then
+if [ -f "/tmp/git_cloned" ]; then
     NEW_INSTALL=0
 else
     NEW_INSTALL=1
@@ -53,9 +58,20 @@ if [ "$NEW_INSTALL" = 1 ]; then
         cd /usr/share/nginx
         git clone $GIT_SSH_URL www
         chown -R www-data:www-data www
-        touch /tmp/git_installed
+        touch /tmp/git_cloned
+        echo "performed: git clone $GIT_SSH_URL www"
+
     fi
-    echo "performed: git clone $GIT_SSH_URL www"
+
+    if [ "$GIT_SSH_URL" = "https://github.com/WordPress/WordPress.git" ]; then
+        # it's a fresh wordpress install, so we need to run Wordpress installation program
+        cd /usr/share/nginx/www
+        gosu www-data wp core install
+        echo "performed: wp core install"
+    fi
+
+
+
 
 elif [ "$NEW_INSTALL" = 0 ]; then
 
@@ -106,13 +122,6 @@ s/password_here/$DB_PASSWORD/
 mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper
 echo "Start logging" >> /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
 chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
-
-# Installing WP-CLI
-
-echo "Installing WP-CLI"
-cd /tmp && curl -O -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-chmod +x wp-cli.phar &&  mv wp-cli.phar /usr/local/bin/wp
-gosu www-data wp --info && echo "WP-CLI installed"
 
 # installing WPFail2Ban plugin
 cd /usr/share/nginx/www

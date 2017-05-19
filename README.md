@@ -1,6 +1,6 @@
 # docker-nginx-fpm-caches-wordpress
 
-[![](https://badge.imagelayers.io/rija/docker-nginx-fpm-caches-wordpress:latest.svg)](https://imagelayers.io/?images=rija/docker-nginx-fpm-caches-wordpress:latest 'Get your own badge on imagelayers.io')
+[![](https://images.microbadger.com/badges/image/rija/docker-nginx-fpm-caches-wordpress.svg)](https://microbadger.com/images/rija/docker-nginx-fpm-caches-wordpress "Get your own image badge on microbadger.com")
 [![Build Status](https://img.shields.io/badge/docker%20hub-automated%20build-ff69b4.svg)](https://hub.docker.com/r/rija/docker-nginx-fpm-caches-wordpress/)
 [![Build Status](https://travis-ci.org/rija/docker-nginx-fpm-caches-wordpress.svg?branch=master)](https://travis-ci.org/rija/docker-nginx-fpm-caches-wordpress)
 

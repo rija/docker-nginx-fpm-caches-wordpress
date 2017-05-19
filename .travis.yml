@@ -8,7 +8,7 @@ before_install:
   - echo "$RIJAMYSQL"
 
 script:
-  - docker build -t rija/docker-nginx-fpm-caches-wordpress .
+  - docker build -t rija/docker-nginx-fpm-caches-wordpress --build-arg VCS_REF=`git rev-parse — short HEAD` --build-arg BUILD_DATE=`date -u +”%Y-%m-%dT%H:%M:%SZ”` --build-arg VERSION=`cat VERSION` .
   - docker run --privileged -d --name rijaweb --net=rijanet --env SERVER_NAME=dockerfiletest.cinecinetique.com --env DB_HOSTNAME=$RIJAMYSQL --env DB_USER=wordpress --env DB_PASSWORD=changemeuser --env DB_DATABASE=wordpress -v /etc/letsencrypt:/etc/letsencrypt -v /var/run/docker.sock:/var/run/docker.sock -p 443:443 -p 80:80 rija/docker-nginx-fpm-caches-wordpress
   - docker exec -it rijaweb bash -c "letsencrypt certonly --help"
   - sleep 15
@@ -31,3 +31,4 @@ script:
 after_failure:
   - docker exec -it rijaweb bash -c "supervisorctl tail bootstrap"
   - docker logs rijaweb
+  - docker exec -it rijaweb bash -c "cat /etc/hosts"

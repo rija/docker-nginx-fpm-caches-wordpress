@@ -7,7 +7,7 @@ services:
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /etc/${COMPOSE_PROJECT_NAME}/.ssh:/root/.ssh
+      - /${HOME}/.ssh:/root/deploykeys:ro
     ports:
       - 443:443
       - 80:80

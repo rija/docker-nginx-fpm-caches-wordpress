@@ -1,6 +1,21 @@
 FROM bitnami/minideb:jessie
 MAINTAINER Rija Menage <dockerfiles@rija.cinecinetique.com>
 
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+LABEL org.label-schema.build-date=$BUILD_DATE \
+	 org.label-schema.name="Wordpress (Nginx/php-fpm) Docker Container" \
+	 org.label-schema.description="Wordpress container running PHP 7.1 served by Nginx/php-fpm with caching, TLS encryption, HTTP/2" \
+	 org.label-schema.url="https://github.com/rija/docker-nginx-fpm-caches-wordpress" \
+	 org.label-schema.vcs-ref=$VCS_REF \
+	 org.label-schema.vcs-url="https://github.com/rija/docker-nginx-fpm-caches-wordpress" \
+	 org.label-schema.vendor="Rija Menage" \
+	 org.label-schema.version=$VERSION \
+	 org.label-schema.schema-version="1.0"
+
+
 EXPOSE 80
 EXPOSE 443
 
@@ -210,3 +225,7 @@ COPY 02periodic /etc/apt/apt.conf.d/02periodic
 # Wordpress Initialization and Startup Script
 COPY  ./bootstrap.sh /bootstrap.sh
 RUN chmod 700 /bootstrap.sh
+
+RUN echo "build_date: $BUILD_DATE" >> ./build_log
+RUN echo "version: $VERSION" >> ./build_log
+RUN echo "vcf_ref: $VCS_REF" >> ./build_log

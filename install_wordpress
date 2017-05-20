@@ -29,7 +29,9 @@ sed -i -e "s/key_to_use/$GIT_DEPLOY_KEY/" /root/.ssh/config
 
 if [ -d /root/deploykeys -a -f /root/deploykeys/$GIT_DEPLOY_KEY -a -f /root/deploykeys/$GIT_DEPLOY_KEY.pub ];then
     cp /root/deploykeys/$GIT_DEPLOY_KEY /root/.ssh/
+    echo "deployed private key"
     cp /root/deploykeys/$GIT_DEPLOY_KEY.pub /root/.ssh/
+    echo "deployed public key"
 fi
 
 # Installing WP-CLI

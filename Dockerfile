@@ -1,21 +1,6 @@
 FROM bitnami/minideb:jessie
 MAINTAINER Rija Menage <dockerfiles@rija.cinecinetique.com>
 
-# Build-time metadata as defined at http://label-schema.org
-ARG BUILD_DATE
-ARG VCS_REF
-ARG VERSION
-LABEL org.label-schema.build-date=$BUILD_DATE \
-	 org.label-schema.name="Wordpress (Nginx/php-fpm) Docker Container" \
-	 org.label-schema.description="Wordpress container running PHP 7.1 served by Nginx/php-fpm with caching, TLS encryption, HTTP/2" \
-	 org.label-schema.url="https://github.com/rija/docker-nginx-fpm-caches-wordpress" \
-	 org.label-schema.vcs-ref=$VCS_REF \
-	 org.label-schema.vcs-url="https://github.com/rija/docker-nginx-fpm-caches-wordpress" \
-	 org.label-schema.vendor="Rija Menage" \
-	 org.label-schema.version=$VERSION \
-	 org.label-schema.schema-version="1.0"
-
-
 EXPOSE 80
 EXPOSE 443
 
@@ -29,22 +14,24 @@ RUN install_packages pwgen \
 						jq \
 						iproute2 \
 						cron \
-						unzip
+						unzip \
 
-# install unattended upgrades, supervisor, mysql-client and fail2ban
-RUN install_packages supervisor \
+# install unattended upgrades, supervisor, mysql-client, ufw and fail2ban
+	&& install_packages supervisor \
 						unattended-upgrades \
 						fail2ban \
-						mysql-client
+						mysql-client \
+						ufw
 
 # php 7.1 installation
 
-RUN install_packages apt-transport-https lsb-release ca-certificates
-RUN curl  -o /etc/apt/trusted.gpg.d/php.gpg -fsSL https://packages.sury.org/php/apt.gpg \
+RUN install_packages apt-transport-https lsb-release ca-certificates \
+	&& curl  -o /etc/apt/trusted.gpg.d/php.gpg -fsSL https://packages.sury.org/php/apt.gpg \
 	&& echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
 
 RUN install_packages php7.1 \
 						php7.1-fpm \
+						php7.1-cli \
 						php7.1-mysql \
 						php7.1-gd \
 						php7.1-intl \
@@ -68,8 +55,7 @@ RUN install_packages php7.1 \
 
 ENV NGINX_VERSION 1.13.0
 
-RUN install_packages build-essential zlib1g-dev libpcre3 libpcre3-dev libssl-dev libgeoip-dev
-RUN install_packages nginx-common
+RUN install_packages build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip-dev nginx-common
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		&& cd /tmp \
 		&& curl -O -fsSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz \
@@ -125,16 +111,20 @@ RUN cd /tmp/nginx-$NGINX_VERSION \
 		&& make && make install \
 		&& ln -fs /usr/share/nginx/sbin/nginx /usr/sbin/nginx
 
+# Removing devel dependencies
+RUN dpkg --remove build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip-dev
 
 # Install LE's ACME client for domain validation and certificate generation and renewal
 
 RUN echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/php.list \
 	&& apt-get update && apt-get -t jessie-backports install -y certbot \
-	&& mkdir -p /tmp/le
+	&& mkdir -p /tmp/le \
+	&& rm -rf /var/lib/apt/lists/*
 
 
 # nginx config
-RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login www-front
+RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login www-front \
+	&& openssl dhparam -out /etc/nginx/dhparam.pem 2048
 COPY  nginx.conf /etc/nginx/nginx.conf
 COPY  restrictions.conf /etc/nginx/restrictions.conf
 COPY  ssl.conf /etc/nginx/ssl.conf
@@ -142,30 +132,29 @@ COPY  security_headers.conf /etc/nginx/security_headers.conf
 COPY  le.ini /etc/nginx/le.ini
 COPY  acme.challenge.le.conf /etc/nginx/acme.challenge.le.conf
 COPY  nginx-site.conf /etc/nginx/sites-available/default
-RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
 
 
 # php-fpm config: Opcode cache config
-RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/7.1/fpm/php.ini
-RUN sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/7.1/fpm/php.ini
+RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/7.1/fpm/php.ini \
+	&& sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/7.1/fpm/php.ini
 
 
 # php-fpm config
-RUN sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php/7.1/fpm/php.ini
-RUN sed -i -e "s/expose_php = On/expose_php = Off/g" /etc/php/7.1/fpm/php.ini
-RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc/php/7.1/fpm/php.ini
-RUN sed -i -e "s/;session.cookie_secure\s*=\s*/session.cookie_secure = True/g" /etc/php/7.1/fpm/php.ini
-RUN sed -i -e "s/session.cookie_httponly\s*=\s*/session.cookie_httponly = True/g" /etc/php/7.1/fpm/php.ini
-RUN sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php/7.1/fpm/php.ini
-RUN sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php/7.1/fpm/php-fpm.conf
-RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/7.1/fpm/pool.d/www.conf
-RUN sed -i -e "s/listen\s*=\s*\/run\/php\/php7.1-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php/7.1/fpm/pool.d/www.conf
-RUN sed -i -e "s/;listen.allowed_clients\s*=\s*127.0.0.1/listen.allowed_clients = 127.0.0.1/g" /etc/php/7.1/fpm/pool.d/www.conf
-RUN sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/log\/\$pool.access.log/g" /etc/php/7.1/fpm/pool.d/www.conf
+RUN sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php/7.1/fpm/php.ini \
+	&& sed -i -e "s/expose_php = On/expose_php = Off/g" /etc/php/7.1/fpm/php.ini \
+	&& sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc/php/7.1/fpm/php.ini \
+	&& sed -i -e "s/;session.cookie_secure\s*=\s*/session.cookie_secure = True/g" /etc/php/7.1/fpm/php.ini \
+	&& sed -i -e "s/session.cookie_httponly\s*=\s*/session.cookie_httponly = True/g" /etc/php/7.1/fpm/php.ini \
+	&& sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php/7.1/fpm/php.ini \
+	&& sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php/7.1/fpm/php-fpm.conf \
+	&& sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/7.1/fpm/pool.d/www.conf \
+	&& sed -i -e "s/listen\s*=\s*\/run\/php\/php7.1-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php/7.1/fpm/pool.d/www.conf \
+	&& sed -i -e "s/;listen.allowed_clients\s*=\s*127.0.0.1/listen.allowed_clients = 127.0.0.1/g" /etc/php/7.1/fpm/pool.d/www.conf \
+	&& sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/log\/\$pool.access.log/g" /etc/php/7.1/fpm/pool.d/www.conf
 
 # create the pid and sock file for php-fpm
-RUN service php7.1-fpm start
-RUN touch /var/log/php7.1-fpm.log && chown www-data:www-data /var/log/php7.1-fpm.log
+RUN service php7.1-fpm start \
+	&& touch /var/log/php7.1-fpm.log && chown www-data:www-data /var/log/php7.1-fpm.log
 
 # grab gosu for easy step-down from root
 ENV GOSU_VERSION 1.7
@@ -190,8 +179,9 @@ RUN GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
                && gosu nobody true
 
 # Supervisor Config
-RUN /usr/bin/easy_install supervisor-stdout
-RUN mkdir -p /var/log/supervisor && mkdir -p /var/run/supervisor
+RUN /usr/bin/easy_install supervisor-stdout \
+	&& mkdir -p /var/log/supervisor \
+	&& mkdir -p /var/run/supervisor
 COPY  ./supervisord.conf /etc/supervisor/supervisord.conf
 RUN chmod 700 /etc/supervisor/supervisord.conf
 
@@ -207,13 +197,11 @@ RUN chmod 700 /root/.ssh/config && chmod 700 /install_wordpress
 # Bootstrap logs
 RUN mkdir -p /var/log/nginx \
 		&& touch /var/log/nginx/error.log \
-		&& touch /var/log/nginx/access.log
-
-RUN chown -R www-front:www-front /var/log/nginx \
+		&& touch /var/log/nginx/access.log \
+		&& chown -R www-front:www-front /var/log/nginx \
 		&& chown www-front:www-front /var/log/nginx/error.log \
-		&& chown www-front:www-front /var/log/nginx/access.log
-
-RUN touch /var/log/certs.log
+		&& chown www-front:www-front /var/log/nginx/access.log \
+		&& touch /var/log/certs.log
 
 # Setting up cronjob
 COPY crontab /etc/wordpress.cron
@@ -226,6 +214,17 @@ COPY 02periodic /etc/apt/apt.conf.d/02periodic
 COPY  ./bootstrap.sh /bootstrap.sh
 RUN chmod 700 /bootstrap.sh
 
-RUN echo "build_date: $BUILD_DATE" >> ./build_log
-RUN echo "version: $VERSION" >> ./build_log
-RUN echo "vcf_ref: $VCS_REF" >> ./build_log
+
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+LABEL org.label-schema.build-date=$BUILD_DATE \
+	 org.label-schema.name="Wordpress (Nginx/php-fpm) Docker Container" \
+	 org.label-schema.description="Wordpress container running PHP 7.1 served by Nginx/php-fpm with caching, TLS encryption, HTTP/2" \
+	 org.label-schema.url="https://github.com/rija/docker-nginx-fpm-caches-wordpress" \
+	 org.label-schema.vcs-ref=$VCS_REF \
+	 org.label-schema.vcs-url="https://github.com/rija/docker-nginx-fpm-caches-wordpress" \
+	 org.label-schema.vendor="Rija Menage" \
+	 org.label-schema.version=$VERSION \
+	 org.label-schema.schema-version="1.0"

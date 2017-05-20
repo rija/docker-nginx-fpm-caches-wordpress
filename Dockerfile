@@ -136,13 +136,8 @@ RUN echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt
 # nginx config
 RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login www-front \
 	&& openssl dhparam -out /etc/nginx/dhparam.pem 2048
-COPY  nginx.conf /etc/nginx/nginx.conf
-COPY  restrictions.conf /etc/nginx/restrictions.conf
-COPY  ssl.conf /etc/nginx/ssl.conf
-COPY  security_headers.conf /etc/nginx/security_headers.conf
-COPY  le.ini /etc/nginx/le.ini
-COPY  acme.challenge.le.conf /etc/nginx/acme.challenge.le.conf
-COPY  nginx-site.conf /etc/nginx/sites-available/default
+COPY nginx-configs/* /etc/nginx/
+COPY nginx-configs/sites-available/nginx-site.conf /etc/nginx/sites-available/default
 
 
 # php-fpm config: Opcode cache config
@@ -190,29 +185,19 @@ RUN GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
                && gosu nobody true
 
 # Supervisor Config
+COPY  ./supervisord.conf /etc/supervisor/supervisord.conf
 RUN /usr/bin/easy_install supervisor-stdout \
 	&& mkdir -p /var/log/supervisor \
-	&& mkdir -p /var/run/supervisor
-COPY  ./supervisord.conf /etc/supervisor/supervisord.conf
-RUN chmod 700 /etc/supervisor/supervisord.conf
+	&& mkdir -p /var/run/supervisor \
+	&& chmod 700 /etc/supervisor/supervisord.conf
 
-# Install Wordpress
+# setting up GIT
 
 ARG GIT_SSH_URL
 ENV GIT_SSH_URL ${GIT_SSH_URL:-"https://github.com/WordPress/WordPress.git"}
 
-COPY install_wordpress /install_wordpress
 COPY ssh_config /root/.ssh/config
-RUN chmod 700 /root/.ssh/config && chmod 700 /install_wordpress
-
-# Bootstrap logs
-RUN mkdir -p /var/log/nginx \
-		&& touch /var/log/nginx/error.log \
-		&& touch /var/log/nginx/access.log \
-		&& chown -R www-front:www-front /var/log/nginx \
-		&& chown www-front:www-front /var/log/nginx/error.log \
-		&& chown www-front:www-front /var/log/nginx/access.log \
-		&& touch /var/log/certs.log
+RUN chmod 700 /root/.ssh/config
 
 # Setting up cronjob
 COPY crontab /etc/wordpress.cron
@@ -221,9 +206,13 @@ RUN crontab /etc/wordpress.cron
 # unattended upgrade configuration
 COPY 02periodic /etc/apt/apt.conf.d/02periodic
 
-# Wordpress Initialization and Startup Script
-COPY  ./bootstrap.sh /bootstrap.sh
-RUN chmod 700 /bootstrap.sh
+
+# Setting up bootstrapping scripts
+COPY scripts/* /
+RUN chmod 700 /bootstrap.sh \
+	&& chmod 700 /install_wordpress \
+	&& chmod 700 /setup_web_cert.sh
+
 
 
 # Build-time metadata as defined at http://label-schema.org

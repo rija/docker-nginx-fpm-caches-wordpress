@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+echo "generating the cert for $SERVER_NAME and www.$SERVER_NAME"
+certbot certonly
+echo "copying the NGINX SSL conf for $SERVER_NAME"
+cp /etc/nginx/ssl.conf /etc/nginx/ssl.$SERVER_NAME.conf
+echo "reloading NGINX configuration"
+/usr/sbin/nginx -t && service nginx reload

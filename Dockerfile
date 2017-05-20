@@ -6,27 +6,37 @@ EXPOSE 443
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
-# Basic Dependencies
-RUN install_packages pwgen \
-						ssh \
-						curl \
-						git \
-						jq \
-						iproute2 \
-						cron \
-						unzip \
+# Enabling https download of packages
+RUN install_packages apt-transport-https ca-certificates
 
-# install unattended upgrades, supervisor, mysql-client, ufw and fail2ban
-	&& install_packages supervisor \
+# Basic Dependencies
+RUN install_packages \
+						# used to generate random keys when creating the wp-config.php file for Wordpress
+						pwgen \
+						# installed for the ssh-keyscan utility to allow non-interactive ssh git interaction
+						ssh \
+						# used to download sources for nginx and gosu, as well as gpg signature and keys
+						curl \
+						# used for installing the Wordpess web application from online git repositories
+						git \
+						# installed for the ip utility used in bootstrap.sh for finding the container's external ip address
+						iproute2 \
+						# used to run cert auto-renewal, database backup  and Wordpress scheduled tasks
+						cron \
+						# manage all processes in the container, act as init script, has PID 1 and handles POSIX signals
+						supervisor \
+						# for automated security updates
 						unattended-upgrades \
+						# tool to manage malicious connections to the web application through IP addressess black-listing
 						fail2ban \
+						# used by the automated backup script
 						mysql-client \
+						# firewall, used in cunjunction with fail2ban
 						ufw
 
 # php 7.1 installation
 
-RUN install_packages apt-transport-https lsb-release ca-certificates \
-	&& curl  -o /etc/apt/trusted.gpg.d/php.gpg -fsSL https://packages.sury.org/php/apt.gpg \
+RUN curl -o /etc/apt/trusted.gpg.d/php.gpg -fsSL https://packages.sury.org/php/apt.gpg \
 	&& echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
 
 RUN install_packages php7.1 \
@@ -55,8 +65,8 @@ RUN install_packages php7.1 \
 
 ENV NGINX_VERSION 1.13.0
 
-RUN install_packages build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip-dev nginx-common
-RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
+RUN install_packages build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip-dev nginx-common \
+		&& GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		&& cd /tmp \
 		&& curl -O -fsSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz \
 		&& curl -O -fsSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc \
@@ -109,7 +119,8 @@ RUN cd /tmp/nginx-$NGINX_VERSION \
 		--with-threads  \
 		--add-module=/tmp/ngx_cache_purge-2.3 \
 		&& make && make install \
-		&& ln -fs /usr/share/nginx/sbin/nginx /usr/sbin/nginx
+		&& ln -fs /usr/share/nginx/sbin/nginx /usr/sbin/nginx \
+		&& rm -r /tmp/nginx-$NGINX_VERSION
 
 # Removing devel dependencies
 RUN dpkg --remove build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip-dev

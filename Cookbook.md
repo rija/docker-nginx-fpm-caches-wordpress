@@ -1,3 +1,8 @@
+**Warning:**
+This page is currently out of date. The information may still work (and there maybe somme good tips)
+but it doesn't reflect either current Docker best practices or the new deployment philosophy of this Dockerfile or both.
+It will be revamped at some point in the future.
+
 ## Usage patterns
 
 The typical pattern I've adopted for some use cases is using a container each for Wordpress and Mysql and two data volume containers, one for each as well. Both containers run within one bridge network on a single host.

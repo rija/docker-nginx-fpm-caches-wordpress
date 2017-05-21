@@ -115,7 +115,7 @@ echo "performed: created wp-config.php"
 if [ "$GIT_SSH_URL" = "https://github.com/WordPress/WordPress.git" -a "$NEW_INSTALL" = 1 ]; then
     # it's a fresh wordpress install, so we need to run Wordpress installation program
     cd /usr/share/nginx/www
-    gosu www-data wp core install --url=https://$SERVER_NAME --title=$SERVER_NAME --admin_user=admin --admin_email=$LE_EMAIL
+    gosu www-data wp core install --url=https://$SERVER_NAME --title=$SERVER_NAME --admin_user=admin --admin_email=$ADMIN_EMAIL
     echo "performed: wp core install"
 fi
 
@@ -127,6 +127,16 @@ chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/ngi
 # installing WPFail2Ban plugin
 cd /usr/share/nginx/www
 gosu www-data wp plugin install wp-fail2ban
+
+# installing Nginx Helper plugin
+gosu www-data wp plugin install nginx-helper
+
+# installing WP Content Security Policy  plugin
+gosu www-data wp plugin install wp-content-security-policy
+
+# installing Disable XML-RPC Pingback
+gosu www-data wp plugin install disable-xml-rpc-pingback
+
 
 # copying wordpress filters for fail2ban
 cd /etc/fail2ban/filter.d/ \

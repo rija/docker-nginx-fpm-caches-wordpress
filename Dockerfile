@@ -19,7 +19,7 @@ RUN install_packages \
 						curl \
 						# used for installing the Wordpess web application from online git repositories
 						git \
-						# installed for the ip utility used in bootstrap.sh for finding the container's external ip address
+						# installed for the ip utility used in bootstrap_container for finding the container's external ip address
 						iproute2 \
 						# used to run cert auto-renewal, database backup  and Wordpress scheduled tasks
 						cron \
@@ -142,11 +142,10 @@ COPY nginx-configs/sites-available/nginx-site.conf /etc/nginx/sites-available/de
 
 # php-fpm config: Opcode cache config
 RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/7.1/fpm/php.ini \
-	&& sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/7.1/fpm/php.ini
-
+	&& sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/7.1/fpm/php.ini \
 
 # php-fpm config
-RUN sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php/7.1/fpm/php.ini \
+	&& sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php/7.1/fpm/php.ini \
 	&& sed -i -e "s/expose_php = On/expose_php = Off/g" /etc/php/7.1/fpm/php.ini \
 	&& sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc/php/7.1/fpm/php.ini \
 	&& sed -i -e "s/;session.cookie_secure\s*=\s*/session.cookie_secure = True/g" /etc/php/7.1/fpm/php.ini \
@@ -184,34 +183,40 @@ RUN GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
                && chmod +x /usr/local/bin/gosu \
                && gosu nobody true
 
-# Supervisor Config
-COPY  ./supervisord.conf /etc/supervisor/supervisord.conf
-RUN /usr/bin/easy_install supervisor-stdout \
+# copy misc configs (supervisord and ssh config)
+COPY  misc-configs/* /etc/
+
+# configuring supervisor
+RUN mv /etc/supervisord.conf /etc/supervisor/supervisord.conf \
+	&& /usr/bin/easy_install supervisor-stdout \
 	&& mkdir -p /var/log/supervisor \
 	&& mkdir -p /var/run/supervisor \
-	&& chmod 700 /etc/supervisor/supervisord.conf
+	&& chmod 700 /etc/supervisor/supervisord.conf \
+
+# ssh config for git authentication
+	&& mkdir -p /root/.ssh \
+	&& mv /etc/ssh_config /root/.ssh/config \
+	&& chmod 700 /root/.ssh/config
 
 # setting up GIT
-
 ARG GIT_SSH_URL
 ENV GIT_SSH_URL ${GIT_SSH_URL:-"https://github.com/WordPress/WordPress.git"}
 
-COPY ssh_config /root/.ssh/config
-RUN chmod 700 /root/.ssh/config
+# copy schedulers configuration files
+COPY schedulers-configs/* /etc/
 
 # Setting up cronjob
-COPY crontab /etc/wordpress.cron
-RUN crontab /etc/wordpress.cron
+RUN crontab /etc/wordpress.cron \
 
 # unattended upgrade configuration
-COPY 02periodic /etc/apt/apt.conf.d/02periodic
+	&&  mv /etc/02periodic /etc/apt/apt.conf.d/02periodic
 
 
 # Setting up bootstrapping scripts
 COPY scripts/* /
-RUN chmod 700 /bootstrap.sh \
+RUN chmod 700 /bootstrap_container \
 	&& chmod 700 /install_wordpress \
-	&& chmod 700 /setup_web_cert.sh
+	&& chmod 700 /setup_web_cert
 
 
 

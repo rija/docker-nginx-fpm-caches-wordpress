@@ -11,156 +11,119 @@ Rija Ménagé
 
 ### Description
 
-Dockerfile to create a container with Nginx and php5-fpm running Wordpress with fastcgi-cache and fastcgi\_cache\_purge. Opcache is also enabled (Fastcgi-cache enables page caching while Opcache enables caching of code execution). Encryption (TLS) is included and enabled by default (configured with Letsencrypt.org's [ACME client](https://github.com/letsencrypt/letsencrypt)). Cron is enabled.
+Dockerfile to create a container with Nginx and php-fpm running a Wordpress web application.
+TLS encryption is provided (and automatically renewed) using free certificates provided by Let's Encrypt.
+Page caching (using Nginx's FastCGI cache) and Opcode caching with Zend Opcache are enabled and configured.
 
-*Available Docker tags:* **v1, stable, latest**
+The Wordpress web application is cloned from Wordpress' official Github.org repository at build time.
+Alternatively, it's also possible to clone a Wordpress-based web site from a different public or private repository
+as long as they are hosted on Github.org, Gitlab.org or Bitbucket.com.
+
+The container doesn't have a database server, but the supplied docker compose file allow instantiating a MariaDB 10.2 database server on the same network as the Wordpress container.
+
+
+**Headline features:**
+* Nginx 1.13.0
+* PHP 7.1
+* FastCGI Caching+Cache Purge and Zend Opcode enabled
+* RealIP Nginx module installed for when running behind a reverse-proxy
+* TLS configured using Mozilla Server-side TLS Intermediate profile + TLSv1.3
+* Latest version of Wordpress is installed at container startup
+* Can clone a Wordpress site from popular online git repositories
+* WP-CLI to manage a Wordpress install from command line
+* OS-level security updates performed automatically
+* TLS certificate automatically renewed
+* Wordpress' wp-cron backed by OS cron deamon
+* Daily backup of database to volume sharable with Docker host
+* Supervisor 3.0 as init script to manage processes' life-cycle
+* Small-footprint Docker image using Bitnami/minideb as BASE image
+
+
+
+*Available Docker Hub tags:* **v1, v2-beta, latest**
+
+### How to run
+
+
+#### with docker run:
 
 ```bash
+
+$ docker run --name a-mariadb-server \
+	-e MYSQL_ROOT_PASSWORD=my-secret-pw \
+	-e MYSQL_USER=wp_user \
+	-e MYSQL_PASSWORD=wp_password \
+	-e MYSQL_DATABASE=wp_database \
+	-d mariadb:10.2
+
 $ docker run -d \
-	--name wordpress \
-	--env SERVER_NAME=example.com \
-	--env DB_HOSTNAME=4abbef615af7 \
-	--env DB_USER=wpuser \
-	--env DB_PASSWORD=changeme \
-	--env DB_DATABASE=wordpress \
+	--link a-mariadb-server:dbserver \
+	--name a-wordpress-container \
+	-e SERVER_NAME=example.com \
+	-e ADMIN_EMAIL=helloworld@example.com \
+	-e DB_HOSTNAME=dbserver \
+	-e DB_USER=wp_user \
+	-e DB_PASSWORD=wp_password \
+	-e DB_DATABASE=wp_database \
 	-v /etc/letsencrypt:/etc/letsencrypt \
-	-v /var/run/docker.sock:/var/run/docker.sock:ro \
+	-v /${HOME}:/root/backups \
 	-p 443:443 -p 80:80 \
 	rija/docker-nginx-fpm-caches-wordpress
+
 ```
 
 
 **Notes:**
-* Database server is **not** included, but if you use ``docker-compose`` one will be deployed and linked to this container
-* a MySQL database server must run on the same network as this container
-* There is no mail server.
-* The version of Wordpress installed is **'latest'** and is installed from Wordpress's official github mirror
-* Wordpress is installed as a single site deployment (no multisite support)
-* Currently, the version of Nginx deployed to the built image is [Nginx 1.13]
-(<https://www.nginx.com/blog/nginx-1-8-and-1-9-released/>)
-* The container talks to the Docker host to find the current IP address  of the database server whose hostname is passed to the docker run command
+The ``ADMIN_EMAIL`` variable is used by WP-CLI for the initial setup of the Wordpress install and by Let's Encrypt's Certbot for managing TLS certificates renewal
 
-
-### How to build
+#### with docker compose:
 
 ```bash
-$ git clone https://github.com/rija/docker-nginx-fpm-caches-wordpress.git
 $ cd docker-nginx-fpm-caches-wordpress
-$ docker build -t="docker-nginx-fpm-caches-wordpress" .
+$ ./make_env.sh
+$ docker-compose up -d
 ```
 
-Building an image is optional, you can also pull a pre-built image from  Docker Hub that tracks any changes made to this Git repository:
-
-```bash
-docker pull rija/docker-nginx-fpm-caches-wordpress
-```
-
-That is optional as well but it is useful for updating the local image to a more recent version. You can let Docker pull the image on-demand whenever you want to run a new container.
-
-
-
-### How to run a Wordpress container (Method 1)
-
-```bash
-$ docker run -d \
-	--name wordpress \
-	--env SERVER_NAME=example.com \
-	--env DB_HOSTNAME=4abbef615af7 \
-	--env DB_USER=wpuser \
-	--env DB_PASSWORD=changeme \
-	--env DB_DATABASE=wordpress \
-	-v /etc/letsencrypt:/etc/letsencrypt \
-	-v /var/run/docker.sock:/var/run/docker.sock:ro \
-	-p 443:443 -p 80:80 \
-	rija/docker-nginx-fpm-caches-wordpress
-
-```
-
-**Notes:**
- * you must replace example.com with your domain name (without the www. prefix).
- * you can find the IP of the database server running on the default docker network with the command *'docker network inspect bridge'*.
- * if you don't want to use IP address and prefer using hostname, you should create your own Docker network to which the Wordpress container and the database server container are connected to.
- * If you intend to use Docker Compose, make sure the name you choose for your container is only within [a-z][A-Z].
- * This method keep database user and password in the shell history, unless the command is preceded by a space.
-
-
-### How to run a Wordpress container (Method 2)
-
-```bash
-$ docker run -d \
-	--name wordpress \
-	--env-file /etc/wordpress_env_variables.txt \
-	-v /etc/letsencrypt:/etc/letsencrypt \
-	-v /var/run/docker.sock:/var/run/docker.sock:ro \
-	-p 443:443 -p 80:80 \
-	rija/docker-nginx-fpm-caches-wordpress
-
-```
-
-**Notes:**
- * This method is similar to the previous one except all environment variables are stored in a text file. It's possible to mix --env and --env-file as well.
- * this method leaves database user and password on the host file system, unless the file is removed after the container is launched
-
+One can adjust the values in the **.env** file updated (and created if non-existent) by ``./make_env.sh``
 
 ### How to enable Encryption (TLS)
 
 It is advised to have read Lets Encrypt's [FAQ](https://community.letsencrypt.org/c/docs/) and [user guide](https://letsencrypt.readthedocs.org/en/latest/index.html)  beforehand.
 
-after the Wordpress container has been started, run the following command and follow the on-screen instructions:
+after the Wordpress container has been started, run the following command on the host and follow the on-screen instructions:
 
 ```bash
-$ docker exec -it wordpress bash -c "letsencrypt certonly"
+$ docker exec -it a-wordpress-container bash -c "/setup_web_cert"
 ```
 
-After the command as returned with a successful message regarding acquisition of certificate, nginx needs to be restarted with encryption enabled and configured. This is done by running the following commands:
-
-```bash
-$ docker exec -it wordpress bash -c "cp /etc/nginx/ssl.conf /etc/nginx/ssl.example.com.conf"
-$ docker exec -it wordpress bash -c "nginx -t && service nginx reload"
-```
+After the command as returned with a successful message regarding acquisition of certificate, nginx will be reloaded with encryption enabled and configured.
 
 **Notes:**
- * There is no change required to nginx configuration for standard use cases
- * It is suggested to replace example.com in the file name by your domain name although any file name that match the pattern ssl.*.conf will be recognised
- * Navigating to the web site will throw a connection error until that step has been performed as encryption is enabled across the board and http connections are redirected to https. You must update nginx configuration files as needed to match your use case if that behaviour is not desirable.
- * Lets Encrypt's' ACME client configuration file is deployed to *'/etc/letsencrypt/cli.ini'*. Update that file to suit your use case regarding certificates.
+ * There is no change needed to nginx configuration for standard use cases
+ * Navigating to the web site will throw a connection error until that step has been performed as encryption is enabled across the board and http connections are redirected to https. You should update nginx configuration files as needed to match your use case if that behaviour is not desirable.
+ * Lets Encrypt's' Certbot client configuration file is deployed to ``/etc/letsencrypt/cli.ini``. Review and amend that file according to needs.
  * the generated certificate is valid for domain.tld and www.domain.tld (SAN)
- * The certificate files are saved on the host server in /etc/letsencrypt
+ * **The certificate files are accessible on the Docker host server** in ``/etc/letsencrypt``
 
-### Using Docker compose
+### How to login to Wordpress Dashboard
 
-commands in this section assume you have an .env file with the following environment variables:
-```
-SERVER_NAME=wp.local
-COMPOSE_PROJECT_NAME=mywebapp
-DB_USER=<database user>
-DB_PASSWORD=<database password>
-DB_DATABASE=<database name>
-MYSQL_ROOT_PASSWORD=<password for the root user of the database server>
+The user is ``admin`` and the initial password (which should be changed immediately) can be found in the container log:
 
+```bash
+docker logs a-wordpress-container | grep "Admin password:"
 ```
 
-##### Instantiating a custom network, two containers: one with the project's image pulled from Docker Hub, one with a MariaDB server pulled from Docker Hub
+### How to build
 
-```
-docker-compose  -f docker-compose.yml up -d
-```
+ ```bash
+ $ cd docker-nginx-fpm-caches-wordpress
+ $ ./make_env.sh && docker-compose up --build -d
+ ```
 
-##### Instantiating a custom network, two containers: one that will be built from local project files, one with MariaDB server pulled from Docker Hub
+One should adjust the values in the **.env** file updated (and created if non-existent) by ``./make_env.sh``
+make_env.sh should be executed at every build so that the dynamic docker labels for build date and vcs ref are populated accurately.
 
-```
-docker-compose up --build -d
-```
-
-
-
-### Usage Patterns and questions
-
-* Please refers to the [Cookbook](https://github.com/rija/docker-nginx-fpm-caches-wordpress/blob/master/Cookbook.md) for tips and usage patterns.
-* Check the [CHANGELOG](https://github.com/rija/docker-nginx-fpm-caches-wordpress/blob/master/CHANGELOG.md) for what's in each version
-* Follow through the links in the [Credits](https://github.com/rija/docker-nginx-fpm-caches-wordpress#credits) and in the project's files
-* Check out the [TODO](https://github.com/rija/docker-nginx-fpm-caches-wordpress/blob/master/TODO) for what things I want add or change next
-* Raise an issue on Github
+Notably, the ``GIT_SSH_URL`` variable can be adjusted to point to a Wordpress-based website project hosted on Github.org, Gitlab.org or Bitbucket.com
 
 ### License
 

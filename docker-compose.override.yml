@@ -18,3 +18,4 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /${HOME}/.ssh:/root/deploykeys:ro
       - /${HOME}/Downloads:/root/backups
+      - /${HOME}:/root/sqlimport:ro

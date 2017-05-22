@@ -24,13 +24,13 @@
 * reduce size of the image of this project **[DONE]** _(Edit: used bitnamit/minideb)_
 * reduce size of the image of the dependent projects: mariadb
 * container independence for Wordpress static files, S3 or shared file system?
-* add a postfix container as a dependent project
+* Replace Supervisord with Mozilla Circus
 
 ## OPERATIONS:
 
 * make Ansible playbooks for setting up container host **[IN PROGRESS]**
 * automated daily backup of the database
-* add restart policies in docker compose file
+* add restart policies in docker compose file **[DONE]**
 * upgrade docker compose syntax to version 3
 
 ## ANALYTICS:
@@ -45,6 +45,7 @@
 * if installing a custom Wordpress project, allow loading of in-repository database dump
 * if installing a custom Wordpress project, allow loading of database dump from host
 * Add support for private git servers
+* use Composer for dependency management
 
 ## MISC:
 

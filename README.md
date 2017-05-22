@@ -24,18 +24,18 @@ The container doesn't have a database server, but the supplied docker compose fi
 
 **Headline features:**
 * Nginx 1.13.0
-* PHP 7.1
+* HTTP/2 and TLS encryption configured
+* TLS configured using Mozilla Server-side TLS Intermediate profile + TLSv1.3
+* PHP 7.1 installed with CLI, PHP-FPM and bare essential extensions
 * FastCGI Caching+Cache Purge and Zend Opcode enabled
 * RealIP Nginx module installed for when running behind a reverse-proxy
-* TLS configured using Mozilla Server-side TLS Intermediate profile + TLSv1.3
 * Latest version of Wordpress is installed at container startup
-* Can clone a Wordpress site from popular online git repositories
+* Can clone a Wordpress-based site from popular online GIT repositories
 * WP-CLI to manage a Wordpress install from command line
 * OS-level security updates performed automatically
 * TLS certificate automatically renewed
-* Wordpress' wp-cron backed by OS cron deamon
 * Daily backup of database to volume sharable with Docker host
-* Supervisor 3.0 as init script to manage processes' life-cycle
+* Supervisord 3.0 as init script to manage processes' life-cycle
 * Small-footprint Docker image using Bitnami/minideb as BASE image
 
 

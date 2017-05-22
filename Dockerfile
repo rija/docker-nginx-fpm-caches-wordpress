@@ -11,8 +11,6 @@ RUN install_packages apt-transport-https ca-certificates
 
 # Basic Dependencies
 RUN install_packages \
-						# used to generate random keys when creating the wp-config.php file for Wordpress
-						pwgen \
 						# installed for the ssh-keyscan utility to allow non-interactive ssh git interaction
 						ssh \
 						# used to download sources for nginx and gosu, as well as gpg signature and keys
@@ -32,38 +30,39 @@ RUN install_packages \
 						# used by the automated backup script
 						mysql-client \
 						# firewall, used in cunjunction with fail2ban
-						ufw
+						ufw \
+						# install the tool to rotate logs
+						logrotate
 
-# php 7.1 installation
+ENV GOSU_VERSION 1.7
+ENV NGINX_VERSION 1.13.0
+ENV PHP_VERSION 7.1
+
+# php installation
 
 RUN curl -o /etc/apt/trusted.gpg.d/php.gpg -fsSL https://packages.sury.org/php/apt.gpg \
-	&& echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
-
-RUN install_packages php7.1 \
-						php7.1-fpm \
-						php7.1-cli \
-						php7.1-mysql \
-						php7.1-gd \
-						php7.1-intl \
-						php7.1-imagick \
-						php7.1-imap \
-						php7.1-mcrypt \
-						php7.1-pspell \
-						php7.1-recode \
-						php7.1-tidy \
-						php7.1-xmlrpc \
-						php7.1-xml \
-						php7.1-json \
-						php7.1-xsl \
-						php7.1-opcache \
-						php7.1-mbstring
+	&& echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list \
+	&& install_packages php$PHP_VERSION \
+						php$PHP_VERSION-fpm \
+						php$PHP_VERSION-cli \
+						php$PHP_VERSION-mysql \
+						php$PHP_VERSION-gd \
+						php$PHP_VERSION-intl \
+						php$PHP_VERSION-imagick \
+						php$PHP_VERSION-imap \
+						php$PHP_VERSION-mcrypt \
+						php$PHP_VERSION-pspell \
+						php$PHP_VERSION-recode \
+						php$PHP_VERSION-tidy \
+						php$PHP_VERSION-xml \
+						php$PHP_VERSION-json \
+						php$PHP_VERSION-opcache \
+						php$PHP_VERSION-mbstring
 
 
 
 
 # install nginx from source with ngx_http_v2_module, ngx_http_realip_module and ngx_cache_purge
-
-ENV NGINX_VERSION 1.13.0
 
 RUN install_packages build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip-dev nginx-common \
 		&& GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
@@ -101,29 +100,33 @@ RUN cd /tmp/nginx-$NGINX_VERSION \
 		--http-client-body-temp-path=/var/lib/nginx/body \
 		--http-fastcgi-temp-path=/var/lib/nginx/fastcgi \
 		--http-proxy-temp-path=/var/lib/nginx/proxy  \
-		--with-debug \
+#		--with-debug \
 		--with-pcre-jit \
 		--with-ipv6 \
 		--with-http_ssl_module \
-		--with-http_stub_status_module \
+#		--with-http_stub_status_module \
 		--with-http_realip_module \
 		--with-http_auth_request_module \
-		--with-http_addition_module \
+#		--with-http_addition_module \
 		--with-http_geoip_module \
 		--with-http_gunzip_module \
 		--with-http_gzip_static_module \
 		--with-http_v2_module \
-		--with-http_sub_module \
+#		--with-http_sub_module \
 		--with-stream \
 		--with-stream_ssl_module \
 		--with-threads  \
 		--add-module=/tmp/ngx_cache_purge-2.3 \
 		&& make && make install \
 		&& ln -fs /usr/share/nginx/sbin/nginx /usr/sbin/nginx \
-		&& rm -r /tmp/nginx-$NGINX_VERSION
+		&& rm -r /tmp/nginx-$NGINX_VERSION \
+		&& rm -r /tmp/ngx_cache_purge-2.3 \
+		&& adduser --system --no-create-home --shell /bin/false --group --disabled-login www-front \
+		&& openssl dhparam -out /etc/nginx/dhparam.pem 2048 \
 
 # Removing devel dependencies
-RUN dpkg --remove build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip-dev
+		&& dpkg --remove build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip-dev
+
 
 # Install LE's ACME client for domain validation and certificate generation and renewal
 
@@ -132,37 +135,7 @@ RUN echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt
 	&& mkdir -p /tmp/le \
 	&& rm -rf /var/lib/apt/lists/*
 
-
-# nginx config
-RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login www-front \
-	&& openssl dhparam -out /etc/nginx/dhparam.pem 2048
-COPY nginx-configs/* /etc/nginx/
-COPY nginx-configs/sites-available/nginx-site.conf /etc/nginx/sites-available/default
-
-
-# php-fpm config: Opcode cache config
-RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/7.1/fpm/php.ini \
-	&& sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/7.1/fpm/php.ini \
-
-# php-fpm config
-	&& sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php/7.1/fpm/php.ini \
-	&& sed -i -e "s/expose_php = On/expose_php = Off/g" /etc/php/7.1/fpm/php.ini \
-	&& sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc/php/7.1/fpm/php.ini \
-	&& sed -i -e "s/;session.cookie_secure\s*=\s*/session.cookie_secure = True/g" /etc/php/7.1/fpm/php.ini \
-	&& sed -i -e "s/session.cookie_httponly\s*=\s*/session.cookie_httponly = True/g" /etc/php/7.1/fpm/php.ini \
-	&& sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php/7.1/fpm/php.ini \
-	&& sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php/7.1/fpm/php-fpm.conf \
-	&& sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/7.1/fpm/pool.d/www.conf \
-	&& sed -i -e "s/listen\s*=\s*\/run\/php\/php7.1-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php/7.1/fpm/pool.d/www.conf \
-	&& sed -i -e "s/;listen.allowed_clients\s*=\s*127.0.0.1/listen.allowed_clients = 127.0.0.1/g" /etc/php/7.1/fpm/pool.d/www.conf \
-	&& sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/log\/\$pool.access.log/g" /etc/php/7.1/fpm/pool.d/www.conf
-
-# create the pid and sock file for php-fpm
-RUN service php7.1-fpm start \
-	&& touch /var/log/php7.1-fpm.log && chown www-data:www-data /var/log/php7.1-fpm.log
-
 # grab gosu for easy step-down from root
-ENV GOSU_VERSION 1.7
 RUN GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
                && curl -o /usr/local/bin/gosu -fsSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
                && curl -o /usr/local/bin/gosu.asc -fsSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
@@ -183,11 +156,49 @@ RUN GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
                && chmod +x /usr/local/bin/gosu \
                && gosu nobody true
 
-# copy misc configs (supervisord and ssh config)
+# copy nginx config
+COPY nginx-configs/* /etc/nginx/
+COPY nginx-configs/sites-available/nginx-site.conf /etc/nginx/sites-available/default
+
+# copy misc configs (supervisord,  ssh config and wordpress)
 COPY  misc-configs/* /etc/
 
+# copy schedulers configuration files
+COPY schedulers-configs/* /etc/
+
+# copy bootstrapping scripts
+COPY scripts/* /
+
+# php-fpm config: Opcode cache config
+RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/$PHP_VERSION/fpm/php.ini \
+	&& sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/$PHP_VERSION/fpm/php.ini \
+
+# php-fpm config
+	&& sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php/$PHP_VERSION/fpm/php.ini \
+	&& sed -i -e "s/expose_php = On/expose_php = Off/g" /etc/php/$PHP_VERSION/fpm/php.ini \
+	&& sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc/php/$PHP_VERSION/fpm/php.ini \
+	&& sed -i -e "s/;session.cookie_secure\s*=\s*/session.cookie_secure = True/g" /etc/php/$PHP_VERSION/fpm/php.ini \
+	&& sed -i -e "s/session.cookie_httponly\s*=\s*/session.cookie_httponly = True/g" /etc/php/$PHP_VERSION/fpm/php.ini \
+	&& sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php/$PHP_VERSION/fpm/php.ini \
+	&& sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php/$PHP_VERSION/fpm/php-fpm.conf \
+	&& sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf \
+	&& sed -i -e "s/listen\s*=\s*\/run\/php\/php$PHP_VERSION-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf \
+	&& sed -i -e "s/;listen.allowed_clients\s*=\s*127.0.0.1/listen.allowed_clients = 127.0.0.1/g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf \
+	&& sed -i -e "s/;access.log\s*=\s*log\/\$pool.access.log/access.log = \/var\/log\/\$pool.access.log/g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf \
+
+# create the pid and sock file for php-fpm
+	&& mkdir -p /var/run/php && chown www-data:www-data /var/run/php \
+	&& touch /run/php/php$PHP_VERSION-fpm.pid && chown www-data:www-data /run/php/php$PHP_VERSION-fpm.pid \
+	&& touch /var/log/php$PHP_VERSION-fpm.log && chown www-data:www-data /var/log/php$PHP_VERSION-fpm.log \
+
+# configuring nginx
+	&& mkdir -p /var/log/nginx \
+	&& chown -R www-front:www-front /var/log/nginx \
+	&& touch /var/log/nginx/error.log && chown www-front:www-front /var/log/nginx/error.log \
+	&& touch /var/log/nginx/access.log && chown www-front:www-front /var/log/nginx/access.log \
+
 # configuring supervisor
-RUN mv /etc/supervisord.conf /etc/supervisor/supervisord.conf \
+	&& mv /etc/supervisord.conf /etc/supervisor/supervisord.conf \
 	&& /usr/bin/easy_install supervisor-stdout \
 	&& mkdir -p /var/log/supervisor \
 	&& mkdir -p /var/run/supervisor \
@@ -196,28 +207,25 @@ RUN mv /etc/supervisord.conf /etc/supervisor/supervisord.conf \
 # ssh config for git authentication
 	&& mkdir -p /root/.ssh \
 	&& mv /etc/ssh_config /root/.ssh/config \
-	&& chmod 700 /root/.ssh/config
+	&& chmod 700 /root/.ssh/config \
+
+# Setting up cronjobs
+	&& crontab /etc/wordpress.cron \
+	&& touch /var/log/certs.log \
+	&& touch /var/log/db-backup.log \
+	&& touch /var/log/wp-cron.log \
+
+# unattended upgrade configuration
+	&&  mv /etc/02periodic /etc/apt/apt.conf.d/02periodic \
+
+# tightening up permissions on bootstrapping scripts
+	&& chmod 700 /bootstrap_container \
+	&& chmod 700 /install_wordpress \
+	&& chmod 700 /setup_web_cert
 
 # setting up GIT
 ARG GIT_SSH_URL
 ENV GIT_SSH_URL ${GIT_SSH_URL:-"https://github.com/WordPress/WordPress.git"}
-
-# copy schedulers configuration files
-COPY schedulers-configs/* /etc/
-
-# Setting up cronjob
-RUN crontab /etc/wordpress.cron \
-
-# unattended upgrade configuration
-	&&  mv /etc/02periodic /etc/apt/apt.conf.d/02periodic
-
-
-# Setting up bootstrapping scripts
-COPY scripts/* /
-RUN chmod 700 /bootstrap_container \
-	&& chmod 700 /install_wordpress \
-	&& chmod 700 /setup_web_cert
-
 
 
 # Build-time metadata as defined at http://label-schema.org
@@ -226,7 +234,7 @@ ARG VCS_REF
 ARG VERSION
 LABEL org.label-schema.build-date=$BUILD_DATE \
 	 org.label-schema.name="Wordpress (Nginx/php-fpm) Docker Container" \
-	 org.label-schema.description="Wordpress container running PHP 7.1 served by Nginx/php-fpm with caching, TLS encryption, HTTP/2" \
+	 org.label-schema.description="Wordpress container running PHP $PHP_VERSION served by Nginx/php-fpm with caching, TLS encryption, HTTP/2" \
 	 org.label-schema.url="https://github.com/rija/docker-nginx-fpm-caches-wordpress" \
 	 org.label-schema.vcs-ref=$VCS_REF \
 	 org.label-schema.vcs-url="https://github.com/rija/docker-nginx-fpm-caches-wordpress" \

@@ -96,21 +96,32 @@ fi
 
 # Here we generate random passwords (thank you pwgen!). The first two are for mysql users, the last batch for random keys in wp-config.php
 # configuring wp-config with DB connection details from linked container then generate random password for keys
+
 echo "Replacing database connection details in wp-config with $DB_DATABASE, $DB_HOSTNAME, $DB_USER, DB_PASSWORD (hidden)"
 sed -e "s/database_name_here/$DB_DATABASE/
 s/localhost/$DB_HOSTNAME/
 s/username_here/$DB_USER/
-s/password_here/$DB_PASSWORD/
-/'AUTH_KEY'/s/put your unique phrase here/`pwgen -c -n -1 65`/
-/'SECURE_AUTH_KEY'/s/put your unique phrase here/`pwgen -c -n -1 65`/
-/'LOGGED_IN_KEY'/s/put your unique phrase here/`pwgen -c -n -1 65`/
-/'NONCE_KEY'/s/put your unique phrase here/`pwgen -c -n -1 65`/
-/'AUTH_SALT'/s/put your unique phrase here/`pwgen -c -n -1 65`/
-/'SECURE_AUTH_SALT'/s/put your unique phrase here/`pwgen -c -n -1 65`/
-/'LOGGED_IN_SALT'/s/put your unique phrase here/`pwgen -c -n -1 65`/
-/'NONCE_SALT'/s/put your unique phrase here/`pwgen -c -n -1 65`/" /usr/share/nginx/www/wp-config-sample.php > /usr/share/nginx/www/wp-config.php
+s/password_here/$DB_PASSWORD/" /etc/wp-config-sample.php > /usr/share/nginx/www/wp-config.php
+
+echo "Generating salt for Wodpress secret keys using api.wordrpess.org"
+# thanks to http://stackoverflow.com/questions/9437309/bash-sed-find-replace-with-special-characters
+perl -i -pe '
+  BEGIN {
+    $keysalts = qx(curl -fsSL https://api.wordpress.org/secret-key/1.1/salt)
+  }
+  s/#random_key_here/$keysalts/g
+' /usr/share/nginx/www/wp-config.php
+
 
 echo "performed: created wp-config.php"
+
+# Replacing Wordpress Default Password handling with wp-password-bcrypt
+# explanation here: https://roots.io/wordpress-password-security-follow-up/
+if [ ! -d /usr/share/nginx/www/wp-content/mu-plugins ];then
+    mkdir -p /usr/share/nginx/www/wp-content/mu-plugins
+fi
+cd  /usr/share/nginx/www/wp-content/mu-plugins && curl -O -fsSL https://raw.githubusercontent.com/roots/wp-password-bcrypt/master/wp-password-bcrypt.php
+echo "performed: installed wp-password-bcrypt"
 
 if [ "$GIT_SSH_URL" = "https://github.com/WordPress/WordPress.git" -a "$NEW_INSTALL" = 1 ]; then
     # it's a fresh wordpress install, so we need to run Wordpress installation program
@@ -119,8 +130,12 @@ if [ "$GIT_SSH_URL" = "https://github.com/WordPress/WordPress.git" -a "$NEW_INST
     echo "performed: wp core install"
 fi
 
+
+
 # Bootstraping Nginx Helper Wordpress plugin's log
-mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper
+if [ ! -d /usr/share/nginx/www/wp-content/uploads/nginx-helper ];then
+    mkdir -p /usr/share/nginx/www/wp-content/uploads/nginx-helper
+fi
 echo "Start logging" >> /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
 chown www-data:www-data /usr/share/nginx/www/wp-content/uploads/nginx-helper/nginx.log
 

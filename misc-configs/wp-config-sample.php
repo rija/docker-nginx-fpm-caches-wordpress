@@ -47,7 +47,7 @@ define('DB_COLLATE', '');
  * @since 2.6.0
  */
 
-random_key_here
+#random_key_here
 
 /**#@-*/
 

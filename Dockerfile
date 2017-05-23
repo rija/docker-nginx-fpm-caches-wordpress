@@ -4,18 +4,19 @@ MAINTAINER Rija Menage <dockerfiles@rija.cinecinetique.com>
 EXPOSE 80
 EXPOSE 443
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+ENTRYPOINT ["/usr/bin/supervisord"]
+CMD ["-c", "/etc/supervisor/supervisord.conf"]
 
 # Enabling https download of packages
 RUN install_packages apt-transport-https ca-certificates
 
 # Basic Dependencies
 RUN install_packages \
-						# installed for the ssh-keyscan utility to allow non-interactive ssh git interaction
-						ssh \
+						# basic process management
+						procps \
 						# used to download sources for nginx and gosu, as well as gpg signature and keys
 						curl \
-						# used for installing the Wordpess web application from online git repositories
+						# used for installing the Wordpress web application from online git repositories
 						git \
 						# installed for the ip utility used in bootstrap_container for finding the container's external ip address
 						iproute2 \
@@ -25,11 +26,11 @@ RUN install_packages \
 						supervisor \
 						# for automated security updates
 						unattended-upgrades \
-						# tool to manage malicious connections to the web application through IP addressess black-listing
+						# tool to manage malicious connections to the web application through IP addresses black-listing
 						fail2ban \
 						# used by the automated backup script
 						mysql-client \
-						# firewall, used in cunjunction with fail2ban
+						# firewall, used in conjunction with fail2ban
 						ufw \
 						# install the tool to rotate logs
 						logrotate
@@ -62,7 +63,7 @@ RUN curl -o /etc/apt/trusted.gpg.d/php.gpg -fsSL https://packages.sury.org/php/a
 
 
 
-# install nginx from source with ngx_http_v2_module, ngx_http_realip_module and ngx_cache_purge
+# Download Nginx and Ngx cache purge source code
 
 RUN install_packages build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip-dev nginx-common \
 		&& GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
@@ -85,9 +86,11 @@ RUN install_packages build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip
 		&& rm -r "$GNUPGHOME" nginx-$NGINX_VERSION.tar.gz.asc \
 		&& tar xzvf nginx-$NGINX_VERSION.tar.gz \
 		&& curl -o ngx_cache_purge-2.3.tar.gz -fsSL https://github.com/FRiCKLE/ngx_cache_purge/archive/2.3.tar.gz \
-		&& tar xzvf ngx_cache_purge-2.3.tar.gz
+		&& tar xzvf ngx_cache_purge-2.3.tar.gz \
 
-RUN cd /tmp/nginx-$NGINX_VERSION \
+# Compile nginx from source with ngx_http_v2_module, ngx_http_realip_module and ngx_cache_purge
+
+		&& cd /tmp/nginx-$NGINX_VERSION \
 		&& ./configure --prefix=/usr/share/nginx \
 		--with-cc-opt='-g -O2 -fPIE -fstack-protector-strong -Wformat \
 		-Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2' \
@@ -125,15 +128,16 @@ RUN cd /tmp/nginx-$NGINX_VERSION \
 		&& openssl dhparam -out /etc/nginx/dhparam.pem 2048 \
 
 # Removing devel dependencies
-		&& dpkg --remove build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip-dev
-
+		&& dpkg --remove build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip-dev \
 
 # Install LE's ACME client for domain validation and certificate generation and renewal
 
-RUN echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/php.list \
+	&& echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/php.list \
 	&& apt-get update && apt-get -t jessie-backports install -y certbot \
 	&& mkdir -p /tmp/le \
-	&& rm -rf /var/lib/apt/lists/*
+	&& rm -rf /var/lib/apt/lists/* \
+
+
 
 # grab gosu for easy step-down from root
 RUN GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
@@ -215,8 +219,9 @@ RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/$PHP_VERSION/fpm/
 	&& touch /var/log/db-backup.log \
 	&& touch /var/log/wp-cron.log \
 
-# unattended upgrade configuration
+# apt upgrade configuration
 	&&  mv /etc/02periodic /etc/apt/apt.conf.d/02periodic \
+	&& mv /etc/apt-preferences /etc/apt/preferences.d/my_preferences \
 
 # tightening up permissions on bootstrapping scripts
 	&& chmod 700 /bootstrap_container \

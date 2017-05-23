@@ -23,7 +23,11 @@ echo "$(date): Installing  Wordpress from repository $GIT_SSH_URL for $SERVER_NA
 
 # setting ssh key auth to the remote repository
 
-ssh-keyscan -t rsa github.com gitlab.com bitbucket.com  > /root/.ssh/known_hosts
+if [ -f /root/deploykeys/git_hosts ];then
+    cp /root/deploykeys/git_hosts /root/.ssh/known_hosts
+    echo "deployed git host keys"
+fi
+
 sed -i -e "s/key_to_use/$GIT_DEPLOY_KEY/" /root/.ssh/config
 
 

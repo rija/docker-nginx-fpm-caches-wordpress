@@ -30,7 +30,7 @@ The container doesn't have a database server, but the supplied docker compose fi
 * FastCGI Caching+Cache Purge and Zend Opcode enabled
 * RealIP Nginx module installed for when running behind a reverse-proxy
 * Latest version of Wordpress is installed at container startup
-* Can clone a Wordpress-based site from popular online GIT repositories
+* Can clone a Wordpress-based site from GIT repositories
 * WP-CLI to manage a Wordpress install from command line
 * OS-level security updates performed automatically
 * TLS certificate automatically renewed
@@ -120,10 +120,14 @@ docker logs a-wordpress-container | grep "Admin password:"
  $ ./make_env.sh && docker-compose up --build -d
  ```
 
-One should adjust the values in the **.env** file updated (and created if non-existent) by ``./make_env.sh``
+One should adjust the values in the **.env** file updated (and created if non-existent) by **./make_env.sh**
 make_env.sh should be executed at every build so that the dynamic docker labels for build date and vcs ref are populated accurately.
 
-Notably, the ``GIT_SSH_URL`` variable can be adjusted to point to a Wordpress-based website project hosted on Github.org, Gitlab.org or Bitbucket.com
+Notably, the ``GIT_SSH_URL`` variable can be adjusted to point to a Wordpress-based website project hosted on a remote GIT repository.
+
+The mounted volume /root/deploykeys must contains file necessary files to allow cloning from a GIT repostory:
+* a file named **git_hosts**  with the ssh host keys for the remote git repository
+* public/private ssh key pair to ssh-git clone/pull from the remote repository (whose name is specified with ENV variable ``GIT_DEPLOY_KEY``)
 
 ### License
 

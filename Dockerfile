@@ -135,12 +135,13 @@ RUN install_packages build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip
 	&& echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/php.list \
 	&& apt-get update && apt-get -t jessie-backports install -y certbot \
 	&& mkdir -p /tmp/le \
-	&& rm -rf /var/lib/apt/lists/* \
+	&& rm -rf /var/lib/apt/lists/*
 
 
 
 # grab gosu for easy step-down from root
 RUN GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+			   && echo "*installing gosu*" \
                && curl -o /usr/local/bin/gosu -fsSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
                && curl -o /usr/local/bin/gosu.asc -fsSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
                && export GNUPGHOME="$(mktemp -d)" \

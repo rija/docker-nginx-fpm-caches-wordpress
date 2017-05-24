@@ -24,7 +24,6 @@ script:
   - docker exec -it rijaweb bash -c "curl --head http://dockerfiletest.cinecinetique.com"
   - docker exec -it rijaweb bash -c "curl --head http://dockerfiletest.cinecinetique.com" | grep 301
   - sleep 30
-  - docker exec -it rijaweb bash -c "test -f /root/.ssh/known_hosts"
   - docker exec -it rijaweb bash -c "cat /usr/share/nginx/www/wp-config.php"
   - docker exec -it rijaweb bash -c "ls -alrt /usr/share/nginx/www/" | grep "wp-content"
 

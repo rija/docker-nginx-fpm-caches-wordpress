@@ -135,31 +135,30 @@ RUN install_packages build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip
 	&& echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/php.list \
 	&& apt-get update && apt-get -t jessie-backports install -y certbot \
 	&& mkdir -p /tmp/le \
-	&& rm -rf /var/lib/apt/lists/*
+	&& rm -rf /var/lib/apt/lists/* \
 
 
 
 # grab gosu for easy step-down from root
-RUN GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
-			   && echo "*installing gosu*" \
-               && curl -o /usr/local/bin/gosu -fsSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
-               && curl -o /usr/local/bin/gosu.asc -fsSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
-               && export GNUPGHOME="$(mktemp -d)" \
-               && found=''; \
-               for server in \
-                       ha.pool.sks-keyservers.net \
-                       hkp://keyserver.ubuntu.com:80 \
-                       hkp://p80.pool.sks-keyservers.net:80 \
-                       pgp.mit.edu \
-               ; do \
-                       echo "Fetching GPG key $GPG_KEYS from $server"; \
-                       gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$GPG_KEYS" && found=yes && break; \
-               done; \
-               test -z "$found" && echo >&2 "error: failed to fetch GPG key $GPG_KEYS" && exit 1; \
-               gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
-               && rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
-               && chmod +x /usr/local/bin/gosu \
-               && gosu nobody true
+	&& GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+	&& curl -o /usr/local/bin/gosu -fsSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
+	&& curl -o /usr/local/bin/gosu.asc -fsSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
+	&& export GNUPGHOME="$(mktemp -d)" \
+	&& found=''; \
+	for server in \
+	       ha.pool.sks-keyservers.net \
+	       hkp://keyserver.ubuntu.com:80 \
+	       hkp://p80.pool.sks-keyservers.net:80 \
+	       pgp.mit.edu \
+	; do \
+	       echo "Fetching GPG key $GPG_KEYS from $server"; \
+	       gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$GPG_KEYS" && found=yes && break; \
+	done; \
+	test -z "$found" && echo >&2 "error: failed to fetch GPG key $GPG_KEYS" && exit 1; \
+	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+	&& rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+	&& chmod +x /usr/local/bin/gosu \
+	&& gosu nobody true
 
 # copy nginx config
 COPY nginx-configs/* /etc/nginx/

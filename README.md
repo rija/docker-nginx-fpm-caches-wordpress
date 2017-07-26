@@ -76,12 +76,20 @@ $ docker run -d \
 **Notes:**
 The ``ADMIN_EMAIL`` variable is used by WP-CLI for the initial setup of the Wordpress install and by Let's Encrypt's Certbot for managing TLS certificates renewal
 
-#### with docker compose:
+#### with Docker compose:
 
 ```bash
 $ cd docker-nginx-fpm-caches-wordpress
 $ ./make_env.sh
 $ docker-compose up -d
+```
+
+One can adjust the values in the **.env** file updated (and created if non-existent) by ``./make_env.sh``
+
+#### with Ansible playbook:
+
+```bash
+$ ansible-playbook --extra-vars="registry_url=registry.gitlab.com registry_user=foobar" ansible/press-site.yml
 ```
 
 One can adjust the values in the **.env** file updated (and created if non-existent) by ``./make_env.sh``

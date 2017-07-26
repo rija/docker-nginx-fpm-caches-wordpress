@@ -8,8 +8,8 @@ VERSION=`cat VERSION`
 
 if [ ! -f .env ];then
     {
-		echo "SERVER_NAME=wordpress.dev";
-		echo "COMPOSE_PROJECT_NAME=wordpress.dev";
+		echo "SERVER_NAME=example.com";
+		echo "COMPOSE_PROJECT_NAME=wordpress";
         echo "#The email will be used for registering to Lets Encrypt for the TLS certificate"
 		echo "ADMIN_EMAIL=user@example.com";
 		echo "WP_DB_USER=wordpress";

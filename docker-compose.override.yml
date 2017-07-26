@@ -1,6 +1,6 @@
 version: '2'
 services:
-  web:
+  webapp:
     restart: 'no'
     build:
       context: .
@@ -12,7 +12,7 @@ services:
     environment:
       DEBUG: 'true'
       GIT_DEPLOY_KEY: ${GIT_DEPLOY_KEY}
-    image: ${IMAGE_NAME}
+    image: ${IMAGE_NAME}:${VERSION}
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro

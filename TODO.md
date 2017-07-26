@@ -10,9 +10,9 @@
 * add a wordpress user on the container's host
 * strict file ownership (uploads is only dir writable, all files owned by wordpress user and restricted)
 * obfuscate Wordpress URL structure and headers
-* disable Wordpress UI for theme update
-* disable Wordpress UI for plugin update
-* disable Wordpress UI for template code editing
+* disable Wordpress UI for theme update **[DONE]**
+* disable Wordpress UI for plugin update **[DONE]**
+* disable Wordpress UI for template code editing **[DONE]**
 * verify PGP signature of the downloaded nginx source code **[DONE]**
 * add support for Fail2ban **[IN PROGRESS]**
 * find a secure, easily configurable way to allow access to xmlrpc.php for staff who can't be tied to one specific IP
@@ -25,17 +25,19 @@
 * reduce size of the image of the dependent projects: mariadb
 * container independence for Wordpress static files, S3 or shared file system?
 * Replace Supervisord with Mozilla Circus
+* tweak mysql config to optimise for low memory
 
 ## OPERATIONS:
 
 * make Ansible playbooks for setting up container host **[IN PROGRESS]**
-* automated daily backup of the database
+* automated daily backup of the database **[DONE]**
 * add restart policies in docker compose file **[DONE]**
 * upgrade docker compose syntax to version 3
 
 ## ANALYTICS:
 
-* send all logs to syslog and send them to splunk on the cloud
+* send all logs to syslog
+* and send them to splunk on the cloud
 * put google analytic agent away from the application (maybe in nginx using ngx_pagespeed)
 * integrate with NewRelics for system monitoring
 
@@ -44,7 +46,7 @@
 * add wp-cli to the container **[DONE]**
 * if installing a custom Wordpress project, allow loading of in-repository database dump
 * if installing a custom Wordpress project, allow loading of database dump from host
-* Add support for private git servers
+* Add support for private git servers **[DONE]**
 * use Composer for dependency management
 
 ## MISC:

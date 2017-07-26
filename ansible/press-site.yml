@@ -1,0 +1,42 @@
+---
+
+- name: build a new image for the Wordpress web site
+  hosts: localhost
+
+  vars_prompt:
+     - name: "gitlab_password"
+       prompt: "please, enter registry password"
+       private: yes
+
+  tasks:
+     - name: Gather context
+       command: cd .. && ./make_env.sh
+
+     - name: login to the gitlab registry
+       docker_login:
+         registry: registry.gitlab.com
+         username: rijam
+         password: "{{gitlab_password}}"
+         reauthorize: yes
+
+    #  - name: Build a new image
+    #    command: cd .. && docker-compose up --build -d
+    #    register: compose_output
+     - docker_service:
+         project_src: ..
+         build: yes
+       register: compose_output
+
+     - debug:
+         msg: "{{compose_output}}"
+
+     - name: Tag and push to the registry
+       vars:
+           image_name: "{{ lookup('ini', 'IMAGE_NAME type=properties file=../.env') }}"
+           image_version: "{{ lookup('ini', 'VERSION type=properties file=../.env') }}"
+       docker_image:
+         name: "{{ image_name }}"
+         repository: "registry.gitlab.com/{{ image_name }}"
+         tag: "{{ image_version }}"
+         pull: no
+         push: yes

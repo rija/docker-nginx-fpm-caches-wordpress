@@ -4,7 +4,7 @@
   hosts: localhost
 
   vars_prompt:
-     - name: "gitlab_password"
+     - name: "registry_password"
        prompt: "please, enter registry password"
        private: yes
 
@@ -14,9 +14,9 @@
 
      - name: login to the gitlab registry
        docker_login:
-         registry: registry.gitlab.com
-         username: rijam
-         password: "{{gitlab_password}}"
+         registry: "{{registry_url}}"
+         username: "{{registry_user}}"
+         password: "{{registry_password}}"
          reauthorize: yes
 
     #  - name: Build a new image

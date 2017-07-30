@@ -88,13 +88,36 @@ One can adjust the values in the **.env** file updated (and created if non-exist
 
 #### with Ansible playbook:
 
+###### - create a new image based on vanilla Wordpress install and push it to a private registry
+
 ```bash
 $ ansible-playbook --extra-vars="registry_url=registry.gitlab.com registry_user=foobar" ansible/press-site.yml
 ```
 
 One can adjust the values in the **.env** file updated (and created if non-existent) by ``./make_env.sh``
 
+In particular, replace the value for GIT_SSH_URL to use the codebase of an existing/under development Wordpress web site.
+
+###### - deploy on a Digital Ocean droplet the image that has been previously pushed to a private registry
+
+```bash
+$ ansible-playbook -i digital_ocean.py  --extra-vars="registry_url=registry.gitlab.com registry_user=foobar docker_host_user=docker" ansible/deploy-site.yml
+```
+
+where digital_ocean.py is downloaded from https://github.com/ansible/ansible/blob/devel/contrib/inventory/digital_ocean.py
+
+```bash
+$ curl -O https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/digital_ocean.py
+$ chmod u+x digital_ocean.py
+```
+
+if you don't deploy on Digital Ocean, you can find the relevant dynamic inventory for your cloud service on https://github.com/ansible/ansible/tree/devel/contrib/inventory
+
+
+
 ### How to enable Encryption (TLS)
+
+**This step is not necessary if you used the ansible playbook above.**
 
 It is advised to have read Lets Encrypt's [FAQ](https://community.letsencrypt.org/c/docs/) and [user guide](https://letsencrypt.readthedocs.org/en/latest/index.html)  beforehand.
 

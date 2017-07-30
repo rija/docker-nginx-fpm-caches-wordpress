@@ -29,7 +29,7 @@
 
 
 
-     - name: deploy web stie
+     - name: deploy web site
        docker_service:
         project_name: "{{ lookup('ini', 'COMPOSE_PROJECT_NAME type=properties file=../.env') }}"
         definition:
@@ -62,6 +62,7 @@
             links:
               - db:dbs
            db:
+            restart: 'always'
             networks:
               - wp_net
             image: mariadb:10.2

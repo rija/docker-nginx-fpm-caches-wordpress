@@ -130,7 +130,7 @@ echo "performed: installed wp-password-bcrypt"
 if [ "$GIT_SSH_URL" = "https://github.com/WordPress/WordPress.git" -a "$NEW_INSTALL" = 1 ]; then
     # it's a fresh wordpress install, so we need to run Wordpress installation program
     cd /usr/share/nginx/www
-    gosu www-data wp core install --url=https://$SERVER_NAME --title=$SERVER_NAME --admin_user=admin --admin_email=$ADMIN_EMAIL
+    gosu www-data wp core install --url=https://$SERVER_NAME --title=$SERVER_NAME --admin_user=admin --admin_email=$ADMIN_EMAIL --admin_password=$ADMIN_PASSWORD
     echo "performed: wp core install"
 
 elif [ "$GIT_SSH_URL" != "https://github.com/WordPress/WordPress.git" -a -f /root/sqlimport/wordpress.sql ]; then

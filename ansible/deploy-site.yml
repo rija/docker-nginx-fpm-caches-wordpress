@@ -36,7 +36,7 @@
           version: '2'
           services:
            webapp:
-            restart: 'always'
+            restart: 'unless-stopped'
             networks:
               - wp_net
             image: "{{registry_url}}/{{ lookup('ini', 'IMAGE_NAME type=properties file=../.env') }}:{{ lookup('ini', 'VERSION type=properties file=../.env') }}"
@@ -55,6 +55,7 @@
               GIT_DEPLOY_KEY: "{{ lookup('ini', 'GIT_DEPLOY_KEY type=properties file=../.env') }}"
               SERVER_NAME: "{{ lookup('ini', 'SERVER_NAME type=properties file=../.env') }}"
               ADMIN_EMAIL: "{{ lookup('ini', 'ADMIN_EMAIL type=properties file=../.env') }}"
+              ADMIN_PASSWORD: "{{ lookup('ini', 'ADMIN_PASSWORD type=properties file=../.env') }}"
               DB_HOSTNAME: dbs
               DB_USER: "{{ lookup('ini', 'WP_DB_USER type=properties file=../.env') }}"
               DB_PASSWORD: "{{ lookup('ini', 'WP_DB_PASSWORD type=properties file=../.env') }}"
@@ -62,7 +63,7 @@
             links:
               - db:dbs
            db:
-            restart: 'always'
+            restart: 'unless-stopped'
             networks:
               - wp_net
             image: mariadb:10.2

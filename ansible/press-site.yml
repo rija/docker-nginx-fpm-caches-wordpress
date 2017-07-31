@@ -19,9 +19,6 @@
          password: "{{registry_password}}"
          reauthorize: yes
 
-    #  - name: Build a new image
-    #    command: cd .. && docker-compose up --build -d
-    #    register: compose_output
      - docker_service:
          project_src: ..
          build: yes

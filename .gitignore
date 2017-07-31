@@ -6,3 +6,4 @@ scratchpad
 ansible-digital_ocean.cache
 hosts
 digital_ocean.py
+*.retry

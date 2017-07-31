@@ -1,7 +1,7 @@
 version: '2'
 services:
   webapp:
-    restart: 'always'
+    restart: 'unless-stopped'
     networks:
       - wp_net
     image: rija/docker-nginx-fpm-caches-wordpress
@@ -20,6 +20,7 @@ services:
       GIT_DEPLOY_KEY: ${GIT_DEPLOY_KEY}
       SERVER_NAME:
       ADMIN_EMAIL:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       DB_HOSTNAME: dbs
       DB_USER: ${WP_DB_USER}
       DB_PASSWORD: ${WP_DB_PASSWORD}
@@ -27,6 +28,7 @@ services:
     links:
       - db:dbs
   db:
+    restart: 'unless-stopped'
     networks:
       - wp_net
     image: mariadb:10.2

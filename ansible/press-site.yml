@@ -32,8 +32,9 @@
            image_name: "{{ lookup('ini', 'IMAGE_NAME type=properties file=../.env') }}"
            image_version: "{{ lookup('ini', 'VERSION type=properties file=../.env') }}"
        docker_image:
-         name: "{{ image_name }}"
-         repository: "registry.gitlab.com/{{ image_name }}"
+         name: "{{registry_url}}/{{ image_name }}"
+         repository: "{{registry_url}}/{{ image_name }}"
          tag: "{{ image_version }}"
          pull: no
          push: yes
+         force: yes

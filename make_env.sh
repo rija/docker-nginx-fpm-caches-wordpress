@@ -12,6 +12,7 @@ if [ ! -f .env ];then
 		echo "COMPOSE_PROJECT_NAME=wordpress";
         echo "#The email will be used for registering to Lets Encrypt for the TLS certificate"
 		echo "ADMIN_EMAIL=user@example.com";
+		echo "ADMIN_PASSWORD=changeme";
 		echo "WP_DB_USER=wordpress";
 		echo "WP_DB_PASSWORD=wordpress";
 		echo "WP_DB_NAME=wordpress";

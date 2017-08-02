@@ -3,7 +3,7 @@
 set -e
 
 # setting up default for environment variables
-SERVER_NAME=${SERVER_NAME:-example.com}
+SERVER_NAME=${SERVER_NAME:-my-example.com}
 DB_HOSTNAME=${DB_HOSTNAME:-$DB_PORT_3306_TCP_ADDR}
 DB_USER=${DB_USER:-$DB_MYSQL_USER}
 DB_PASSWORD=${DB_PASSWORD:-$DB_MYSQL_PASSWORD}
@@ -11,7 +11,7 @@ DB_DATABASE=${DB_DATABASE:-$DB_MYSQL_DATABASE}
 
 # making sure only one instance of this script run
 
-if [ ! -f /var/run/install_worpress.pid ];then
+if [ ! -f /var/run/install_wordpress.pid ];then
     echo $$ > /var/run/install_wordpress.pid
 else
     echo "install_wordpress is already running"
@@ -107,7 +107,7 @@ s/localhost/$DB_HOSTNAME/
 s/username_here/$DB_USER/
 s/password_here/$DB_PASSWORD/" /etc/wp-config-sample.php > /usr/share/nginx/www/wp-config.php
 
-echo "Generating salt for Wodpress secret keys using api.wordrpess.org"
+echo "Generating salt for Wordpress secret keys using api.wordrpess.org"
 # thanks to http://stackoverflow.com/questions/9437309/bash-sed-find-replace-with-special-characters
 perl -i -pe '
   BEGIN {
@@ -131,7 +131,7 @@ if [ "$GIT_SSH_URL" = "https://github.com/WordPress/WordPress.git" -a "$NEW_INST
     # it's a fresh wordpress install, so we need to run Wordpress installation program
     cd /usr/share/nginx/www
     gosu www-data wp core install --url=https://$SERVER_NAME --title=$SERVER_NAME --admin_user=admin --admin_email=$ADMIN_EMAIL --admin_password=$ADMIN_PASSWORD
-    echo "performed: wp core install"
+    echo "performed: wp core install (--url=https://$SERVER_NAME --title=$SERVER_NAME --admin_user=admin --admin_email=$ADMIN_EMAIL --admin_password=##HIDDEN##)"
 
 elif [ "$GIT_SSH_URL" != "https://github.com/WordPress/WordPress.git" -a -f /root/sqlimport/wordpress.sql ]; then
     mysql  -h $DB_HOSTNAME -u $DB_USER -p$DB_PASSWORD $DB_DATABASE < /root/sqlimport/wordpress.sql
@@ -168,7 +168,7 @@ cd /etc/fail2ban/filter.d/ \
 
 echo "Wordpress installed on $(date)" > /tmp/last_wordpress
 
-if [ -f /var/run/install_worpress.pid ];then
+if [ -f /var/run/install_wordpress.pid ];then
     rm /var/run/install_wordpress.pid
 fi
 

@@ -22,6 +22,7 @@ if [ ! -f .env ];then
 		echo "GIT_SSH_URL=https://github.com/WordPress/WordPress.git";
 		echo "GIT_DEPLOY_KEY=git_deploy_key";
 		echo "IMAGE_NAME=my-wordpress-dev";
+		echo "REGISTRY_URL=registry.gitlab.com"
 		echo "BUILD_DATE=$BUILD_DATE";
 		echo "VCS_REF=$VCS_REF";
 		echo "VERSION=$VERSION";

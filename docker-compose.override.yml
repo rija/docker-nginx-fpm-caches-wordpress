@@ -12,7 +12,7 @@ services:
     environment:
       DEBUG: 'true'
       GIT_DEPLOY_KEY: ${GIT_DEPLOY_KEY}
-    image: ${IMAGE_NAME}:${VERSION}
+    image: ${REGISTRY_URL}/${IMAGE_NAME}:${VERSION}
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro

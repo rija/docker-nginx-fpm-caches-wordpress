@@ -220,7 +220,9 @@ RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/$PHP_VERSION/fpm/
 	&& touch /var/log/wp-cron.log \
 
 # apt upgrade configuration
+# apt upgrade configuration
 	&&  mv /etc/02periodic /etc/apt/apt.conf.d/02periodic \
+	&&  mv /etc/50unattended-upgrades /etc/apt/apt.conf.d/50unattended-upgrades \
 	&& mv /etc/apt-preferences /etc/apt/preferences.d/my_preferences \
 
 # tightening up permissions on bootstrapping scripts

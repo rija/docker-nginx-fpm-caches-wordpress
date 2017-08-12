@@ -3,6 +3,11 @@
 - name: build a new image for the Wordpress web site
   hosts: localhost
 
+  vars:
+     force_build: no
+     image_name: "{{ lookup('ini', 'IMAGE_NAME type=properties file=../.env') }}"
+     image_version: "{{ lookup('ini', 'VERSION type=properties file=../.env') }}"
+
   vars_prompt:
      - name: "registry_password"
        prompt: "please, enter registry password"
@@ -10,7 +15,12 @@
 
   tasks:
      - name: Gather context
-       command: cd .. && ./make_env.sh
+       command: ./make_env.sh
+       args:
+        chdir: ..
+
+     - debug:
+         msg: "image version: {{image_version}}"
 
      - name: login to the gitlab registry
        docker_login:
@@ -19,24 +29,15 @@
          password: "{{registry_password}}"
          reauthorize: yes
 
-     - docker_service:
-         project_src: ..
-         build: yes
-         recreate: always
-       register: compose_output
 
-     - debug:
-         msg: "{{compose_output}}"
-
-     - name: Tag and push to the registry
-       vars:
-           image_name: "{{ lookup('ini', 'IMAGE_NAME type=properties file=../.env') }}"
-           image_version: "{{ lookup('ini', 'VERSION type=properties file=../.env') }}"
+     - name: Build, Tag and push to the registry
        docker_image:
+         state: build
          name: "{{registry_url}}/{{ image_name }}"
          repository: "{{registry_url}}/{{ image_name }}"
          tag: "{{ image_version }}"
+         path: ..
          pull: no
          push: yes
-         force: yes
-         nocache: yes
+         rm: yes
+         force: "{{force_build}}"

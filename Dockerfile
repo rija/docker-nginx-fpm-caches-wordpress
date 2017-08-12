@@ -19,6 +19,7 @@ RUN install_packages \
 						# used for installing the Wordpress web application from online git repositories
 						git \
 						# installed for the ip utility used in bootstrap_container for finding the container's external ip address
+						# also used as an action for fail2ban
 						iproute2 \
 						# used to run cert auto-renewal, database backup  and Wordpress scheduled tasks
 						cron \
@@ -224,6 +225,12 @@ RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/$PHP_VERSION/fpm/
 	&&  mv /etc/02periodic /etc/apt/apt.conf.d/02periodic \
 	&&  mv /etc/50unattended-upgrades /etc/apt/apt.conf.d/50unattended-upgrades \
 	&& mv /etc/apt-preferences /etc/apt/preferences.d/my_preferences \
+
+# fail2ban configuration
+	&& touch /var/log/auth.log \
+	&& cp /etc/wordpress.conf /etc/fail2ban/jail.d/wordpress.conf \
+	&& mkdir -p /var/run/fail2ban \
+
 
 # tightening up permissions on bootstrapping scripts
 	&& chmod 700 /bootstrap_container \

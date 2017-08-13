@@ -33,6 +33,8 @@ RUN install_packages \
 						mysql-client \
 						# firewall, used in conjunction with fail2ban
 						ufw \
+						# syslog daemon needed by fail2ban's Wordpress plugin
+						rsyslog \
 						# install the tool to rotate logs
 						logrotate
 
@@ -229,6 +231,8 @@ RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/$PHP_VERSION/fpm/
 # fail2ban configuration
 	&& touch /var/log/auth.log \
 	&& cp /etc/wordpress.conf /etc/fail2ban/jail.d/wordpress.conf \
+	&& cp /etc/nginx-forbidden.conf /etc/fail2ban/filter.d/nginx-forbidden.conf \
+	&& cp /etc/nginx-noproxy.conf /etc/fail2ban/filter.d/nginx-noproxy.conf \
 	&& mkdir -p /var/run/fail2ban \
 
 

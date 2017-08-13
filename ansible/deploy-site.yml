@@ -12,6 +12,8 @@
   hosts: all
   vars:
     ansible_user: "{{docker_host_user}}"
+    update_image: no
+    reload: smart
 
   vars_prompt:
      - name: "registry_password"
@@ -32,11 +34,15 @@
      - name: deploy web site
        docker_service:
         project_name: "{{ lookup('ini', 'COMPOSE_PROJECT_NAME type=properties file=../.env') }}"
+        pull: "{{update_image}}"
+        recreate: "{{reload}}"
         definition:
           version: '2'
           services:
            webapp:
             restart: 'unless-stopped'
+            cap_add:
+              - NET_ADMIN
             networks:
               - wp_net
             image: "{{registry_url}}/{{ lookup('ini', 'IMAGE_NAME type=properties file=../.env') }}:{{ lookup('ini', 'VERSION type=properties file=../.env') }}"

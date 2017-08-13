@@ -2,6 +2,8 @@ version: '2'
 services:
   webapp:
     restart: 'unless-stopped'
+    cap_add:
+      - NET_ADMIN
     networks:
       - wp_net
     image: rija/docker-nginx-fpm-caches-wordpress

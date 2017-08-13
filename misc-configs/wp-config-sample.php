@@ -82,6 +82,10 @@ define( 'AUTOMATIC_UPDATER_DISABLED', true );
 # Disable Plugin and Theme Update and Installation, implies DISALLOW_FILE_EDIT=true
 define( 'DISALLOW_FILE_MODS', true );
 
+# WPf2b will block user enumeration attempts 
+define('WP_FAIL2BAN_BLOCK_USER_ENUMERATION',true);
+
+
 /* That's all, stop editing! Happy blogging. */
 
 /** Absolute path to the WordPress directory. */

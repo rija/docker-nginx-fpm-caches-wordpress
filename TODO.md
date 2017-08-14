@@ -8,13 +8,13 @@
 * reverse start.sh/supervisord relationship so that supervisord is the init process and start.sh is under its control **[DONE]** _(Edit: start.sh is now bootstrap_container)_
 * create an apparmor profile for the project
 * add a wordpress user on the container's host
-* strict file ownership (uploads is only dir writable, all files owned by wordpress user and restricted)
+* strict file ownership (uploads is only dir writable, all files owned by wordpress user and restricted) **[IN PROGRESS]**
 * obfuscate Wordpress URL structure and headers
 * disable Wordpress UI for theme update **[DONE]**
 * disable Wordpress UI for plugin update **[DONE]**
 * disable Wordpress UI for template code editing **[DONE]**
 * verify PGP signature of the downloaded nginx source code **[DONE]**
-* add support for Fail2ban **[IN PROGRESS]**
+* add support for Fail2ban **[DONE]**
 * find a secure, easily configurable way to allow access to xmlrpc.php for staff who can't be tied to one specific IP
 
 ## ARCHITECTURE:
@@ -30,6 +30,7 @@
 ## OPERATIONS:
 
 * make Ansible playbooks for setting up container host **[IN PROGRESS]**
+* make Ansible playbooks for setting up container  **[DONE]**
 * automated daily backup of the database **[DONE]**
 * add restart policies in docker compose file **[DONE]**
 * upgrade docker compose syntax to version 3
@@ -44,8 +45,8 @@
 ## WORDPRESS & DEVELOPMENT:
 * enable wp-cron **[DONE]**
 * add wp-cli to the container **[DONE]**
-* if installing a custom Wordpress project, allow loading of in-repository database dump
-* if installing a custom Wordpress project, allow loading of database dump from host
+* ~~if installing a custom Wordpress project, allow loading of in-repository database dump~~
+* if installing a custom Wordpress project, allow loading of database dump from host **[IN PROGRESS]**
 * Add support for private git servers **[DONE]**
 * use Composer for dependency management
 

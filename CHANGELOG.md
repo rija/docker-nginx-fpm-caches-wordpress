@@ -1,23 +1,23 @@
 CHANGELOG
 
 
-## v2 (upcoming)
+## v2
 
 * Supervisord 3.0 is PID 1 and properly manages all the processes in the container
 * Uses PHP 7.1
 * TLS encryption with Let's Encrypt and automated certificate renewal, configured using Mozilla intermediary profile for server side TLS
 * Use Nginx 1.13.0 with real_ip,  HTTP/2 and TLSv1.3 configured
 * FastCGI page caching and cache purge compiled in Nginx
-* docker-compose is now the preferred way to use this Dockerfile
-* The deployment now relies on git for installing vanilla Wordpress  or a Wordpress based web site
+* docker-compose is now the preferred way to use this Dockerfile, directly or through Ansible
+* The deployment now relies on git for installing vanilla Wordpress or a Wordpress based web site
 * Security has been improved on many layers:
-  * Setup of Fail2ban for black-listing ip addresses of attackers and abusers at firewall level
+  * Setup of Fail2ban for black-listing ip addresses of attackers
   * Tightening of file permissions and configuration of server processess and bootstrapping scripts
   * Security headers in Nginx responses
   * Pre-installed WP Plugins for using Fail2Ban, reducing XML-RPC attack surface, and enabling Content Security Policy
   * PGP signature verification of downloaded package through APT or CURL
-* The Docker image size has been significantly reduced (from 599MB/46layers to 192.2MB/27layers)
-* uses WP-CLI
+* The Docker image size has been significantly reduced (from 599MB/46layers to 186.1MB/25layers)
+* uses WP-CLI for managing Wordpress
 
 ## v1: Initial Release
 

@@ -40,7 +40,7 @@ The container doesn't have a database server, but the supplied docker compose fi
 
 
 
-*Available Docker Hub tags:* **v1, v2-beta, latest**
+*Available Docker Hub tags:* **v1, v2, latest**
 
 ### How to run
 

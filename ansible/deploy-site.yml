@@ -1,6 +1,6 @@
 ---
 
-- name: bilding the env file locally
+- name: Building the env file locally
   hosts: localhost
 
   tasks:
@@ -22,14 +22,12 @@
 
   tasks:
 
-     - name: login to the gitlab registry
+     - name: login to the remote registry
        docker_login:
          registry: "{{registry_url}}"
          username: "{{registry_user}}"
          password: "{{registry_password}}"
          reauthorize: yes
-
-
 
      - name: deploy web site
        docker_service:

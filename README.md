@@ -91,7 +91,7 @@ One can adjust the values in the **.env** file updated (and created if non-exist
 ###### - create a new image based on vanilla Wordpress install and push it to a private registry
 
 ```bash
-$ ansible-playbook --extra-vars="registry_url=registry.gitlab.com registry_user=foobar" ansible/press-site.yml
+$ ansible-playbook --extra-vars="registry_url=registry.gitlab.com registry_user=foobar force_build=yes" ansible/press-site.yml
 ```
 
 One can adjust the values in the **.env** file updated (and created if non-existent) by ``./make_env.sh``

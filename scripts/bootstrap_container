@@ -33,10 +33,10 @@ echo "127.0.0.1	$SERVER_NAME" >> /etc/hosts
 
 echo "boostrapping database backup"
 
-if [ ! -d /root/backups ];then
-    mkdir -p /root/backups
+if [ ! -d /root/sql ];then
+    mkdir -p /root/sql
 fi
-touch /root/backups/wordpress.sql
+touch /root/sql/wordpress.sql
 
 
 echo "bootsrapped on $(date)" > /tmp/last_bootstrap

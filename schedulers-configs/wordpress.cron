@@ -1,4 +1,4 @@
 #crontab
 @weekly     ( date ; certbot renew && nginx -t && service nginx reload  ) >> /var/log/certs.log 2>&1
-@daily      ( date ; mv /root/backups/wordpress.sql /root/backups/wordpress.sql.old ; mysqldump -h $DB_HOSTNAME -u $DB_USER -p$DB_PASSWORD $DB_DATABASE > /root/backups/wordpress.sql  ) >> /var/log/db-backup.log 2>&1
+@daily      ( date ; mv /root/sql/wordpress.sql /root/sql/wordpress.sql.old ; mysqldump -h $DB_HOSTNAME -u $DB_USER -p$DB_PASSWORD $DB_DATABASE > /root/sql/wordpress.sql  ) >> /var/log/db-backup.log 2>&1
 @hourly     ( date ; /usr/bin/php /usr/share/nginx/www/wp-cron.php  ) >> /var/log/wp-cron.log 2>&1

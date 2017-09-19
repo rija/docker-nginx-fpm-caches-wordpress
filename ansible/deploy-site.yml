@@ -14,6 +14,8 @@
     ansible_user: "{{docker_host_user}}"
     update_image: no
     reload: smart
+    sqldir: "${HOME}/sql"
+    no_db_import: no
 
   vars_prompt:
      - name: "registry_password"
@@ -28,6 +30,16 @@
          username: "{{registry_user}}"
          password: "{{registry_password}}"
          reauthorize: yes
+
+     - name: create the sql directory for database import and backup
+       file:
+         path: "{{sqldir}}"
+         state: directory
+         mode: 0755
+
+     - name: optionally set up flag to prevent database import
+       command: touch "{{sqldir}}/no_db_import"
+       when: no_db_import == "yes"
 
      - name: deploy web site
        docker_service:
@@ -46,17 +58,13 @@
             image: "{{registry_url}}/{{ lookup('ini', 'IMAGE_NAME type=properties file=../.env') }}:{{ lookup('ini', 'VERSION type=properties file=../.env') }}"
             volumes:
               - /etc/letsencrypt:/etc/letsencrypt
-              - /var/run/docker.sock:/var/run/docker.sock:ro
-              - /${HOME}/.ssh:/root/deploykeys:ro
-              - /${HOME}/Downloads:/root/backups
-              - /${HOME}:/root/sqlimport:ro
+              - "{{sqldir}}:/root/sql"
             ports:
               - 443:443
               - 80:80
             depends_on:
               - db
             environment:
-              GIT_DEPLOY_KEY: "{{ lookup('ini', 'GIT_DEPLOY_KEY type=properties file=../.env') }}"
               SERVER_NAME: "{{ lookup('ini', 'SERVER_NAME type=properties file=../.env') }}"
               ADMIN_EMAIL: "{{ lookup('ini', 'ADMIN_EMAIL type=properties file=../.env') }}"
               ADMIN_PASSWORD: "{{ lookup('ini', 'ADMIN_PASSWORD type=properties file=../.env') }}"

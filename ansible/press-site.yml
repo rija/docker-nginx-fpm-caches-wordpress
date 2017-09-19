@@ -5,6 +5,8 @@
 
   vars:
      force_build: no
+     download_wp: no
+     php_memory_limit: "128M"
      image_name: "{{ lookup('ini', 'IMAGE_NAME type=properties file=../.env') }}"
      image_version: "{{ lookup('ini', 'VERSION type=properties file=../.env') }}"
 
@@ -22,7 +24,14 @@
      - debug:
          msg: "image version: {{image_version}}"
 
-     - name: login to the gitlab registry
+
+     - name: optionally download vanilla wordpress from source control
+       git:
+        repo: "https://github.com/WordPress/WordPress.git"
+        dest: ../website/wordpress
+       when: download_wp == "yes"
+
+     - name: login to the remote registry
        docker_login:
          registry: "{{registry_url}}"
          username: "{{registry_user}}"
@@ -41,3 +50,5 @@
          push: yes
          rm: yes
          force: "{{force_build}}"
+         buildargs:
+           PHP_MEMLIMIT: "{{php_memory_limit}}"

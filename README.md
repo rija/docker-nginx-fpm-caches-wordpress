@@ -15,11 +15,13 @@ Dockerfile to create a container with Nginx and php-fpm running a Wordpress web 
 TLS encryption is provided (and automatically renewed) using free certificates provided by Let's Encrypt.
 Page caching (using Nginx's FastCGI cache) and Opcode caching with Zend Opcache are enabled and configured.
 
-The Wordpress web application is cloned from Wordpress' official Github.org repository at build time.
-Alternatively, it's also possible to clone a Wordpress-based web site from a different public or private repository
-as long as they are hosted on Github.org, Gitlab.org or Bitbucket.com.
+The container can be deployed with either a vanilla installation of Wordpress or an existing Wordpress-based codebase.
 
 The container doesn't have a database server, but the supplied docker compose file allow instantiating a MariaDB 10.2 database server on the same network as the Wordpress container.
+
+When choosing to use an existing Wordpress-based web site, the codebase is baked into the image when the image is built, so that the deployed container is immutable, making it play nicely in a versioned deployment pipelines.
+
+When choosing to use a vanilla installation of Wordpress, the latest wordpress software is baked at build time, and additional security and caching related plugins are installed during deployment of the container.
 
 
 **Headline features:**
@@ -61,12 +63,13 @@ $ docker run -d \
 	--name a-wordpress-container \
 	-e SERVER_NAME=example.com \
 	-e ADMIN_EMAIL=helloworld@example.com \
+	-e ADMIN_PASSWORD=changemenow \
 	-e DB_HOSTNAME=dbserver \
 	-e DB_USER=wp_user \
 	-e DB_PASSWORD=wp_password \
 	-e DB_DATABASE=wp_database \
 	-v /etc/letsencrypt:/etc/letsencrypt \
-	-v /${HOME}:/root/backups \
+	-v /${HOME}:/root/sql \
 	-p 443:443 -p 80:80 \
 	rija/docker-nginx-fpm-caches-wordpress
 
@@ -74,7 +77,7 @@ $ docker run -d \
 
 
 **Notes:**
-The ``ADMIN_EMAIL`` variable is used by WP-CLI for the initial setup of the Wordpress install and by Let's Encrypt's Certbot for managing TLS certificates renewal
+The ``ADMIN_EMAIL`` variable is used by WP-CLI for the initial setup of the Wordpress install and by Let's Encrypt's Certbot for managing TLS certificates renewal. It is also supplied alongside ``ADMIN_PASSWORD`` to the Wordpress install associated with the admin user.
 
 #### with Docker compose:
 
@@ -88,17 +91,16 @@ One can adjust the values in the **.env** file updated (and created if non-exist
 
 #### with Ansible playbook:
 
-###### - create a new image based on vanilla Wordpress install and push it to a private registry
+###### - New image based on vanilla Wordpress pushed to a private registry
 
 ```bash
-$ ansible-playbook --extra-vars="registry_url=registry.gitlab.com registry_user=foobar force_build=yes" ansible/press-site.yml
+$ ansible-playbook --extra-vars="registry_url=registry.gitlab.com registry_user=foobar force_build=yes download_wp=yes" ansible/press-site.yml
 ```
 
 One can adjust the values in the **.env** file updated (and created if non-existent) by ``./make_env.sh``
 
-In particular, replace the value for GIT_SSH_URL to use the codebase of an existing/under development Wordpress web site.
 
-###### - deploy on a Digital Ocean droplet the image that has been previously pushed to a private registry
+###### - Deploy the previously baked image to a Digital Ocean droplet
 
 ```bash
 $ ansible-playbook -i digital_ocean.py  --extra-vars="registry_url=registry.gitlab.com registry_user=foobar docker_host_user=docker" ansible/deploy-site.yml
@@ -114,6 +116,39 @@ $ chmod u+x digital_ocean.py
 if you don't deploy on Digital Ocean, you can find the relevant dynamic inventory for your cloud service on https://github.com/ansible/ansible/tree/devel/contrib/inventory
 
 
+###### - Workflow for an existing web site
+
+make sure you have the web site in a directory called ``wordpress`` inside the ``website`` directory. Then ensure the database dump to be imported is there as well under the name ``wordpress.sql``:
+
+```
+website/
+├── README.md
+├── wordpress
+├── VERSION
+└── wordpress.sql
+```
+
+Then ensure you have an ``.env`` file with [appropriate variables](docs/env-sample):
+
+```bash
+$ ./make_env.sh
+
+```
+ 
+The script above will also keep the build specific variables up-to-date.
+
+Now, you can bake an image and upload it to a registry
+
+```bash
+$ ansible-playbook --extra-vars="registry_url=registry.gitlab.com registry_user=foobar force_build=yes" ansible/press-site.yml
+```
+
+
+to deploy, use: 
+
+```bash
+$ ansible-playbook -vvv   -i digital_ocean.py  --extra-vars="registry_url=registry.gitlab.com registry_user=hkims docker_host_user=dodoho update_image=yes" ansible/deploy-site.yml
+```
 
 ### How to enable Encryption (TLS)
 
@@ -136,15 +171,11 @@ After the command as returned with a successful message regarding acquisition of
  * the generated certificate is valid for domain.tld and www.domain.tld (SAN)
  * **The certificate files are accessible on the Docker host server** in ``/etc/letsencrypt``
 
-### How to login to Wordpress Dashboard
-
-The user is ``admin`` and the initial password (which should be changed immediately) can be found in the container log:
-
-```bash
-docker logs a-wordpress-container | grep "Admin password:"
-```
 
 ### How to build
+
+First, make sure there is a Wordpress codebase under the ``website/`` directory.
+Check the [website/README.md](website/README.md) for more details.
 
  ```bash
  $ cd docker-nginx-fpm-caches-wordpress
@@ -154,11 +185,10 @@ docker logs a-wordpress-container | grep "Admin password:"
 One should adjust the values in the **.env** file updated (and created if non-existent) by **./make_env.sh**
 make_env.sh should be executed at every build so that the dynamic docker labels for build date and vcs ref are populated accurately.
 
-Notably, the ``GIT_SSH_URL`` variable can be adjusted to point to a Wordpress-based website project hosted on a remote GIT repository.
+### How to login to Wordpress Dashboard
 
-The mounted volume /root/deploykeys must contains file necessary files to allow cloning from a GIT repostory:
-* a file named **git_hosts**  with the ssh host keys for the remote git repository
-* public/private ssh key pair to ssh-git clone/pull from the remote repository (whose name is specified with ENV variable ``GIT_DEPLOY_KEY``)
+The user is ``admin`` and the initial password can be supplied as ``ADMIN_PASSWORD`` in the **.env** file generated by  **./make_env.sh**
+
 
 ### License
 

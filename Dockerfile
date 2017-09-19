@@ -167,14 +167,20 @@ RUN install_packages build-essential zlib1g-dev libpcre3-dev libssl-dev libgeoip
 COPY nginx-configs/* /etc/nginx/
 COPY nginx-configs/sites-available/nginx-site.conf /etc/nginx/sites-available/default
 
-# copy misc configs (supervisord,  ssh config and wordpress)
-COPY  misc-configs/* /etc/
-
-# copy schedulers configuration files
-COPY schedulers-configs/* /etc/
+# copy  configs (supervisord,  ssh config,  wordpress config sample and scheduling configs)
+COPY  misc-configs/* schedulers-configs/* /etc/
 
 # copy bootstrapping scripts
 COPY scripts/* /
+
+# copy web site content into the container image
+COPY website/wordpress /usr/share/nginx/wordpress/
+COPY website/*.* /usr/share/nginx/
+
+
+# PHP.ini memory limit can be configured using build time, user supplied values
+ARG PHP_MEMLIMIT=128M
+ENV PHP_MEMLIMIT ${PHP_MEMLIMIT}
 
 # php-fpm config: Opcode cache config
 RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/$PHP_VERSION/fpm/php.ini \
@@ -187,6 +193,7 @@ RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/$PHP_VERSION/fpm/
 	&& sed -i -e "s/;session.cookie_secure\s*=\s*/session.cookie_secure = True/g" /etc/php/$PHP_VERSION/fpm/php.ini \
 	&& sed -i -e "s/session.cookie_httponly\s*=\s*/session.cookie_httponly = True/g" /etc/php/$PHP_VERSION/fpm/php.ini \
 	&& sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php/$PHP_VERSION/fpm/php.ini \
+	&& sed -i -e "s/memory_limit\s*=\s*128M/memory_limit = $PHP_MEMLIMIT/g" /etc/php/$PHP_VERSION/fpm/php.ini \
 	&& sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php/$PHP_VERSION/fpm/php-fpm.conf \
 	&& sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf \
 	&& sed -i -e "s/listen\s*=\s*\/run\/php\/php$PHP_VERSION-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf \
@@ -223,7 +230,6 @@ RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/$PHP_VERSION/fpm/
 	&& touch /var/log/wp-cron.log \
 
 # apt upgrade configuration
-# apt upgrade configuration
 	&&  mv /etc/02periodic /etc/apt/apt.conf.d/02periodic \
 	&&  mv /etc/50unattended-upgrades /etc/apt/apt.conf.d/50unattended-upgrades \
 	&& mv /etc/apt-preferences /etc/apt/preferences.d/my_preferences \
@@ -240,10 +246,6 @@ RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/$PHP_VERSION/fpm/
 	&& chmod 700 /bootstrap_container \
 	&& chmod 700 /install_wordpress \
 	&& chmod 700 /setup_web_cert
-
-# setting up GIT
-ARG GIT_SSH_URL
-ENV GIT_SSH_URL ${GIT_SSH_URL:-"https://github.com/WordPress/WordPress.git"}
 
 
 # Build-time metadata as defined at http://label-schema.org

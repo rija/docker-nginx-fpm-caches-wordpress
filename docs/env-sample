@@ -1,0 +1,14 @@
+SERVER_NAME=example.com
+COMPOSE_PROJECT_NAME=wordpress
+#The email will be used for registering to Lets Encrypt for the TLS certificate
+ADMIN_EMAIL=foo@bar.com
+ADMIN_PASSWORD=changemenow
+WP_DB_USER=wordpress
+WP_DB_PASSWORD=wordpress
+WP_DB_NAME=wordpress
+MYSQL_ROOT_PASSWORD=mysqlrootpassword
+IMAGE_NAME=user/project/image
+REGISTRY_URL=registry.gitlab.com
+BUILD_DATE=2017-09-18T20:08:11Z
+VCS_REF=11fd881
+VERSION=v3

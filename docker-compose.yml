@@ -6,20 +6,16 @@ services:
       - NET_ADMIN
     networks:
       - wp_net
-    image: rija/docker-nginx-fpm-caches-wordpress
+    image: ${REGISTRY_URL}/${IMAGE_NAME}:${VERSION}
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /${HOME}/.ssh:/root/deploykeys:ro
-      - /tmp:/root/backups
-      - /${HOME}:/root/sqlimport:ro
+      - /tmp:/root/sql
     ports:
       - 443:443
       - 80:80
     depends_on:
       - db
     environment:
-      GIT_DEPLOY_KEY: ${GIT_DEPLOY_KEY}
       SERVER_NAME:
       ADMIN_EMAIL:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}

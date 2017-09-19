@@ -5,17 +5,14 @@ services:
     build:
       context: .
       args:
-        GIT_SSH_URL: ${GIT_SSH_URL}
+        PHP_MEMLIMIT: ${PHP_MEMLIMIT}
         VCS_REF: ${VCS_REF}
         BUILD_DATE: ${BUILD_DATE}
         VERSION: ${VERSION}
     environment:
       DEBUG: 'true'
-      GIT_DEPLOY_KEY: ${GIT_DEPLOY_KEY}
     image: ${REGISTRY_URL}/${IMAGE_NAME}:${VERSION}
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /${HOME}/.ssh:/root/deploykeys:ro
-      - /${HOME}/Downloads:/root/backups
-      - /${HOME}:/root/sqlimport:ro
+      - /${HOME}/Downloads:/root/sql

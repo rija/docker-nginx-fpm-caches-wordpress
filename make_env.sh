@@ -4,7 +4,7 @@ set -ex
 
 BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
 VCS_REF=`git rev-parse --short HEAD`
-VERSION=`cat VERSION`
+VERSION=`cat website/VERSION`
 
 if [ ! -f .env ];then
     {
@@ -17,10 +17,6 @@ if [ ! -f .env ];then
 		echo "WP_DB_PASSWORD=wordpress";
 		echo "WP_DB_NAME=wordpress";
 		echo "MYSQL_ROOT_PASSWORD=wordpress";
-        echo "#uncomment and subsitute placeholder text from below instead, keeping same connection format,  if clonning a wordpress web site from private repo"
-		echo "#GIT_SSH_URL=git@github.com:user/project.git";
-		echo "GIT_SSH_URL=https://github.com/WordPress/WordPress.git";
-		echo "GIT_DEPLOY_KEY=git_deploy_key";
 		echo "IMAGE_NAME=my-wordpress-dev";
 		echo "REGISTRY_URL=registry.gitlab.com"
 		echo "BUILD_DATE=$BUILD_DATE";

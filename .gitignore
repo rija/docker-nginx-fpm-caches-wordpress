@@ -6,4 +6,7 @@ scratchpad
 ansible-digital_ocean.cache
 hosts
 digital_ocean.py
+website/wordpress
+website/wordpress.sql
+website/VERSION
 *.retry

@@ -6,9 +6,9 @@
   vars:
      force_build: no
      download_wp: no
-     php_memory_limit: "128M"
-     image_name: "{{ lookup('ini', 'IMAGE_NAME type=properties file=../.env') }}"
-     image_version: "{{ lookup('ini', 'VERSION type=properties file=../.env') }}"
+     push_image: yes
+     image_name: "{{ lookup('ini', 'IMAGE_NAME type=properties file=../website/.env') }}"
+     image_version: "{{ lookup('ini', 'VERSION type=properties file=../website/.env') }}"
 
   vars_prompt:
      - name: "registry_password"
@@ -16,20 +16,21 @@
        private: yes
 
   tasks:
-     - name: Gather context
-       command: ./make_env.sh
-       args:
-        chdir: ..
-
-     - debug:
-         msg: "image version: {{image_version}}"
-
 
      - name: optionally download vanilla wordpress from source control
        git:
         repo: "https://github.com/WordPress/WordPress.git"
         dest: ../website/wordpress
        when: download_wp == "yes"
+
+     - name: Gather context
+       command: ./make_env
+       args:
+        chdir: ../website/
+
+     - debug:
+         msg: "image version: {{image_version}}"
+
 
      - name: login to the remote registry
        docker_login:
@@ -46,9 +47,7 @@
          repository: "{{registry_url}}/{{ image_name }}"
          tag: "{{ image_version }}"
          path: ..
-         pull: no
-         push: yes
+         pull: yes
+         push: "{{push_image}}"
          rm: yes
          force: "{{force_build}}"
-         buildargs:
-           PHP_MEMLIMIT: "{{php_memory_limit}}"

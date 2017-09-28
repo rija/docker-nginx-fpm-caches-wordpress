@@ -1,12 +1,13 @@
 This directory must contain the web site to be deployed to container.
 It's either vanilla Wordpress install, or an existing Wordpress web site alongside the database schema.
 
-In both case, add a VERSION file so ``make_env.sh`` can read your project's version (it will be used as a tag to the Docker image uploaded to private registry)
+In both case, add a VERSION file so the  ``make_env`` script can read your project's version (it will be used as a tag to the Docker image uploaded to private registry)
 
 ## Naming convention and file structure for vanilla installation
 
 ```
 website/
+├── make_env
 ├── README.md
 ├── VERSION
 └── wordpress
@@ -32,6 +33,7 @@ git clone https://github.com/WordPress/WordPress.git website/wordpress
 
 ```
 website/
+├── make_env
 ├── README.md
 ├── wordpress
 ├── VERSION

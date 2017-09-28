@@ -5,7 +5,7 @@
 
   tasks:
       - name: Gather context
-        command: cd .. && ./make_env.sh
+        command: cd ../website/ && ./make_env
 
 
 - name: Deploy a Wordpress web site to remote host
@@ -43,7 +43,7 @@
 
      - name: deploy web site
        docker_service:
-        project_name: "{{ lookup('ini', 'COMPOSE_PROJECT_NAME type=properties file=../.env') }}"
+        project_name: "{{ lookup('ini', 'COMPOSE_PROJECT_NAME type=properties file=../website/.env') }}"
         pull: "{{update_image}}"
         recreate: "{{reload}}"
         definition:
@@ -55,7 +55,7 @@
               - NET_ADMIN
             networks:
               - wp_net
-            image: "{{registry_url}}/{{ lookup('ini', 'IMAGE_NAME type=properties file=../.env') }}:{{ lookup('ini', 'VERSION type=properties file=../.env') }}"
+            image: "{{registry_url}}/{{ lookup('ini', 'IMAGE_NAME type=properties file=../website/.env') }}:{{ lookup('ini', 'VERSION type=properties file=../website/.env') }}"
             volumes:
               - /etc/letsencrypt:/etc/letsencrypt
               - "{{sqldir}}:/root/sql"
@@ -65,13 +65,13 @@
             depends_on:
               - db
             environment:
-              SERVER_NAME: "{{ lookup('ini', 'SERVER_NAME type=properties file=../.env') }}"
-              ADMIN_EMAIL: "{{ lookup('ini', 'ADMIN_EMAIL type=properties file=../.env') }}"
-              ADMIN_PASSWORD: "{{ lookup('ini', 'ADMIN_PASSWORD type=properties file=../.env') }}"
+              SERVER_NAME: "{{ lookup('ini', 'SERVER_NAME type=properties file=../website/.env') }}"
+              ADMIN_EMAIL: "{{ lookup('ini', 'ADMIN_EMAIL type=properties file=../website/.env') }}"
+              ADMIN_PASSWORD: "{{ lookup('ini', 'ADMIN_PASSWORD type=properties file=../website/.env') }}"
               DB_HOSTNAME: dbs
-              DB_USER: "{{ lookup('ini', 'WP_DB_USER type=properties file=../.env') }}"
-              DB_PASSWORD: "{{ lookup('ini', 'WP_DB_PASSWORD type=properties file=../.env') }}"
-              DB_DATABASE: "{{ lookup('ini', 'WP_DB_NAME type=properties file=../.env') }}"
+              DB_USER: "{{ lookup('ini', 'WP_DB_USER type=properties file=../website/.env') }}"
+              DB_PASSWORD: "{{ lookup('ini', 'WP_DB_PASSWORD type=properties file=../website/.env') }}"
+              DB_DATABASE: "{{ lookup('ini', 'WP_DB_NAME type=properties file=../website/.env') }}"
             links:
               - db:dbs
            db:
@@ -83,9 +83,9 @@
               - mariadb_data:/var/lib/mysql
             environment:
               MYSQL_RANDOM_ROOT_PASSWORD: 1
-              MYSQL_USER: "{{ lookup('ini', 'WP_DB_USER type=properties file=../.env') }}"
-              MYSQL_PASSWORD: "{{ lookup('ini', 'WP_DB_PASSWORD type=properties file=../.env') }}"
-              MYSQL_DATABASE: "{{ lookup('ini', 'WP_DB_NAME type=properties file=../.env') }}"
+              MYSQL_USER: "{{ lookup('ini', 'WP_DB_USER type=properties file=../website/.env') }}"
+              MYSQL_PASSWORD: "{{ lookup('ini', 'WP_DB_PASSWORD type=properties file=../website/.env') }}"
+              MYSQL_DATABASE: "{{ lookup('ini', 'WP_DB_NAME type=properties file=../website/.env') }}"
 
           networks:
             wp_net:
@@ -101,8 +101,8 @@
 
      - assert:
         that:
-          - "webapp.{{ lookup('ini', 'COMPOSE_PROJECT_NAME type=properties file=../.env') }}_webapp_1.state.running"
-          - "db.{{ lookup('ini', 'COMPOSE_PROJECT_NAME type=properties file=../.env') }}_db_1.state.running"
+          - "webapp.{{ lookup('ini', 'COMPOSE_PROJECT_NAME type=properties file=../website/.env') }}_webapp_1.state.running"
+          - "db.{{ lookup('ini', 'COMPOSE_PROJECT_NAME type=properties file=../website/.env') }}_db_1.state.running"
 
      - name: set up SSL certificate
-       command: docker exec -i "{{ lookup('ini', 'COMPOSE_PROJECT_NAME type=properties file=../.env') }}_webapp_1" bash -l -c "/setup_web_cert"
+       command: docker exec -i "{{ lookup('ini', 'COMPOSE_PROJECT_NAME type=properties file=../website/.env') }}_webapp_1" bash -l -c "/setup_web_cert"

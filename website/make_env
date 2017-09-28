@@ -2,9 +2,11 @@
 
 set -ex
 
+cd wordpress
 BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
 VCS_REF=`git rev-parse --short HEAD`
-VERSION=`cat website/VERSION`
+VERSION=`cat ../VERSION`
+cd ..
 
 if [ ! -f .env ];then
     {
@@ -30,3 +32,4 @@ else
                 s/VERSION\s*=\s*.*$/VERSION=$VERSION/" .env
     echo ".env updated"
 fi
+

@@ -1,6 +1,7 @@
 version: '2'
 services:
   webapp:
+    env_file: website/.env
     restart: 'unless-stopped'
     cap_add:
       - NET_ADMIN
@@ -26,6 +27,7 @@ services:
     links:
       - db:dbs
   db:
+    env_file: website/.env
     restart: 'unless-stopped'
     networks:
       - wp_net

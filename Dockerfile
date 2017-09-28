@@ -1,5 +1,5 @@
 FROM bitnami/minideb:jessie
-MAINTAINER Rija Menage <dockerfiles@rija.cinecinetique.com>
+MAINTAINER Rija Menage <rija+dockerfiles@cinecinetique.com>
 
 EXPOSE 80
 EXPOSE 443
@@ -8,10 +8,11 @@ ENTRYPOINT ["/usr/bin/supervisord"]
 CMD ["-c", "/etc/supervisor/supervisord.conf"]
 
 # Enabling https download of packages
-RUN install_packages apt-transport-https ca-certificates
+RUN install_packages apt-transport-https ca-certificates \
 
 # Basic Dependencies
-RUN install_packages \
+
+&& install_packages \
 						# basic process management
 						procps \
 						# used to download sources for nginx and gosu, as well as gpg signature and keys
@@ -178,10 +179,6 @@ COPY website/wordpress /usr/share/nginx/wordpress/
 COPY website/*.* /usr/share/nginx/
 
 
-# PHP.ini memory limit can be configured using build time, user supplied values
-ARG PHP_MEMLIMIT=128M
-ENV PHP_MEMLIMIT ${PHP_MEMLIMIT}
-
 # php-fpm config: Opcode cache config
 RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/$PHP_VERSION/fpm/php.ini \
 	&& sed -i -e"s/^;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" /etc/php/$PHP_VERSION/fpm/php.ini \
@@ -193,7 +190,6 @@ RUN sed -i -e"s/^;opcache.enable=0/opcache.enable=1/" /etc/php/$PHP_VERSION/fpm/
 	&& sed -i -e "s/;session.cookie_secure\s*=\s*/session.cookie_secure = True/g" /etc/php/$PHP_VERSION/fpm/php.ini \
 	&& sed -i -e "s/session.cookie_httponly\s*=\s*/session.cookie_httponly = True/g" /etc/php/$PHP_VERSION/fpm/php.ini \
 	&& sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php/$PHP_VERSION/fpm/php.ini \
-	&& sed -i -e "s/memory_limit\s*=\s*128M/memory_limit = $PHP_MEMLIMIT/g" /etc/php/$PHP_VERSION/fpm/php.ini \
 	&& sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php/$PHP_VERSION/fpm/php-fpm.conf \
 	&& sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf \
 	&& sed -i -e "s/listen\s*=\s*\/run\/php\/php$PHP_VERSION-fpm.sock/listen = 127.0.0.1:9000/g" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf \

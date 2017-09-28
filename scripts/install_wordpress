@@ -114,16 +114,6 @@ if ! [[ -f /usr/share/nginx/wordpress.sql || -f /usr/share/nginx/wordpress.sql.l
     gosu www-data wp plugin install disable-xml-rpc-pingback --activate
 
 
-    # copying wordpress filters for fail2ban
-    echo "Downloading fail2ban Wordpress filters"
-    cd /etc/fail2ban/filter.d/ \
-       && curl -O -fsSL https://plugins.svn.wordpress.org/wp-fail2ban/trunk/filters.d/wordpress-hard.conf \
-       && curl -O -fsSL https://plugins.svn.wordpress.org/wp-fail2ban/trunk/filters.d/wordpress-soft.conf
-
-    # restarting fail2ban
-    echo "(Re)starting fail2ban..."
-    supervisorctl restart fail2ban
-    fail2ban-client -s /var/run/fail2ban/fail2ban.sock reload
 
 else
 
@@ -141,6 +131,16 @@ else
 fi
 
 
+# copying wordpress filters for fail2ban
+echo "Downloading fail2ban Wordpress filters"
+cd /etc/fail2ban/filter.d/ \
+   && curl -O -fsSL https://plugins.svn.wordpress.org/wp-fail2ban/trunk/filters.d/wordpress-hard.conf \
+   && curl -O -fsSL https://plugins.svn.wordpress.org/wp-fail2ban/trunk/filters.d/wordpress-soft.conf
+
+# restarting fail2ban
+echo "(Re)starting fail2ban..."
+supervisorctl restart fail2ban
+fail2ban-client -s /var/run/fail2ban/fail2ban.sock reload
 
 echo "Wordpress installed on $(date)" > /tmp/last_wordpress
 

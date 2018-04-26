@@ -147,7 +147,7 @@ $ ansible-playbook --extra-vars="registry_url=registry.gitlab.com registry_user=
 to deploy, use:
 
 ```bash
-$ ansible-playbook -vvv   -i digital_ocean.py  --extra-vars="registry_url=registry.gitlab.com registry_user=hkims docker_host_user=dodoho update_image=yes" ansible/deploy-site.yml
+$ ansible-playbook -vvv   -i digital_ocean.py  --extra-vars="registry_url=registry.gitlab.com registry_user=foobar docker_host_user=someuser update_image=yes" ansible/deploy-site.yml
 ```
 
 ### How to enable Encryption (TLS)

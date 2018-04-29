@@ -150,6 +150,17 @@ to deploy, use:
 $ ansible-playbook -vvv   -i digital_ocean.py  --extra-vars="registry_url=registry.gitlab.com registry_user=foobar docker_host_user=someuser update_image=yes" ansible/deploy-site.yml
 ```
 
+*Note:*
+There is a known issue, such that sometimes the install script will fails to load the database dump and the docker logs will show the following error:
+```
+install_wordpress stdout | this is an existing Wordpress web site, loading the database dump if not loaded already ...
+install_wordpress stderr | ERROR install_wordpress stderr |  2003 (HY000) install_wordpress stderr | : Can't connect to MySQL server on 'dbs' (111)
+2018-04-27 16:18:14,558 INFO exited: install_wordpress (exit status 1; not expected)
+```
+
+When that happens, simply re-run the installation script ``/install_wordpress`` and the database will be loaded correctly.
+There is an issue raised for this: [#11](https://github.com/rija/docker-nginx-fpm-caches-wordpress/issues/11)
+
 ### How to enable Encryption (TLS)
 
 **This step is not necessary if you used the ansible playbook above.**

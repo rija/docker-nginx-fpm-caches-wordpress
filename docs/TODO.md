@@ -16,6 +16,7 @@
 * verify PGP signature of the downloaded nginx source code **[DONE]**
 * add support for Fail2ban **[DONE]**
 * find a secure, easily configurable way to allow access to xmlrpc.php for staff who can't be tied to one specific IP
+* move cronjobs into their own container
 
 ## ARCHITECTURE:
 
@@ -26,10 +27,11 @@
 * container independence for Wordpress static files, S3 or shared file system?
 * Replace Supervisord with Mozilla Circus
 * tweak mysql config to optimise for low memory
+* Spread out system's services onto mulitple containers
 
 ## OPERATIONS:
 
-* make Ansible playbooks for setting up container host **[IN PROGRESS]**
+* make Ansible playbooks for setting up container host **[DONE]**
 * make Ansible playbooks for setting up container  **[DONE]**
 * automated daily backup of the database **[DONE]**
 * add restart policies in docker compose file **[DONE]**
@@ -46,7 +48,7 @@
 * enable wp-cron **[DONE]**
 * add wp-cli to the container **[DONE]**
 * ~~if installing a custom Wordpress project, allow loading of in-repository database dump~~
-* if installing a custom Wordpress project, allow loading of database dump from host **[IN PROGRESS]**
+* if installing a custom Wordpress project, allow loading of database dump from host **[DONE]**
 * Add support for private git servers **[DONE]**
 * use Composer for dependency management
 

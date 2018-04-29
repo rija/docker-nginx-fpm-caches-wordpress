@@ -142,6 +142,10 @@ echo "(Re)starting fail2ban..."
 supervisorctl restart fail2ban
 fail2ban-client -s /var/run/fail2ban/fail2ban.sock reload
 
+# Ensuring the cronjobs can read the database environment variables
+echo "For the database backup cronjob: env | grep DB > /etc/environment"
+env | grep DB > /etc/environment
+
 echo "Wordpress installed on $(date)" > /tmp/last_wordpress
 
 if [ -f /var/run/install_wordpress.pid ];then
